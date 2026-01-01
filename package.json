@@ -42,6 +42,7 @@
 		"@xyflow/svelte": "^1.5.0",
 		"@xyflow/system": "^0.0.74",
 		"elkjs": "^0.11.0",
+		"runed": "^0.37.1",
 		"surrealdb": "^1.3.2"
 	}
 }

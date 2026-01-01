@@ -1,15 +1,48 @@
+@import '@xyflow/svelte/dist/style.css';
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin "@iconify/tailwind4";
 
-@import '@xyflow/svelte/dist/style.css';
-
 .svelte-flow {
-    --xy-node-border-radius-default: 1;
+    --xy-background-color-default: var(--color-stone-100);
+    --xy-node-color-default: var(--color-stone-300);
+    --xy-node-border-radius-default: 2px;
     --xy-node-border-default: 1px solid var(--color-slate-300);
-    --xy-node-background-color-default: var(--color-slate-200);
-    --xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);
-    --xy-controls-button-background-color: var(--color-slate-100);
-    --xy-controls-button-background-color-hover: var(--color-sky-200);
-    --xy-node-default.selectable.selected: var(--color-emerald-500);
+/*    --xy-node-background-color-default: var(--color-slate-200);*/
+    --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%);
+    --xy-controls-button-background-color-default: var(--color-stone-50);
+    --xy-controls-button-background-color-hover: var(--color-emerald-200);
+    --xy-resize-background-color-default: var(--color-orange-200);
+/*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
+}
+/**/
+.svelte-flow.dark {
+    --xy-background-color-default: var(--color-neutral-800);
+    --xy-node-color-default: var(--color-stone-800);
+    --xy-node-border-default: 1px solid var(--color-stone-800);
+/*    --xy-node-background-color-default: var(--color-slate-600);*/
+/*    --xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);*/
+    --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%);
+    --xy-controls-button-background-color-default: var(--color-stone-700);
+    --xy-controls-button-background-color-hover: var(--color-stone-500);
+    --xy-resize-background-color-default: var(--color-orange-500);
+/*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
+}
+
+.svelte-flow__resize-control {
+
+}
+.svelte-flow__node {
+    border-radius: 8px;
+    border: 1px solid var(--color-stone-400);
+}
+.svelte-flow__node.selectable {
+    box-shadow: var(--shadow-sm);
+}
+.svelte-flow__node.selectable:hover {
+    box-shadow: var(--shadow-lg);
+    border: 1px solid --alpha(var(--color-emerald-100)/30%);
+}
+.svelte-flow__node.selected {
+    border: 1px solid var(--color-emerald-500);
 }

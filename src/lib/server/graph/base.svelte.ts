@@ -42,6 +42,7 @@ export class GraphBase {
 			width: opts.width,
 			height: opts.height,
 			position: opts.position,
+			connectable: false,
 			type,
 			data
 		}

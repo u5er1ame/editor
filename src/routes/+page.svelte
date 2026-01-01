@@ -10,7 +10,7 @@
 const edges = $state.raw([
 ]);
 
-let colorMode: ColorMode = $state('system');
+let colorMode: ColorMode = $state("system");
 </script>
 
 <SvelteFlowProvider>
