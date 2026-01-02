@@ -17,14 +17,17 @@ import {
 import ELK from "elkjs/lib/elk.bundled.js";
 
 import Button from '$lib/components/Button.svelte';
-import RoomGroup from '$lib/components/nodes/RoomGroup.svelte';
-import BoardGroup from '$lib/components/nodes/BoardGroup.svelte';
+
+// INFO: custom node types use global css class for styling
+// each node wrapper has class "svelte-flow__node-{type}"
+// where "type" is key from this table
+// make sure keys in this table match styles in respective node component
+import { Flow } from '$lib/utils';
 
 let { nodes=$bindable([]), edges=$bindable([]), colorMode=$bindable("system") }: SvelteFlowProps = $props();
-// console.log("nodes", nodes);
 const elk = new ELK();
+console.log("nodes", nodes);
 const { fitView } = useSvelteFlow();
-const defaultSize = {width: 200, height: 200};
 
 async function layout(nodes: Node[],edges: Edge[], options: any) {
     if (!elk) return { nodes, edges };
@@ -35,8 +38,8 @@ async function layout(nodes: Node[],edges: Edge[], options: any) {
             }
             return ({
                 id: node.id,
-                width: node.measured?.width || defaultSize.width,
-                height: node.measured?.height || defaultSize.height,
+                width: node.measured?.width ,
+                height: node.measured?.height,
                 x: node.position?.x || 0,
                 y: node.position?.y || 0,
                 padding: 10,
@@ -71,10 +74,10 @@ import { twMerge } from 'tailwind-merge';
 async function onLayout() {
     try {
         let options = {
-            "elk.algorithm": "rectpacking",
+            "elk.algorithm": "layered",
             "elk.direction": "RIGHT",
-            "elk.layered.spacing.nodeNodeBetweenLayers": defaultSize.width/8,
-            "elk.spacing.nodeNode": defaultSize.width/8,
+            // "elk.layered.spacing.nodeNodeBetweenLayers": defaultSize.width/8,
+            // "elk.spacing.nodeNode": defaultSize.width/8,
         };
         const withLayout = await layout(nodes, edges, options);
         nodes = withLayout.nodes
@@ -95,14 +98,6 @@ const onconnectend: OnConnectEnd = (event, state) => {
     // TODO: handle out of group case
 }
 
-// INFO: custom node types use global css class for styling
-// each node wrapper has class "svelte-flow__node-{type}"
-// where "type" is key from this table
-// make sure keys in this table match styles in respective node component
-const nodeTypes = {
-    electric_rooms: RoomGroup,
-    boards: BoardGroup,
-}
 
 
 
@@ -137,11 +132,10 @@ $effect(() => {
 
 <SvelteFlow
     proOptions={{hideAttribution: true}}
-    oninit={onLayout}
     {nodes}
     {edges}
     {colorMode}
-    {nodeTypes}
+    nodeTypes={Flow.nodeTypes}
     maxZoom={4}
     snapGrid={[5, 5]}
 >
