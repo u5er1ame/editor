@@ -61,7 +61,7 @@ const onfocus = (e: FocusEvent &{ currentTarget: EventTarget & HTMLInputElement}
 </script>
 
 <div bind:this={node} class="size-full flex items-stretch">
-    <p class="size-full text-stone-300 text-[10px]">{data?.name}</p>
+    <p class="size-full text-stone-300 content-center text-[10px]">{data?.name}</p>
     <NodeResizer {...resizeProps} handleClass="hidden invisible" lineClass="rounded-lg" isVisible={selected && resizeable} color="var(--color-yellow-100)" class="rounded-lg" nodeId={id} />
     <NodeToolbar class="text-slate-500 h-full"  position={Position.Right} align="start" nodeId={id}>
 	<div class="flex flex-col gap-1 *:rounded-lg" transition:fade>
@@ -85,6 +85,7 @@ padding: 4px;
 border-radius: 2px;
 width: "auto";
 color: var(--color-stone-200, var(--xy-node-color-default));
+background-color: --alpha(var(--color-stone-700, var(--xy-node-background-color-default))/70%);
 text-align: center;
 border: var(--xy-node-border, var(--xy-node-border-default));
 }

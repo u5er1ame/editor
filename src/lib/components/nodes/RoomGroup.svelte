@@ -6,11 +6,14 @@
     import CustomControlButton from '../CustomControlButton.svelte';
 
     import type {  Board, ElectricRoom } from '$lib/server/schemas';
+	import { useResizeObserver } from 'runed';
+	import { Flow } from '$lib/utils';
 
     type Props = {
 	data?: ElectricRoom,
 	class?: string
 	} & NodeProps<Node<ElectricRoom>>
+    let { id, data, class: className, type, ...rest }: Props = $props();
 
     let selectedNodes = $state<string[]>([]);
 
@@ -21,8 +24,24 @@
 
     let selected = $derived.by(()=>selectedNodes.length > 0 && selectedNodes.every(item=>item == id));
     let resizeable = $state(false);
+    let content: HTMLDivElement | undefined = $state();
 
-    let { id, data, class: className, ...rest }: Props = $props();
+    let resizeProps = $state({
+	minWidth: Flow.dimensions[type].width,
+	minHeight: Flow.dimensions[type].height,
+	maxWidth: 128,
+	maxHeight: 128,
+    });
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
+
+useResizeObserver(()=>content, ([info])=>{
+    if (!content || !info) return;
+    resizeProps.minWidth = clamp(info.contentRect.width, content.scrollWidth , resizeProps.maxWidth)+8;
+    resizeProps.minHeight = clamp(info.contentRect.height, content.scrollHeight, resizeProps.maxHeight)+8;
+});
+
 
     id = id || data?.id.toString();
 
@@ -60,8 +79,8 @@
     // isConnectable = false; // always false for groups
     // TODO: validate data by schema here or on fetch?
 </script>
-<div {ondblclick} transition:fade class="room size-full" role="list">
-    <NodeResizer isVisible={selected && resizeable}  class="rounded-lg" nodeId={id} />
+<div {ondblclick} bind:this={content} transition:fade class="room size-full" role="list">
+    <NodeResizer {...resizeProps} isVisible={selected && resizeable}  class="rounded-lg" nodeId={id} />
     {#if !zoom}
 	<NodeToolbar class="text-slate-500" offset={0}  position={Position.Top} align="start" nodeId={id}>
 	    <CustomControlButton type="button" class="hover:text-orange-400" title="Edit board" onclick={ondblclick}>
