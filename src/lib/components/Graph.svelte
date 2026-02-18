@@ -36,22 +36,29 @@ import Button from '$lib/components/Button.svelte';
 
 import { Flow } from '$lib/utils';
 import Toolbar  from './Toolbar.svelte';
+import { untrack } from "svelte";
 
 let { nodes=$bindable([]), edges=$bindable([]), colorMode=$bindable("system") }: SvelteFlowProps & { elk: ELK | null } = $props();
 
 let dbNodes: Node[] = $state.raw(nodes);
+let dbEdges: Edge[] = $state.raw(edges || []);
 const { fitView, getZoom, updateNode, getNodes } = useSvelteFlow();
 
-const boards = dbNodes.filter(n=>n.type == "breakers");
 const zoom = $derived.by(getZoom);
-const isHidden = $derived(zoom<0.8);
+const isHidden = $derived(zoom<1);
 
 
+const boards = $derived.by(getNodes);
 $effect(()=>{
-    boards.forEach(n=>{
-        n.hidden = isHidden;
-        updateNode(n.id,{ hidden: isHidden });
-    });
+    if (useNodesInitialized().current) {
+        untrack(()=>{
+            boards.filter(n=>n.type == "breakers" || n.type == "unsaved_breakers")
+            .forEach(n=>{
+                n.hidden = isHidden;
+                $effect.pre(()=>updateNode(n.id,{ hidden: isHidden }));
+            });
+        });
+    }
 });
 
 async function onLayout() {
@@ -109,7 +116,7 @@ async function oninit() {
 
 function onflowerror(e: any) {
     console.error(e);
-    toast.error("Flow error: "+e.message);
+    toast.error("Flow error: "+e);
 }
 </script>
 
@@ -122,7 +129,7 @@ function onflowerror(e: any) {
     selectionOnDrag
     panOnDrag={[1]}
     nodes={dbNodes}
-    {edges}
+    edges={dbEdges}
     {colorMode}
     nodeTypes={Flow.nodeTypes}
     minZoom={0.1}
