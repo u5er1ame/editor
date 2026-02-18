@@ -132,6 +132,7 @@ function onflowerror(e: any) {
     edges={dbEdges}
     {colorMode}
     nodeTypes={Flow.nodeTypes}
+    edgeTypes={Flow.edgeTypes}
     minZoom={0.1}
     maxZoom={99}
     snapGrid={[5, 5]}

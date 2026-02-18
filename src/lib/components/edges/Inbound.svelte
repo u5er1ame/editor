@@ -13,6 +13,4 @@ let [path, labelX, labelY] = $derived(
   );
 </script>
 
-<div class="surreal-edge">
-    <BaseEdge {id} {path} {labelX} {labelY} {...rest} />
-</div>
+<BaseEdge {id} {path} {labelX} {labelY} {...rest} />

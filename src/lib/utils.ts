@@ -1,11 +1,13 @@
 import * as Custom from "$lib/components/nodes";
-import type { Node, Dimensions, Edge, NodeTypes, XYPosition, NodeProps } from "@xyflow/svelte";
+import { default as Edges } from "$lib/components/edges";
+import type { Node, Dimensions, Edge, NodeTypes, XYPosition, NodeProps, EdgeTypes } from "@xyflow/svelte";
 import type { NodeBase } from "@xyflow/system";
 import type { ElkLayoutAlgorithmDescription, ElkNode, LayoutOptions } from "elkjs/lib/elk-api";
 import { xy2elk } from "./client/utls";
 
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import type { ActionResult } from "surrealdb";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -40,6 +42,7 @@ export const breakerDimensions = {
 
 export type FlowOptions = {
 	nodeTypes: NodeTypes,
+	edgeTypes: EdgeTypes,
 	dimensions: { [key: string]: NodeDimensions },
 	flowOptions: { [key: string]: Omit<NodeBase, "id" | "data" | "type" | "position"> },
 	layoutOptions: { [key: string]: LayoutOptions },
@@ -55,12 +58,10 @@ export const Flow: FlowOptions = {
 		unsaved_breakers: Custom.Rewrite.Breaker,
 		unsaved_root_breakers: Custom.Rewrite.Breaker,
 	},
-	// nodeTypes: {
-	// 	electric_rooms: Custom.Room,
-	// 	boards: Custom.Board,
-	// 	breakers: Custom.Breaker,
-	// 	root_breakers: Custom.RootBreaker,
-	// },
+	edgeTypes: {
+		inbound: Edges.Inbound,
+		outbound: Edges.Outbound,
+	},
 	dimensions: {
 		electric_rooms: roomDimensions,
 		boards: boardDimensions,
