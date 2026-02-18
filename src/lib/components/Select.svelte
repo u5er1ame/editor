@@ -33,7 +33,6 @@ let val = $state(undefined);
 $effect(()=>{
     value = val
 });
-$inspect(val);
 </script>
 
     <Select.Root type="single" {open} bind:value={val} {...restProps} >

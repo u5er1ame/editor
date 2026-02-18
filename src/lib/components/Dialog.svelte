@@ -19,7 +19,6 @@ export type Form<T extends FormTypes> = {
 	description?: string,
 	type: T,
 	fieldProps?: FieldProps<T>,
-	value?: unknown,
 	errors?: { message?: string }[];
     }
 };
@@ -50,18 +49,17 @@ let {
     form,
 }: Props = $props();
 
+let formData: {[key: string]: any} = {};
+for (const k of Object.keys(form)) {
+    formData[k] = null;
+}
+
 function submit(e: SubmitEvent) {
     e.preventDefault();
     open = !open;
-    console.log(form);
-    const out = Object.entries(form).reduce((acc, entry)=>{
-	// console.log(entry);
-	acc[entry[0]] = entry[1].value;
-	return acc;
-    });
-    onsubmit(out);
+    onsubmit(formData);
     Object.entries(form).forEach(([k,_])=>{
-	form[k].value = undefined
+	formData[k] = undefined
     });
 }
 
@@ -78,7 +76,7 @@ const field: { [key in FormTypes]: Component<typeof Input | typeof Select.Root |
 	<Dialog.Close />
     {/if}
     <Dialog.Content>
-        <Dialog.Header>
+	<Dialog.Header>
 	    {header}
         </Dialog.Header>
 	{#if form }
@@ -94,7 +92,7 @@ const field: { [key in FormTypes]: Component<typeof Input | typeof Select.Root |
 					{data.label}
 				    </Field.Label>
 				{/if}
-				<Component bind:value={form[key].value} {...data.fieldProps} />
+				<Component bind:value={formData[key]} {...data.fieldProps} />
 				{#if data.description}
 				    <Field.Description>
 					{data.description}

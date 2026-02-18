@@ -19,6 +19,7 @@ let item: HTMLDivElement | undefined = $state();
 
 const { getZoom } = useSvelteFlow();
 const zoom = $derived.by(getZoom);
+const threshold = $derived(zoom<0.5);
 const nodes = useNodes();
 
 let { id, type, data, class: className, width, height, ...rest }: Props = $props();
@@ -83,7 +84,6 @@ let dialogData: Form<FormTypes> = {
         label: "Name",
         description: "Enter board name",
         fieldProps: { id: "name", placeholder: "Q99" },
-        value: "",
 	errors: [],
     },
     description: {
@@ -92,22 +92,19 @@ let dialogData: Form<FormTypes> = {
         description: "description",
         fieldProps: {
 	    id: "description",
-	    value: "",
 	    data: [
 		{label: "a", value: "A"},
 		{label: "b", value: "B"},
 		{label: "c", value: "C"}
 	    ]
 	},
-        value: "",
 	errors: [],
     },
     value: {
         type: "input",
         label: "Value",
         description: "enter value",
-        fieldProps: { id: "value", type: "number", placeholder: "100", value: "" },
-        value: "",
+        fieldProps: { id: "value", type: "number", placeholder: "100" },
 	errors: [],
     }
 }
@@ -120,8 +117,6 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
     type = "unsaved_breakers";
     const child_id = [type, data.name, uid, unsaved_count].join("-");
     $resizer.set(child_id, false); // add to resizer list for toolbar (change later?)
-    console.log("adding breaker", child_id, "to", id);
-    // console.log(data);
     // $effect.root(()=>{
         nodes.update((current)=>{
         const item: Node<Board> = {
@@ -149,29 +144,31 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
 // TODO: validate data by schema here or on fetch?
 </script>
 
+{#if openDialog}
 <Dialog bind:open={openDialog} onsubmit={createBreaker} form={dialogData} />
+{/if}
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
 <div bind:this={item} class="size-full flex items-stretch">
-    {#if zoom<0.8}
+    {#if threshold}
 	<p class="size-full text-stone-300 content-center text-[1em]">{data?.name}</p>
     {/if}
     {#if type == "unsaved_boards"}
         <span onclick={()=>toast.warning("Board not saved yet")} title="This item arnt saved to database"  class="absolute m-0.5 w-2 h-2 top-0 right-0 bg-amber-400/40 icon-[solar--danger-triangle-bold-duotone]"></span>
     {/if}
 </div>
-    <NodeToolbar class="text-slate-500 h-full"  position={Position.Right} align="start" nodeId={id}>
-	<div class="flex flex-col gap-1 *:rounded-lg" transition:fade>
-	    <ControlButton   title="Add breaker" onclick={()=>{openDialog=true}}>
-		<span class="icon-[material-symbols--add-2-rounded]"></span>
-	    </ControlButton>
-	<ControlButton  title="Rename board" onclick={()=>console.log("click")}>
-	    <span class="icon-[solar--clapperboard-edit-bold-duotone]"></span>
-	</ControlButton>
-	</div>
-    </NodeToolbar>
-    <NodeToolbar isVisible={zoom>0.8} class="text-slate-500 text-md" offset={-4}  position={Position.Top} align="center" nodeId={id}>
-	{data?.name}
-    </NodeToolbar>
+<NodeToolbar class="text-slate-500 h-full"  position={Position.Right} align="start" nodeId={id}>
+    <div class="flex flex-col gap-1 *:rounded-lg" transition:fade>
+        <ControlButton   title="Add breaker" onclick={()=>{openDialog=true}}>
+            <span class="icon-[material-symbols--add-2-rounded]"></span>
+        </ControlButton>
+    <ControlButton  title="Rename board" onclick={()=>console.log("click")}>
+        <span class="icon-[solar--clapperboard-edit-bold-duotone]"></span>
+    </ControlButton>
+    </div>
+</NodeToolbar>
+<NodeToolbar isVisible={!threshold} class="text-slate-500 text-md" offset={-4}  position={Position.Top} align="center" nodeId={id}>
+    {data?.name}
+</NodeToolbar>
 
 <style>
 :global(.svelte-flow__node-unsaved_boards) {
@@ -187,11 +184,8 @@ border: 1px dotted --alpha(var(--color-amber-500)/30%);
 }
 
 :global(.svelte-flow__node-boards.selectable) {
-border-radius: 2px;
-width: "auto";
 color: var(--color-stone-200, var(--xy-node-color-default));
 background-color: --alpha(var(--color-stone-700, var(--xy-node-background-color-default))/40%);
-text-align: center;
 border: var(--xy-node-border, var(--xy-node-border-default));
 }
 

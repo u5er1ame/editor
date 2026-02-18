@@ -31,5 +31,5 @@ export const load: PageServerLoad = async ({ params }): Promise<PageServerData> 
 	const test_data: Node[] = new Array().concat(rooms, boards, breakers);
 	// TODO: validate
 	//
-	return { nodes: jsonify(test_data), error: null };
+	return { nodes: jsonify(test_data), edges: [], error: null };
 };

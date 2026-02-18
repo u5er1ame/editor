@@ -33,8 +33,8 @@ export const boardDimensions = {
 }
 
 export const breakerDimensions = {
-	width: 16,
-	height: 16,
+	width: 20,
+	height: 20,
 	position: { x: 0, y: 0 },
 }
 
@@ -48,12 +48,12 @@ export const Flow: FlowOptions = {
 	nodeTypes: {
 		electric_rooms: Custom.Rewrite.Room,
 		boards: Custom.Rewrite.Board,
-		breakers: Custom.Base.Breaker,
+		breakers: Custom.Rewrite.Breaker,
 		root_breakers: Custom.Base.Breaker,
 		// INFO: these nodes created by user and not saved in db yet
 		unsaved_boards: Custom.Rewrite.Board,
-		unsaved_breakers: Custom.Base.Breaker,
-		unsaved_root_breakers: Custom.Base.Breaker,
+		unsaved_breakers: Custom.Rewrite.Breaker,
+		unsaved_root_breakers: Custom.Rewrite.Breaker,
 	},
 	// nodeTypes: {
 	// 	electric_rooms: Custom.Room,
