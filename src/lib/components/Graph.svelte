@@ -15,16 +15,26 @@ import { twMerge } from 'tailwind-merge';
 import {
     useSvelteFlow,
     useNodesInitialized,
+    useConnection,
+    useOnSelectionChange,
+    getIncomers,
+    getConnectedEdges,
+    addEdge,
+    useEdges,
     SvelteFlow,
     Panel,
     Controls,
     Background,
     BackgroundVariant,
+    type OnConnect,
+    type OnConnectEnd,
     type SvelteFlowProps,
     type Node,
     type Edge,
     type ColorMode,
-    useOnSelectionChange,
+	type IsValidConnection,
+	type OnBeforeConnect,
+	type EdgeTypes,
 } from '@xyflow/svelte';
 import { toast } from "svelte-sonner";
 import Button from '$lib/components/Button.svelte';
@@ -37,12 +47,17 @@ import Button from '$lib/components/Button.svelte';
 import { Flow } from '$lib/utils';
 import Toolbar  from './Toolbar.svelte';
 import { untrack } from "svelte";
+	import type { EdgeBase } from "@xyflow/system";
+
+const connection = $derived(useConnection().current);
 
 let { nodes=$bindable([]), edges=$bindable([]), colorMode=$bindable("system") }: SvelteFlowProps & { elk: ELK | null } = $props();
 
 let dbNodes: Node[] = $state.raw(nodes);
 let dbEdges: Edge[] = $state.raw(edges || []);
-const { fitView, getZoom, updateNode, getNodes } = useSvelteFlow();
+
+const { fitView, getZoom, getNode, updateNode, getNodes, getEdges } = useSvelteFlow();
+const edgesStore = useEdges();
 
 const zoom = $derived.by(getZoom);
 const isHidden = $derived(zoom<1);
@@ -114,6 +129,49 @@ async function oninit() {
     // onLayout();
 }
 
+let lastEdge: Edge | null = $state(null);
+
+const onbeforeconnect: OnBeforeConnect = (c) => {
+    console.log("before connect");
+    if (getNode(c.source)?.parentId == getNode(c.target)?.parentId) {
+        console.log("inbound");
+        return { ...c, type: "straight", animated: true };
+    }
+    else {
+        console.log("outbound");
+        return { ...c, type: "bezier", animated: true };
+    }
+}
+
+const onconnect: OnConnect = (c) => {
+        console.log("connect", c);
+}
+
+
+const onconnectend: OnConnectEnd = (e, c) => {
+    console.log("connect end", c);
+    // const edge = getEdge(c.id);
+    // const updated = addEdge(c, edgesStore.current);
+    // edgesStore.set(updated)
+    // if (c.isValid) {
+    //     console.log("connected", e, c);
+    // }
+}
+
+const isValidConnection : IsValidConnection = (e) => {
+    if (e.source == e.target) {
+        return false;
+    }
+    const through = getConnectedEdges(getNodes(), getEdges())
+        // .filter(n => n.id == e.source)
+    // console.log(through);
+    // if (through.length > 0) {
+    //     return false;
+    // }
+    return true;
+}
+
+
 function onflowerror(e: any) {
     console.error(e);
     toast.error("Flow error: "+e);
@@ -124,6 +182,10 @@ function onflowerror(e: any) {
     proOptions={{hideAttribution: true}}
     {oninit}
     {onflowerror}
+    {onconnect}
+    {onbeforeconnect}
+    {onconnectend}
+    {isValidConnection}
     onselectionend={()=>{selectionReady = true}}
     onselectionstart={()=>{selectionReady = false}}
     selectionOnDrag

@@ -134,7 +134,7 @@
     --xy-controls-button-background-color-default: var(--color-stone-50);
     --xy-controls-button-background-color-hover: var(--color-emerald-200);
     --xy-resize-background-color-default: var(--color-orange-200);
-    --xy-edge-stroke: var(--color-yellow-400);
+    --xy-edge-stroke: var(--color-orange-300);
 /*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
 }
 /**/
@@ -149,7 +149,7 @@
     --xy-controls-button-background-color-default: var(--color-stone-700);
     --xy-controls-button-background-color-hover: var(--color-stone-500);
     --xy-resize-background-color-default: var(--color-orange-500);
-    --xy-edge-stroke: var(--color-yellow-400);
+    /* --xy-edge-stroke: var(--color-yellow-400); */
 /*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
 }
 
