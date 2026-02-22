@@ -136,7 +136,6 @@
 	}
 
 	const onbeforeconnect: OnBeforeConnect = (c) => {
-		console.log('before connect');
 		if (getNode(c.source)?.parentId == getNode(c.target)?.parentId) {
 			return { ...c, type: 'straight', animated: true };
 		} else {
@@ -145,11 +144,15 @@
 	};
 
 	const onconnect: OnConnect = (c) => {
-		console.log('connect', c);
 	};
 
 	const onconnectend: OnConnectEnd = (e, c) => {
+		// BUG: little edgecase because i add target node too
+		if(c.toNode == null) {
+			intersection.clear();
+		}
 		reactiveIntersection = intersection.values().toArray();
+		intersection.clear();
 		// const edge = getEdge(c.id);
 		// const updated = addEdge(c, edgesStore.current);
 		// edgesStore.set(updated)
@@ -178,11 +181,15 @@
 
 	let intersection: Set<Node> = new Set();
 	let reactiveIntersection: Node[] = $state([]);
+	// FIXME: idk why it works as intended. rewrite for single timer
 	$effect(()=>{
 		tick().then(()=>{
 			reactiveIntersection.forEach((n)=>{
 				updateNode(n.id, { class: "outline outline-rose-600 animate-pulse" });
 			});
+			if (reactiveIntersection.length > 0) {
+				toast.warning("Cycle detected! Connection skipped");
+			}
 		});
 		reactiveIntersection.forEach((n)=>{
 			setTimeout(()=>{
