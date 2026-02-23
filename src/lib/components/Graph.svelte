@@ -226,6 +226,7 @@
 </script>
 
 <SvelteFlow
+	class="size-full"
 	proOptions={{ hideAttribution: true }}
 	{oninit}
 	{onflowerror}
