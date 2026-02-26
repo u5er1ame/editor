@@ -71,35 +71,3 @@ const hide = $derived(!zoom?"":"hidden");
 	</NodeToolbar>
     {/if}
 </div>
-
-<style>
-.room {
-font-size: 10px;
-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
-text-align: left;
-}
-:global(.svelte-flow__node-electric_rooms) {
-font-size: 10px;
-background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
-text-align: center;
-border: 1px dashed --alpha(var(--color-stone-500)/30%);
-backdrop-filter: blur(2px);
-}
-:global(.svelte-flow__node-electric_rooms.selectable.selected) {
-border: 1px solid var(--color-emerald-500);
-box-shadow: var(--shadow-2xl);
-}
-:global(.svelte-flow__node-electric_rooms.selectable.selected:not(.draggable)) {
-border: 1px solid var(--color-yellow-500);
-box-shadow: var(--shadow-2xl);
-}
-:global(.svelte-flow__node-electric_rooms:not(.draggable)) {
-padding: 10px;
-font-size: 10px;
-background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
-text-align: center;
-border: 1px dashed --alpha(var(--color-yellow-400)/30%);
-backdrop-filter: blur(2px);
-}
-
-</style>

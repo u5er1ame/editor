@@ -14,7 +14,6 @@
 	import {
 		useSvelteFlow,
 		useNodesInitialized,
-		useConnection,
 		useOnSelectionChange,
 		getIncomers,
 		SvelteFlow,
@@ -22,14 +21,12 @@
 		Controls,
 		Background,
 		BackgroundVariant,
-		type OnConnect,
 		type OnConnectEnd,
 		type SvelteFlowProps,
 		type Node,
 		type Edge,
-		type ColorMode,
 		type IsValidConnection,
-		type OnBeforeConnect	} from '@xyflow/svelte';
+		type OnBeforeConnect} from '@xyflow/svelte';
 	import { toast } from 'svelte-sonner';
 	import Button from '$lib/components/Button.svelte';
 
@@ -57,7 +54,7 @@
 	const isHidden = $derived(zoom < 1);
 
 	watch(()=>isHidden, (current) => {
-		allEdges.filter((e) => e.type == 'straight').forEach((e) => {
+		allEdges.filter((e) => e.type == 'inbound').forEach((e) => {
 			e.hidden = current;
 			$effect.pre(() => updateEdge(e.id, { hidden: current }));
 		});
@@ -106,16 +103,12 @@
 		dbNodes.forEach((n) => $resizer.set(n.id, false));
 		// onLayout();
 	}
-
 	const onbeforeconnect: OnBeforeConnect = (c) => {
 		if (getNode(c.source)?.parentId == getNode(c.target)?.parentId) {
-			return { ...c, type: 'straight', animated: true };
+			return { ...c, type: 'inbound', animated: true };
 		} else {
-			return { ...c, type: 'bezier', animated: true };
+			return { ...c, type: 'outbound', animated: true };
 		}
-	};
-
-	const onconnect: OnConnect = (c) => {
 	};
 
 	const onconnectend: OnConnectEnd = (e, c) => {
@@ -125,13 +118,8 @@
 		}
 		reactiveIntersection = intersection.values().toArray();
 		intersection.clear();
-		// const edge = getEdge(c.id);
-		// const updated = addEdge(c, edgesStore.current);
-		// edgesStore.set(updated)
-		// if (c.isValid) {
-		//     console.log("connected", e, c);
-		// }
 	};
+
 	function buildList(node: Node, include_themselves = false) {
 		let out = new Set<Node>(include_themselves ? [node] : []);
 		function getConnected(n: Node) {
@@ -180,6 +168,9 @@
 		const start = getNode(e.target);
 		if (!end || !start) return false;
 
+		// INFO: this is very simple implementation of common ancestors
+		// not all cases covered
+		// always connect from root and it will be fine
 		const list = buildList(start, true);
 		const list_source = buildList(end, true);
 		intersection = list.intersection(list_source);
@@ -202,7 +193,6 @@
 	proOptions={{ hideAttribution: true }}
 	{oninit}
 	{onflowerror}
-	{onconnect}
 	{onbeforeconnect}
 	{onconnectend}
 	{isValidConnection}

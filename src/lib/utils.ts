@@ -52,7 +52,7 @@ export const Flow: FlowOptions = {
 		electric_rooms: Custom.Rewrite.Room,
 		boards: Custom.Rewrite.Board,
 		breakers: Custom.Rewrite.Breaker,
-		root_breakers: Custom.Base.Breaker,
+		root_breakers: Custom.Rewrite.Breaker,
 		// INFO: these nodes created by user and not saved in db yet
 		unsaved_boards: Custom.Rewrite.Board,
 		unsaved_breakers: Custom.Rewrite.Breaker,
