@@ -1,5 +1,5 @@
 <script module>
-	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import { SvelteMap } from 'svelte/reactivity';
 	import { writable } from 'svelte/store';
 
 	export const resizer = writable(new SvelteMap<string, boolean>());
@@ -10,19 +10,13 @@
 <script lang="ts">
 	import type { ELK } from 'elkjs/lib/elk-api';
 
-	import { Uuid } from 'surrealdb';
-	import { twMerge } from 'tailwind-merge';
 	import { watch } from 'runed';
 	import {
 		useSvelteFlow,
 		useNodesInitialized,
 		useConnection,
 		useOnSelectionChange,
-		useNodesData,
 		getIncomers,
-		getConnectedEdges,
-		addEdge,
-		useEdges,
 		SvelteFlow,
 		Panel,
 		Controls,
@@ -35,11 +29,7 @@
 		type Edge,
 		type ColorMode,
 		type IsValidConnection,
-		type OnBeforeConnect,
-		type EdgeTypes,
-		getOutgoers,
-		type Connection
-	} from '@xyflow/svelte';
+		type OnBeforeConnect	} from '@xyflow/svelte';
 	import { toast } from 'svelte-sonner';
 	import Button from '$lib/components/Button.svelte';
 
@@ -50,9 +40,7 @@
 
 	import { Flow } from '$lib/utils';
 	import Toolbar from './Toolbar.svelte';
-	import { tick, untrack } from 'svelte';
-
-	const connection = $derived(useConnection().current);
+	import { tick } from 'svelte';
 
 	let {
 		nodes = $bindable([]),
@@ -103,22 +91,6 @@
 			// onLayout();
 			once = false;
 		}
-	});
-
-	type Theme = { mode: ColorMode; icon: string };
-	const themes: Theme[] = [
-		{ mode: 'system', icon: 'icon-[material-symbols--computer-outline-rounded]' },
-		{ mode: 'light', icon: 'icon-[material-symbols--light-mode-outline-rounded]' },
-		{ mode: 'dark', icon: 'icon-[material-symbols--dark-mode-outline-rounded]' }
-	];
-	let themeIdx = $state(0);
-
-	function toggleColorMode() {
-		themeIdx = (themeIdx + 1) % themes.length;
-	}
-
-	$effect(() => {
-		colorMode = themes[themeIdx].mode;
 	});
 
 	let selectedNodesIds = $state<string[]>([]);
@@ -286,16 +258,6 @@
 		class="flex h-fit w-auto flex-row items-center justify-center gap-2 bg-transparent p-1"
 		position="top-left"
 	>
-		<Button
-			title={themes[themeIdx].mode + ' mode'}
-			onclick={() => {
-				toggleColorMode();
-			}}
-		>
-			{#snippet children()}
-				<span class={twMerge('size-6', themes[themeIdx].icon)}></span>
-			{/snippet}
-		</Button>
 	</Panel>
 	<Background size={1} variant={BackgroundVariant.Dots} />
 </SvelteFlow>

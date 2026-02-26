@@ -20,17 +20,7 @@
   }
 
   // INFO: use mode-watcher to resolve system color on startup
-  let colorMode: ColorMode = $state("system");
-  $effect(() => {
-    if (colorMode !== 'system') {
-      document.documentElement.classList.toggle('dark', colorMode === 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      if(mode.current === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
-    }
-  });
+  let colorMode: ColorMode = $derived(mode.current ?? "system");
 
   $effect(() => {
     return ()=>{
@@ -41,7 +31,7 @@
   });
 </script>
 
-<SvelteFlowProvider >
+<SvelteFlowProvider>
   <!-- {#if data.error == null} -->
     <Graph {elk} nodes={data.nodes} bind:colorMode />
   <!-- {/if} -->
