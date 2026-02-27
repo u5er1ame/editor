@@ -37,7 +37,10 @@
 
 	import { Flow } from '$lib/utils';
 	import Toolbar from './Toolbar.svelte';
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
+	import ScrollArea from './ui/scroll-area/scroll-area.svelte';
+	import { flatToNested } from '$lib/client/utls';
+	import Breadcrumb from './Breadcrumb.svelte';
 
 	let {
 		nodes = $bindable([]),
@@ -92,6 +95,13 @@
 
 	let selectedNodesIds = $state<string[]>([]);
 	let selectedNodes = $state<Node[]>([]);
+	let panelView = $derived.by(()=>{
+		if (selectedNodes.length == 0) {
+			const roots = untrack(()=>allNodes.filter(n=>!n.parentId));
+			return roots
+		}
+		return selectedNodes;
+	});
 
 	useOnSelectionChange(({ nodes }) => {
 		selectedNodesIds = nodes.map((n) => n.id);
@@ -246,8 +256,21 @@
 	</Panel>
 	<Panel
 		class="flex h-fit w-auto flex-row items-center justify-center gap-2 bg-transparent p-1"
+		position="top-center"
+	>
+		<Breadcrumb />
+	</Panel>
+	<Panel
+		class="flex h-fit w-auto flex-row items-center justify-center gap-2 bg-transparent p-1"
 		position="top-left"
 	>
+		<ScrollArea class="w-fit max-w-xl h-fit max-h-1/3 bg-rose-200">
+			{#each panelView as node}
+				<div class="w-fit h-fit bg-rose-200">
+					{node.data.name}
+				</div>
+			{/each}
+		</ScrollArea>
 	</Panel>
 	<Background size={1} variant={BackgroundVariant.Dots} />
 </SvelteFlow>
