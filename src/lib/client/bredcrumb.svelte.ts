@@ -34,20 +34,11 @@ export function groupBy(items: Array<Node>, key?: string) {
 }
 
 export class CrumbBuilder {
-	// all_nodes: Array<Array<Node>> = $derived.by(() => {
-	// 	// PERF: this updates on any change (drag/move/scroll etc)
-	// 	// but handles updates right away if new nodes added
-	// 	const nodes = useNodes().current;
-	// 	return [
-	// 		nodes.filter((n) => roomTypes.includes(n.type!)),
-	// 		nodes.filter((n) => boardTypes.includes(n.type!)),
-	// 		nodes.filter((n) => breakerTypes.includes(n.type!))
-	// 	];
-	// });
 	all_nodes: Array<Node> = $derived(useNodes().current);
 	by_type: Record<string, Array<Node>> = $derived(Object.groupBy(this.filtered_by_selection, (item)=>item.type!));
 	selection: Array<Node> = $state([]);
 	selection_grouped: Array<Array<Node>> = $state([[], [], []]);
+	filter_grouped: Array<Array<Node>> = $state([[], [], []]);
 	italics: Array<"italic" | ""> = $derived.by(() => this.selection_grouped.map((items) => items.length > 1 ? "italic" : ""));
 	filtered_by_selection: Array<Node> = $derived.by(() => {
 		if (this.selection.length == 0) {
@@ -63,20 +54,19 @@ export class CrumbBuilder {
 			return a;
 		}).values().toArray();
 	});
-	// titles = $derived.by(() => {
-	// 	Object.entries(this.by_type).map(([key, value])=>{})
-	// 	const default_title = ['Помещения', 'Щиты', 'Автоматы'];
-	// 	return this.filtered_by_selection.map((item, idx) => {
-	// 	if (item.length == 0) {
-	// 		return default_title[idx];
-	// 	}
-	// 	if (item.length > 1) {
-	// 		return 'выбрано ' + item.length;
-	// 	} else {
-	// 		return item[0].data.name;
-	// 	}
-	// 	});
-	// });
+	titles = $derived.by(() => {
+		const default_title = ['Помещения', 'Щиты', 'Автоматы'];
+		return this.selection_grouped.map((item, idx) => {
+		if (item.length == 0) {
+			return default_title[idx];
+		}
+		if (item.length > 1) {
+			return 'выбрано ' + item.length;
+		} else {
+			return item[0].data.name;
+		}
+		});
+	});
 	constructor() {
 		watch(
 			() => this.selection,
@@ -87,6 +77,20 @@ export class CrumbBuilder {
 				}
 
 				this.selection_grouped = [
+					current.filter((n) => roomTypes.includes(n.type!)),
+					current.filter((n) => boardTypes.includes(n.type!)),
+					current.filter((n) => breakerTypes.includes(n.type!))
+				]
+			});
+		watch(
+			() => this.filtered_by_selection,
+			(current, prev) => {
+				if (current.length == 0) {
+					this.selection_grouped = [[], [], []];
+					return;
+				}
+
+				this.filter_grouped = [
 					current.filter((n) => roomTypes.includes(n.type!)),
 					current.filter((n) => boardTypes.includes(n.type!)),
 					current.filter((n) => breakerTypes.includes(n.type!))
