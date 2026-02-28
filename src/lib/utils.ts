@@ -8,9 +8,10 @@ import { xy2elk } from "./client/utls";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import type { ActionResult } from "surrealdb";
+import type { IColumn } from "@svar-ui/svelte-grid";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+	return twMerge(clsx(inputs))
 }
 
 export type NodeDimensions = Dimensions & { position: XYPosition };
@@ -40,13 +41,21 @@ export const breakerDimensions = {
 	position: { x: 0, y: 0 },
 }
 
+const defaultBoardDescription: IColumn[] = [
+	{ id: "name", header: "#", width: 64, editor: "text" },
+	{ id: "description", header: "Description", width: 256, editor: "text" },
+	{ id: "value", header: "Value", width: 64, editor: "text" },
+];
+
 export type FlowOptions = {
 	nodeTypes: NodeTypes,
+	tableLayout: { [key: string]: IColumn[] },
 	edgeTypes: EdgeTypes,
 	dimensions: { [key: string]: NodeDimensions },
 	flowOptions: { [key: string]: Omit<NodeBase, "id" | "data" | "type" | "position"> },
 	layoutOptions: { [key: string]: LayoutOptions },
 };
+// TODO: create builder for this
 export const Flow: FlowOptions = {
 	nodeTypes: {
 		electric_rooms: Custom.Rewrite.Room,
@@ -57,6 +66,20 @@ export const Flow: FlowOptions = {
 		unsaved_boards: Custom.Rewrite.Board,
 		unsaved_breakers: Custom.Rewrite.Breaker,
 		unsaved_root_breakers: Custom.Rewrite.Breaker,
+	},
+	tableLayout: {
+		electric_rooms: [{
+			id: "name",
+			header: "Name",
+			width: 200,
+		}],
+		boards: defaultBoardDescription,
+		// INFO: these nodes created by user and not saved in db yet
+		unsaved_boards: [{
+			id: "name",
+			header: "Name",
+			width: 200,
+		}],
 	},
 	edgeTypes: {
 		inbound: Edges.Inbound,
@@ -130,7 +153,7 @@ export function toNode(item: ActionResult<{}>, parentId_filedName?: string): Nod
 		id: item.id.toString(),
 		type: item.id.tb,
 		data: item,
-		parentId: parentId_filedName ? item[parentId_filedName].toString(): undefined,
+		parentId: parentId_filedName ? item[parentId_filedName].toString() : undefined,
 		initialWidth: Flow.dimensions[item.id.tb].width,
 		initialHeight: Flow.dimensions[item.id.tb].height,
 		...Flow.dimensions[item.id.tb],
@@ -154,9 +177,9 @@ export function splitByParent(nodes: Node[]): Record<string, Node[]> {
 }
 
 export function toElk(rooms: Node[], boards: Node[], breakers: Node[]) {
-	const root: ElkNode[] = rooms.map((r: Node)=>{
-		const childs = boards.filter((b: Node)=>b.parentId == r.id).map((board: Node)=>{
-			const childs = breakers.filter((breaker: Node)=>breaker.parentId == board.id).map(xy2elk);
+	const root: ElkNode[] = rooms.map((r: Node) => {
+		const childs = boards.filter((b: Node) => b.parentId == r.id).map((board: Node) => {
+			const childs = breakers.filter((breaker: Node) => breaker.parentId == board.id).map(xy2elk);
 			const item = xy2elk(board);
 			item.layoutOptions = Flow.layoutOptions[board.type];
 			item.children = childs;
