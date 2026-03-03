@@ -7,7 +7,7 @@ import { xy2elk } from "./client/utls";
 
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { ActionResult } from "surrealdb";
+import { r, RecordId, Table, type ActionResult } from "surrealdb";
 import type { IColumn } from "@svar-ui/svelte-grid";
 
 export function cn(...inputs: ClassValue[]) {
@@ -22,7 +22,7 @@ export default {
 	height: 128,
 	position: { x: 0, y: 0 },
 }
-// INFO: type infered from id.tb (table name)
+// INFO: type infered from id.table (table name)
 export const roomDimensions = {
 	width: 128,
 	height: 128,
@@ -72,6 +72,7 @@ export const Flow: FlowOptions = {
 			id: "name",
 			header: "Name",
 			width: 200,
+			editor: "text",
 		}],
 		boards: defaultBoardDescription,
 		// INFO: these nodes created by user and not saved in db yet
@@ -79,6 +80,7 @@ export const Flow: FlowOptions = {
 			id: "name",
 			header: "Name",
 			width: 200,
+			editor: "text",
 		}],
 	},
 	edgeTypes: {
@@ -151,13 +153,13 @@ export const Flow: FlowOptions = {
 export function toNode(item: ActionResult<{}>, parentId_filedName?: string): Node {
 	return {
 		id: item.id.toString(),
-		type: item.id.tb,
+		type: item.id.table,
 		data: item,
 		parentId: parentId_filedName ? item[parentId_filedName].toString() : undefined,
-		initialWidth: Flow.dimensions[item.id.tb].width,
-		initialHeight: Flow.dimensions[item.id.tb].height,
-		...Flow.dimensions[item.id.tb],
-		...Flow.flowOptions[item.id.tb],
+		initialWidth: Flow.dimensions[item.id.table].width,
+		initialHeight: Flow.dimensions[item.id.table].height,
+		...Flow.dimensions[item.id.table],
+		...Flow.flowOptions[item.id.table],
 	}
 }
 

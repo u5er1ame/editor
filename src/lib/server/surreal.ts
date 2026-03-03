@@ -1,20 +1,19 @@
-import { error } from '@sveltejs/kit';
 import { Surreal } from 'surrealdb';
 
 export const surreal = new Surreal();
 
 export async function isConnected() {
 	try {
-		const isConnected = surreal.connect('ws://localhost:8008/rpc', {
-			database: 'dev',
-			namespace: 'test',
+		const isConnected = await surreal.connect('ws://localhost:8008/rpc', {
+			database: 'main',
+			namespace: 'main',
 			auth: {
-				username: 'root',
-				password: 'root'
+				username: 'editor',
+				password: 'server'
 			}
 		});
-		return await isConnected;
+		return isConnected;
 	} catch (e) {
-		error(500,'surrealdb instance not running');
+		return false;
 	}
 }

@@ -41,7 +41,7 @@
 	import ScrollArea from './ui/scroll-area/scroll-area.svelte';
 	import { flatToNested } from '$lib/client/utls';
 	import Breadcrumb from './Breadcrumb.svelte';
-	import Table from './Table.svelte';
+	import NodeDataTable from './NodeDataTable.svelte';
 
 	let {
 		nodes = $bindable([]),
@@ -258,7 +258,7 @@
 		position="bottom-left"
 	>
 		<!-- <ScrollArea class="w-fit max-w-xl h-fit max-h-1/3 bg-rose-200"> -->
-			<Table />
+			<NodeDataTable />
 		<!-- </ScrollArea> -->
 	</Panel>
 	<Background size={1} variant={BackgroundVariant.Dots} />
