@@ -1,9 +1,7 @@
-import type { ConnectionStatus } from "surrealdb";
-import type { PageServerLoad } from "./$types";
 import { isConnected } from "$lib/server/surreal";
+import type { PageServerData } from "./$types";
 
-export const load: PageServerLoad = async ({ fetch }) => {
-	// const connected = await isConnected();
-	const status: {message: ConnectionStatus} = await fetch('/api/v1/db/status').then(r=>r.json());
-	return { db: status.message };
+export const load: PageServerData = async () => {
+	console.log('server');
+	await isConnected();
 };
