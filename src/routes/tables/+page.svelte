@@ -6,6 +6,7 @@
 
 	let { data, ...rest } = $props();
 	const tables = $derived(data.tables);
+	let fields: any[] = $state([]);
 	function getIcon(table: any) {
 		switch (table.kind.kind) {
 			case 'RELATION':
@@ -18,12 +19,16 @@
 				return '';
 		}
 	}
+	async function getFields(table: string) {
+		fields = await fetch(`/api/v1/db/tables/schema/${table}`).then(r => r.json()).then((r)=>r);
+	}
+
 </script>
 
 <ScrollArea orientation="horizontal">
 	<div class="flex flex-row gap-2 p-1">
 		{#each tables as table, i}
-			<Button variant="outline">{table.name}{@html getIcon(table)}</Button>
+			<Button onclick={()=>getFields(table.name)} variant="outline">{table.name}{@html getIcon(table)}</Button>
 		{/each}
 	</div>
 </ScrollArea>

@@ -9,6 +9,7 @@
 	import { icons } from '$lib/client/color_mode.svelte';
 	import DbStatusIcon from '$lib/components/DbStatusIcon.svelte';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
+	import Button from '$lib/components/ui/button/button.svelte';
 
 	let { children, data } = $props();
 
@@ -52,9 +53,9 @@
 			<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->
 			{#key mode.current}
 				<div in:scale>
-					<Nav.Item class="cursor-pointer" onclick={toggleMode}>
+					<Button variant="ghost" class="cursor-pointer" onclick={toggleMode}>
 						<span class={twMerge(mode_icon, 'size-6 content-center p-4 align-middle')}></span>
-					</Nav.Item>
+					</Button>
 				</div>
 			{/key}
 		</Nav.List>
