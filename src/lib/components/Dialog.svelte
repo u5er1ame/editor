@@ -1,14 +1,14 @@
 <script module>
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
-import  Select  from "$lib/components/Select.svelte";
 import { Input } from "./ui/input";
+import  Select  from "$lib/components/Select.svelte";
 
 export type FormTypes = "input" | "select" | "button" | "checkbox";
 
 export type FieldProps<T extends FormTypes> =
     T extends "input" ? typeof Input:
-    T extends "select" ? typeof Select.Root:
+    T extends "select" ? typeof Select:
     T extends "button" ? typeof Button:
     T extends "checkbox" ? typeof Checkbox:
     never;
@@ -50,6 +50,7 @@ let {
 }: Props = $props();
 
 let formData: {[key: string]: any} = {};
+// svelte-ignore state_referenced_locally
 for (const k of Object.keys(form)) {
     formData[k] = null;
 }
@@ -63,7 +64,7 @@ function submit(e: SubmitEvent) {
     });
 }
 
-const field: { [key in FormTypes]: Component<typeof Input | typeof Select.Root | typeof Button | typeof Checkbox> } = {
+const field: { [key in FormTypes]: Component<typeof Input | typeof Select | typeof Button | typeof Checkbox> } = {
     input: Input,
     select: Select,
     button: Button,

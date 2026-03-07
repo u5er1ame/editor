@@ -1,7 +1,3 @@
-import BasedRoom from './BasedRoom.svelte';
-import BasedBoard from './BasedBoard.svelte';
-import BasedBreaker from './BasedBreaker.svelte';
-import BasedRootBreaker from './BasedRootBreaker.svelte';
 
 import Room from './RoomGroup.svelte';
 import Board from './BoardGroup.svelte';
@@ -14,13 +10,6 @@ import RwBreaker from './rewrite/Breaker.svelte';
 
 export default { Room, Board, Breaker, RootBreaker };
 
-
-export const Base = {
-    Room: BasedRoom,
-    Board: BasedBoard,
-    Breaker: BasedBreaker,
-    RootBreaker: BasedRootBreaker
-};
 
 export const Rewrite = {
     Room: RwRoom,

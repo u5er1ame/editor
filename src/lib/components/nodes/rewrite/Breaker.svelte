@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { type Edge, type Node, type NodeProps, Handle, NodeResizer, NodeToolbar, Position, useOnSelectionChange, useSvelteFlow, useViewport } from '@xyflow/svelte';
+    import { type Edge, type Node, type NodeProps, Handle, NodeResizer, Position, useOnSelectionChange, useSvelteFlow } from '@xyflow/svelte';
     import type { Breaker } from '$lib/server/schemas';
-	import { Flow } from '$lib/utils';
-	import { resizer } from '$lib/components/Graph.svelte';
+    import { Flow } from '$lib/utils';
+    import { resizer } from '$lib/components/Graph.svelte';
 
     type Props = {
 	data?: Breaker,
@@ -23,6 +23,7 @@
     let selected = $derived.by(()=>selectedNodes.length > 0 && selectedNodes.every(item=>item == id));
     let resizeable = $derived(selected && $resizer.get(id));
 
+    // svelte-ignore state_referenced_locally
     let resizeProps = $state({
         minWidth: Flow.dimensions[type].width,
         minHeight: Flow.dimensions[type].height,
@@ -31,6 +32,7 @@
     });
 
     const flow = useSvelteFlow();
+    // svelte-ignore state_referenced_locally
     const node = flow.getNode(id)
 
 </script>

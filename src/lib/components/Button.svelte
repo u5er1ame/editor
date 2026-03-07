@@ -12,7 +12,8 @@
 
     let { children, class: className=defaultClass, title, onclick, ...rest }: Props = $props();
 
-    className = twMerge(clsx(defaultClass, className));
+    // svelte-ignore state_referenced_locally
+        className = twMerge(clsx(defaultClass, className));
 </script>
 
 <button {title} {onclick} {...rest} class={className}>

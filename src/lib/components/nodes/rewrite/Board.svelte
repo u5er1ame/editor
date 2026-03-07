@@ -8,6 +8,7 @@ import type { Board } from '$lib/server/schemas';
 import { resizer } from '$lib/components/Graph.svelte';
 import Dialog, { type FormTypes } from '$lib/components/Dialog.svelte';
 import { type Form } from '$lib/components/Dialog.svelte';
+	import { r, RecordId, StringRecordId } from 'surrealdb';
 
 
 type Props = {
@@ -23,11 +24,11 @@ const threshold = $derived(zoom<0.5);
 const nodes = useNodes();
 
 let { id, type, data, class: className, width, height, ...rest }: Props = $props();
+// svelte-ignore state_referenced_locally
 id = id || data?.id!.toString();
 
 
-let editName = $state(false);
-let name = $state(data?.name);
+// let editName = $state(false);
 
 onMount(()=>{
     return () => {
@@ -43,6 +44,7 @@ useOnSelectionChange(({nodes}: { nodes: Node[], edges: Edge[] })=>{
 let selected = $derived.by(()=>selectedNodes.length > 0 && selectedNodes.every(item=>item == id));
 let resizeable = $derived(selected && $resizer.get(id));
 
+// svelte-ignore state_referenced_locally
 let resizeProps = $state({
     minWidth: Flow.dimensions[type].width,
     minHeight: Flow.dimensions[type].height,
@@ -51,7 +53,6 @@ let resizeProps = $state({
 });
 
 const flow = useSvelteFlow();
-const node = flow.getNode(id)
 
 
 function ondblclick(e: MouseEvent) {
@@ -75,7 +76,7 @@ function ondblclick(e: MouseEvent) {
 // });
 // const onfocus = (e: FocusEvent &{ currentTarget: EventTarget & HTMLInputElement})=>e.currentTarget.select()
 
-const s = $derived((height*flow.getZoom()).toFixed());
+// const s = $derived(+(height!*flow.getZoom()).toFixed());
 
 let openDialog = $state(false);
 let dialogData: Form<FormTypes> = {
@@ -153,7 +154,7 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
 	<p class="size-full text-stone-300 content-center text-[1em]">{data?.name}</p>
     {/if}
     {#if type == "unsaved_boards"}
-        <span onclick={()=>toast.warning("Board not saved yet")} title="This item arnt saved to database"  class="absolute m-0.5 w-2 h-2 top-0 right-0 bg-amber-400/40 icon-[solar--danger-triangle-bold-duotone]"></span>
+        <button onclick={()=>toast.warning("Board not saved yet")} title="This item arnt saved to database"  class="absolute m-0.5 w-2 h-2 top-0 right-0 bg-amber-400/40 icon-[solar--danger-triangle-bold-duotone]"></button>
     {/if}
 </div>
 <NodeToolbar class="text-slate-500 h-full"  position={Position.Right} align="start" nodeId={id}>

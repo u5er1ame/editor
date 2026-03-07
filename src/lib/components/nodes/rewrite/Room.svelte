@@ -21,6 +21,7 @@ let { id, data, type, class: className, children, width, height, ...rest }: Prop
 let content: HTMLElement | null = $state(null);
 
 let editName = $state(false);
+// svelte-ignore state_referenced_locally
 let name = $state(data?.name);
 
 onMount(()=>{
@@ -37,6 +38,7 @@ useOnSelectionChange(({nodes})=>{
 let selected = $derived.by(()=>selectedNodes.length > 0 && selectedNodes.every(item=>item == id));
 let resizeable = $derived(selected && $resizer.get(id));
 
+// svelte-ignore state_referenced_locally
 let resizeProps = $state({
     minWidth: Flow.dimensions[type].width,
     minHeight: Flow.dimensions[type].height,
@@ -59,7 +61,6 @@ useResizeObserver(()=>content, ([info])=>{
 });
 
 const flow = useSvelteFlow();
-const node = flow.getNode(id)
 
 let zoom = $derived(flow.getZoom() > 1);
 
@@ -83,7 +84,7 @@ $effect(()=>{
     }
 });
 const onfocus = (e: FocusEvent &{ currentTarget: EventTarget & HTMLInputElement})=>e.currentTarget.select()
-const s = $derived((height*flow.getZoom()).toFixed());
+const s = $derived(+(height!*flow.getZoom()).toFixed());
 
 function onblur(e: FocusEvent) {
     e.stopPropagation();
