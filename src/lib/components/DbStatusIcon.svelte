@@ -8,13 +8,20 @@
 	let { onclick } = $props();
 
 	let status: ConnectionStatus | 'error' | undefined = $state(undefined);
-	let sse = $state(new EventSource('api/v1/db/status'));
-	onMount(() => {
-		sse.onmessage = (event) => {
-			status = event.data;
-		};
-		return () => sse.close();
-	});
+	let sse = ""
+	// let sse = new EventSource('api/v1/db/status');
+	// onMount(() => {
+	// 	console.log('mount');
+	// 	sse.onmessage = (event) => {
+	// 		status = event.data;
+	// 	};
+	// 	sse.onerror = (event) => {
+	// 		status = 'error';
+	// 		console.log(event);
+	// 		sse.close();
+	// 	};
+	// 	return () => sse.close();
+	// });
 	const bg_color = $derived.by(() => {
 		switch (status) {
 			case 'connected':
