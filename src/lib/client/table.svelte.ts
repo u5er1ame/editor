@@ -9,25 +9,24 @@ export class DataTable {
 		console.log(table.toString());
 	}
 }
-type tst = ZodType<RecordId<"boards">>;
 
 const LevelSchema = z.object({
-	id: z.string(),
+	id: z.custom<RecordId<"levels">>(),
 	name: z.string(),
 });
 const ElectricRoomSchema = z.object({
-	id: z.string(),
+	id: z.custom<RecordId<"electric_rooms">>(),
 	name: z.string(),
-	level: z.string(),
+	level: z.custom<RecordId<"levels">>(),
 });
 const BoardSchema = z.object({
-	id: z.string(),
+	id: z.custom<RecordId<"boards">>(),
 	name: z.string(),
-	room: z.string(),
+	room: z.custom<RecordId<"electric_rooms">>(),
 });
 const BreakerSchema = z.object({
-	id: z.string(),
+	id: z.custom<RecordId<"breakers">>(),
 	name: z.string(),
 	value: z.number(),
-	board: z.string(),
+	board: z.custom<RecordId<"boards">>(),
 });
