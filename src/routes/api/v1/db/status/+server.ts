@@ -53,9 +53,6 @@ export const GET: RequestHandler = ({ setHeaders }) => {
       start(controller) {
         clients.add(controller);
         safeEnqueue(`data: ${status}\n\n`);
-
-        // optional heartbeat
-
         return () => {
           clients.delete(controller);
           try { controller.close(); } catch { }

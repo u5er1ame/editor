@@ -13,7 +13,6 @@
 
 	let { children, data } = $props();
 
-	$inspect(data);
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 
@@ -31,10 +30,10 @@
 <ModeWatcher />
 <Toaster richColors position="top-center" />
 
-<div class="flex size-full flex-col p-1">
+<div class="flex size-full flex-col">
 	<Nav.Root
 		orientation="horizontal"
-		class="z-50 size-full max-h-16 max-w-full justify-between gap-1 border-b border-b-stone-400"
+		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-stone-400"
 	>
 		<Nav.List>
 			{#await new Promise((r) => setTimeout(r, 200))}
