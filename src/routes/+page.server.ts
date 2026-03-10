@@ -1,7 +1,5 @@
-import { jsonify, Table, type Prettify } from 'surrealdb';
+import { jsonify } from 'surrealdb';
 import type { Node } from "@xyflow/svelte";
-import { surreal, isConnected } from '$lib/server/surreal';
-import type { Breaker } from '$lib/server/schemas';
 import { fakeElectricRooms, fakeBoards, fakeBreakers } from '$lib/fake_data';
 import { toNode } from '$lib/utils';
 import type { PageServerData, PageServerLoad } from './$types';

@@ -4,24 +4,26 @@
 	import Button from './ui/button/button.svelte';
 	import { onMount } from 'svelte';
 	import { twMerge } from 'tailwind-merge';
+	import { toast } from 'svelte-sonner';
 
 	let { onclick } = $props();
 
 	let status: ConnectionStatus | 'error' | undefined = $state(undefined);
-	let sse = ""
-	// let sse = new EventSource('api/v1/db/status');
-	// onMount(() => {
-	// 	console.log('mount');
-	// 	sse.onmessage = (event) => {
-	// 		status = event.data;
-	// 	};
-	// 	sse.onerror = (event) => {
-	// 		status = 'error';
-	// 		console.log(event);
-	// 		sse.close();
-	// 	};
-	// 	return () => sse.close();
-	// });
+	// let sse = ""
+	let sse = new EventSource('api/v1/db/status');
+	onMount(() => {
+		sse.onmessage = (event) => {
+			console.log('got message', event.data);
+			status = event.data;
+		};
+		sse.onerror = (event) => {
+			status = 'error';
+			console.log(event);
+			toast.error('Connection error');
+			sse.close();
+		};
+		return () => sse.close();
+	});
 	const bg_color = $derived.by(() => {
 		switch (status) {
 			case 'connected':
@@ -55,6 +57,10 @@
 <Button {onclick} variant="ghost" class="size-icon cursor-pointer">
 	{#if status == 'connecting' || status == 'reconnecting'}
 		<Spinner class={twMerge(text_color, ' content-center align-middle')}></Spinner>
+	{:else if status == 'error'}
+		<div
+			class={twMerge('icon-[material-symbols--error] size-4 content-center align-middle', bg_color)}
+		></div>
 	{:else}
 		<div
 			class={twMerge(

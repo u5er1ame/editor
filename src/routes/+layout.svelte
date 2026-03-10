@@ -7,12 +7,13 @@
 	import { Toaster } from '$lib/components/ui/sonner/index';
 	import * as Nav from '$lib/components/ui/navigation-menu/index';
 	import { icons } from '$lib/client/color_mode.svelte';
-	// import DbStatusIcon from '$lib/components/DbStatusIcon.svelte';
+	import DbStatusIcon from '$lib/components/DbStatusIcon.svelte';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 
 	let { children, data } = $props();
 
+	$inspect(data);
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 
@@ -39,7 +40,7 @@
 			{#await new Promise((r) => setTimeout(r, 200))}
 				<Spinner />
 			{:then}
-				<!-- <DbStatusIcon onclick={recconect} /> -->
+				<DbStatusIcon onclick={recconect} />
 			{/await}
 			<Nav.Item>
 				<Nav.Link href="/">Home</Nav.Link>
