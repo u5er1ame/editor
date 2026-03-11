@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { toast } from 'svelte-sonner';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { Button } from '$lib/components/ui/button';
-	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
 	import Table from '$lib/components/Table.svelte';
 	import type { IColumn } from '@svar-ui/svelte-grid';
-	import { tick } from 'svelte';
 
 	let { data, ...rest } = $props();
+
 	const tables = $derived(data.tables);
-	let fields: any[] = $state([]);
+
 	function getIcon(table: any) {
 		switch (table.kind.kind) {
 			case 'RELATION':
@@ -21,18 +18,6 @@
 			default:
 				return '';
 		}
-	}
-
-	let columns: IColumn[] = $state([]);
-	let values = $state({data: []});
-	async function getFields(table: string) {
-		fields = await fetch(`/api/v1/db/tables/schema/${table}`)
-			.then((r) => r.json())
-			.then((r) => r);
-		columns = fields.map(columnFromFieldDef);
-
-		await tick()
-		values = await fetch(`/api/v1/db/tables?q=${table}`).then((r) => r.json());
 	}
 
 	function columnFromFieldDef(field: any): IColumn {
@@ -56,8 +41,9 @@
 	<Tabs.Root>
 		<Tabs.List class="size-full">
 			{#each tables as table, i}
-				<Tabs.Trigger value={table.name} variant="outline"
-					>{table.name}{@html getIcon(table)}</Tabs.Trigger>
+				<Tabs.Trigger value={table.name}>
+					{table.name}{@html getIcon(table)}</Tabs.Trigger
+				>
 			{/each}
 		</Tabs.List>
 		{#each tables as table}
