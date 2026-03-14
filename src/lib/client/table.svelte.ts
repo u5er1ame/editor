@@ -1,6 +1,8 @@
-import { z, ZodObject } from "zod/v4";
-import { RecordId, type Table } from "surrealdb";
-import type { IColumn, TEditorType } from "@svar-ui/svelte-grid";
+import { z } from "zod/v4";
+import { type Table } from "surrealdb";
+import type { IColumn, IColumnConfig, IHeaderCell, IHeaderFilter, IOption, TEditorType, TSortFunction } from "@svar-ui/svelte-grid";
+
+import { schemas } from "$lib/client/schemas";
 
 export class DataTable {
 	table;
@@ -8,26 +10,25 @@ export class DataTable {
 	columns?: IColumn[];
 	data?: any[];
 	options?: { id: string, label: string }[] = [];
+	usePagination = false;
 	pagedData: any[] = $state([]);
 	pageSize = 15;
-	constructor(table: Table) {
+	constructor(table: Table, usePagination = false) {
+		this.usePagination = usePagination;
 		this.table = table;
 		this.schema = schemas.get(table.name);
 		if (!this.schema) {
 			throw new Error(`Schema for table ${table.name} not found`);
 		}
-		// this.columns = this.getColumns();
+		// this.columns = this.getColumns(); // INFO: this should be done in runtime
 	}
 	async fetchData() {
 		const data = await fetch(`/api/v1/db/tables/?q=${this.table.name}`).then((r) => r.json());
 		this.data = data.data;
+		this.pageSize = this.usePagination ? this.pageSize : (this.data?.length ?? 15);
 		this.pagedData = this.paginate({ from: 0, to: this.pageSize });
-		const table = this.schema?.meta()?.table2fetch;
-		if (table) {
-			const res = await fetch("/api/v1/db/tables?q=" + table).then((r) => r.json());
-			this.options = res.data.map((item: z.infer<typeof this.schema>) => ({ id: item.id, label: item.name }));
-		}
 	}
+
 	paginate(e: any) {
 		const { from, to } = e;
 		if (this.data == null) {
@@ -38,109 +39,101 @@ export class DataTable {
 		return this.pagedData;
 	}
 
-	getColumns() {
+
+	async getColumns() {
 		if (!this.schema) return [];
-
-		return Object.entries(this.schema.shape).map(([key, value]) => {
-			let header = key.charAt(0).toUpperCase() + key.slice(1);
-			const out = {
-				id: key,
-				header,
-				sort: true,
-			} as IColumn;
-
-			if (key == 'id') {
-				out.hidden = true;
-				return out;
+		const config = Object.entries(this.schema.shape).map(async ([key, value]) => {
+			let column: ColumnBuilder = new ColumnBuilder(key).default();
+			const meta = value.meta();
+			if (!meta) return column.build();
+			const options = meta.table;
+			if (meta.column) {
+				column.any(meta.column);
 			}
-			switch (value.type) {
-				case 'custom':
-					/// TODO: add combobox
-					out.editor = {
-						type: 'combo' as TEditorType,
-						config: {
-							options: this.options
-						},
-					};
-					out.options = this.options;
-					break;
-				case 'optional':
-					/// FIXME: idk how to handle optional it could be anything
-					out.editor = {
-						type: 'combo' as TEditorType,
-						config: {
-							buttons: ["clear"],
-							options: this.options,
-						},
-					};
-					out.options = this.options;
-					break;
-				case "string":
-					out.editor = 'text' as TEditorType;
-					break;
-				default:
-					out.editor = 'text' as TEditorType;
+			if (options == undefined && (column.column.editor == "combo" || column.column.editor == "richselect")) {
+				console.warn("no table for combo/richselect", key);
 			}
+			if (options != undefined) {
+				const res = await fetch("/api/v1/db/tables?q=" + options).then((r) => r.json());
+				column.setComboOptions(res?.data.map((item: z.infer<typeof this.schema>) => ({ id: item.id, label: item.name })));
+			}
+			const out = column.build();
 			return out;
 		});
+		const out = await Promise.all(config);
+		return out;
+	}
+}
+
+
+
+export class ColumnBuilder {
+	column: IColumnConfig = {};
+	constructor(key: string) {
+		this.column.id = key;
+	}
+	any(options: IColumn) {
+		this.column = { ...this.column, ...options };
+		return this;
+	}
+	hidden() {
+		this.column.hidden = true;
+		return this;
+	}
+	header(header?: (string | Partial<IHeaderCell>)[]) {
+		this.column.header = header ?? [{ text: this.column.id.charAt(0).toUpperCase() + this.column.id.slice(1) }];
+		return this;
+	}
+	headerFilter(filter?: IHeaderFilter) {
+		if (!this.column.header) this.column.header = [];
+		if (typeof this.column.header == "string") {
+			this.column.header = [{ text: this.column.header }];
+		}
+		if (Array.isArray(this.column.header)) {
+			this.column.header.push({ filter: filter ?? { type: "text" } });
+		}
+		else {
+			this.column.header.filter = filter ?? { type: "text" }
+		}
+		return this;
+	}
+	sort(sort?: TSortFunction) {
+		this.column.sort = sort ?? true;
+		return this;
+	}
+	editor(editor?: Partial<TEditorType>) {
+		this.column.editor = editor ?? { type: "text" };
+		return this;
+	}
+	setComboOptions(options: IOption[]) {
+		if (!this.column.editor) return this;
+		if (options.length == 0) {
+			this.column.editor = "text";
+			console.warn("no options for selector changing to text", this.column);
+			return this;
+		}
+		switch (typeof this.column.editor) {
+			case "string":
+				if (this.column.editor == "richselect" || this.column.editor == "combo") {
+					this.column.options = options
+				}
+				break;
+			case "object":
+				throw new Error("not implemented");
+			case "function":
+				this.column.options = options;
+				break;
+			default:
+				break;
+		}
+		return this;
+	}
+	default() {
+		return this.header();
+	}
+
+	build() {
+		return this.column;
 	}
 
 }
-
-const LevelSchema = z.object({
-	id: z.custom<RecordId<"levels">>(),
-	name: z.string(),
-});
-const ElectricRoomSchema = z.object({
-	id: z.custom<RecordId<"electric_rooms">>(),
-	name: z.string(),
-	level: z.custom<RecordId<"levels">>(),
-}).meta({
-	table2fetch: "levels",
-});
-const BoardSchema = z.object({
-	id: z.custom<RecordId<"boards">>(),
-	name: z.string(),
-	room: z.custom<RecordId<"electric_rooms">>(),
-}).meta({
-	table2fetch: "electric_rooms",
-});
-const BreakerSchema = z.object({
-	id: z.custom<RecordId<"breakers">>(),
-	name: z.string(),
-	value: z.number().optional(),
-	description: z.string().optional(), // FIXME: is this should be generated from graph?
-	board: z.custom<RecordId<"boards">>(),
-}).meta({
-	table2fetch: "boards",
-});
-
-const BreakerConnectionSchema = z.object({
-	id: z.custom<RecordId<"connects">>(),
-	in: z.custom<RecordId<"breakers">>(),
-	cable: z.string().optional(),
-	out: z.custom<RecordId<"breakers"> | RecordId<"area_name">>(),
-});
-
-const AreaNameSchema = z.object({
-	id: z.custom<RecordId<"area_name">>(),
-	name: z.string(),
-	shop: z.custom<RecordId<"shops">>().optional(),
-}).meta({
-	table2fetch: "shops",
-});
-
-const ShopSchema = z.object({
-	id: z.custom<RecordId<"shops">>(),
-	name: z.string(),
-});
-
-const schemas = new Map<string, ZodObject>([
-	["connects", BreakerConnectionSchema],
-	["levels", LevelSchema],
-	["electric_rooms", ElectricRoomSchema],
-	["boards", BoardSchema],
-	["breakers", BreakerSchema],
-	["area_name", AreaNameSchema],
-	["shops", ShopSchema],
-]);
