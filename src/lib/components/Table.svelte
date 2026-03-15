@@ -27,9 +27,10 @@
 
 	let { table, ...rest } = $props();
 
-	const table_state = new DataTable(new Table(table));
 	// TODO: custom editor function
 	const autoConfig = { editor: 'text', flexgrow: 1 };
+
+	const table_state = new DataTable(new Table(table));
 </script>
 
 {#if browser}

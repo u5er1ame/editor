@@ -38,7 +38,7 @@ const AreaNameSchema = z.object({
 });
 
 const ShopSchema = z.object({
-	id: z.custom<RecordId<"shops">>(),
+	id: z.custom<RecordId<"shops">>().meta({ column: { hidden: true } }),
 	name: z.string().meta({ column: { editor: "text", sort: (a: any, b: any) => a.name.localeCompare(b.name) } }),
 });
 
