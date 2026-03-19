@@ -7,6 +7,7 @@
 
 	const tables = $derived(data.tables);
 
+	$inspect(tables);
 	function getIcon(table: any) {
 		switch (table.kind.kind) {
 			case 'RELATION':

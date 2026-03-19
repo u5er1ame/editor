@@ -6,23 +6,23 @@
 	import { twMerge } from 'tailwind-merge';
 	import { toast } from 'svelte-sonner';
 
-	let { onclick } = $props();
+	let { onclick, status: initialStatus } = $props();
 
-	let status: ConnectionStatus | 'error' | undefined = $state(undefined);
-	// let sse = ""
-	let sse = new EventSource('api/v1/db/status');
+	let status: ConnectionStatus | 'error' | undefined = $derived(initialStatus);
+	let sse = ""
+	// let sse = new EventSource('api/v1/db/status');
 	onMount(() => {
-		sse.onmessage = (event) => {
-			console.log('got message', event.data);
-			status = event.data;
-		};
-		sse.onerror = (event) => {
-			status = 'error';
-			console.log(event);
-			toast.error('Connection error');
-			sse.close();
-		};
-		return () => sse.close();
+		// sse.onmessage = (event) => {
+		// 	console.log('got message', event.data);
+		// 	status = event.data;
+		// };
+		// sse.onerror = (event) => {
+		// 	status = 'error';
+		// 	console.error(event);
+			// toast.error('Connection error');
+		// 	sse.close();
+		// };
+		// return () => sse.close();
 	});
 	const bg_color = $derived.by(() => {
 		switch (status) {

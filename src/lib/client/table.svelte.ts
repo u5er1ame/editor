@@ -54,8 +54,31 @@ export class DataTable {
 				console.warn("no table for combo/richselect", key);
 			}
 			if (options != undefined) {
+				// TODO: check if table exists? return 404
 				const res = await fetch("/api/v1/db/tables?q=" + options).then((r) => r.json());
-				column.setComboOptions(res?.data.map((item: z.infer<typeof this.schema>) => ({ id: item.id, label: item.name })));
+				const items = res?.data.map((item: z.infer<typeof this.schema>) => ({ id: item.id, label: item.name }));
+				column.setComboOptions(items);
+				switch (meta.filter) {
+					case "richselect":
+						column.headerFilter({
+							type: "richselect",
+							config: {
+								options: items,
+								template: (i) => i.label,
+								placeholder: "Filter",
+								handler: (val, fil) => {
+									if (fil == "") return true;
+									return val == fil
+								},
+							},
+						});
+						break;
+					case "text":
+						column.headerFilter()
+						break;
+					default:
+						break;
+				}
 			}
 			const out = column.build();
 			return out;
@@ -86,14 +109,15 @@ export class ColumnBuilder {
 	}
 	headerFilter(filter?: IHeaderFilter) {
 		if (!this.column.header) this.column.header = [];
+		if (filter == undefined) filter = { type: "text" };
 		if (typeof this.column.header == "string") {
-			this.column.header = [{ text: this.column.header }];
+			this.column.header = [{ text: this.column.header, filter }];
 		}
 		if (Array.isArray(this.column.header)) {
-			this.column.header.push({ filter: filter ?? { type: "text" } });
+			this.column.header.push({ filter });
 		}
 		else {
-			this.column.header.filter = filter ?? { type: "text" }
+			this.column.header.filter = filter;
 		}
 		return this;
 	}
@@ -119,6 +143,7 @@ export class ColumnBuilder {
 				}
 				break;
 			case "object":
+				// TODO: this is for semi-custom editor, not implemented right now
 				throw new Error("not implemented");
 			case "function":
 				this.column.options = options;

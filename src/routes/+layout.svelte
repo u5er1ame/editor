@@ -10,15 +10,19 @@
 	import DbStatusIcon from '$lib/components/DbStatusIcon.svelte';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import { toast } from 'svelte-sonner';
 
-	let { children, data } = $props();
+	let { children, data, ...rest } = $props();
 
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 
 	async function recconect(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
 		if (data.db == 'disconnected' || data.db == 'reconnecting') {
-			await fetch('api/v1/db/connect').then((r) => r.json());
+			const res = await fetch('api/v1/db/connect').then((r) => r.json());
+			if (!res.connected) {
+				toast.error("DB reconnection error");
+			}
 		}
 	}
 </script>
@@ -39,7 +43,7 @@
 			{#await new Promise((r) => setTimeout(r, 200))}
 				<Spinner />
 			{:then}
-				<DbStatusIcon onclick={recconect} />
+				<DbStatusIcon onclick={recconect} status={data.db} />
 			{/await}
 			<Nav.Item>
 				<Nav.Link href="/">Home</Nav.Link>

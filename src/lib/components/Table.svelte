@@ -24,6 +24,12 @@
 	});
 
 	let tbl: IApi | undefined = $state();
+	$effect(() => {
+		if (tbl == undefined) return;
+		tbl.on("update-cell", (ev) => {
+			console.log("updated", ev);
+		});
+	});
 
 	let { table, ...rest } = $props();
 
@@ -38,7 +44,7 @@
 		<Style>
 			{#await table_state.fetchData() }
 			<!-- {#await Promise.all([tableObj.fetchData(), tableObj.getColumns()])} -->
-				<Skeleton />
+				<Skeleton class="size-full" />
 			{:then}
 				{#if table_state.data != null}
 					<Toolbar api={tbl} />
