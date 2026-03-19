@@ -110,6 +110,8 @@
 
     --wx-color-link: var(--accent-foreground) !important;
     --wx-background-hover: var(--secondary) !important;
+
+    --wx-input-placeholder-color: var(--secondary) !important;
 };
 
 .wx-willow-dark-theme .wx-cell:focus {
