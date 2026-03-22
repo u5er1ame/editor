@@ -7,8 +7,15 @@
 
 	const tables = $derived(data.tables);
 
-	$inspect(tables);
-	function getIcon(table: any) {
+	function isWriteable(table: any) {
+		if (table.drop) {
+			return `<span class="icon-[material-symbols--lock] text-red-500"></span>`;
+		}
+		else {
+			return ``;
+		}
+	}
+	function getKind(table: any) {
 		switch (table.kind.kind) {
 			case 'RELATION':
 				return `<span class="icon-[material-symbols--graph-8]"></span>`;
@@ -39,18 +46,26 @@
 </script>
 
 <div class="size-full p-1">
-	<Tabs.Root>
-		<Tabs.List class="size-full">
-			{#each tables as table, i}
-				<Tabs.Trigger value={table.name}>
-					{table.name}{@html getIcon(table)}</Tabs.Trigger
-				>
+	{#if tables.length > 0}
+		<Tabs.Root>
+			<Tabs.List class="size-full">
+				{#each tables as table, i}
+					<Tabs.Trigger value={table.name} title={table.name + (table.drop?" Writes disabled":"")}>
+						{@html isWriteable(table)}{table.name}{@html getKind(table)}
+					</Tabs.Trigger>
+				{/each}
+			</Tabs.List>
+			{#each tables as table}
+				<Tabs.Content value={table.name}>
+					<Table table={table.name} isWriteable={!(table.drop)} />
+				</Tabs.Content>
 			{/each}
-		</Tabs.List>
-		{#each tables as table}
-			<Tabs.Content value={table.name}>
-				<Table table={table.name} />
-			</Tabs.Content>
-		{/each}
-	</Tabs.Root>
+		</Tabs.Root>
+	{:else}
+		<div class="size-full">
+			<div class="text-center">
+				<div class="text-xl">No tables found</div>
+			</div>
+		</div>
+	{/if}
 </div>
