@@ -24,8 +24,8 @@ const ElectricRoomSchema = z.object({
 });
 
 const BoardSchema = z.object({
-	id: z.custom<RecordId<"boards">>().transform((v) => new StringRecordId(v))
-		.meta({ hidden: true }),
+	id: z.custom<string>().transform((v) => new StringRecordId(v))
+		.meta({ column: { hidden: true } }),
 	name: z.string()
 		.meta({ column: { editor: "text", auto: "data" } }),
 	room: z.custom<RecordId<"electric_rooms">>().transform((v) => new StringRecordId(v))
