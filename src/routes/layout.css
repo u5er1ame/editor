@@ -92,8 +92,8 @@
     --wx-table-select-color: var(--foreground) !important;
     --wx-table-select-border: inset 3px 0 var(--color-emerald-500) !important;
 
-    --wx-button-background: var(--primary) !important;
-    --wx-button-font-color: var(--primary-foreground) !important;
+    --wx-button-background: var(--secondary) !important;
+    --wx-button-font-color: var(--secondary-foreground) !important;
 
     --wx-color-disabled: var(--muted) !important;
     --wx-color-font-disabled: var(--muted-foreground) !important;

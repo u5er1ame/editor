@@ -54,7 +54,7 @@ const AreaNameSchema = z.object({
 	id: z.custom<RecordId<"area_name">>().transform((v) => new StringRecordId(v))
 		.meta({ column: { hidden: true } }),
 	name: z.string()
-		.meta({ column: { header: [{ text: "Name" }, { filter: "text" }], sort: true, editor: "text", auto: "data" } }),
+		.meta({ filter: "text", column: {  sort: true, editor: "text", auto: "data" } }),
 	shop: z.custom<string>().transform((v) => new StringRecordId(v)).optional()
 		.meta({
 			table: "shops",

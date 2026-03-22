@@ -69,6 +69,7 @@ export class DataTable {
 			if (options == undefined && (column.column.editor == "combo" || column.column.editor == "richselect")) {
 				console.warn("no table for combo/richselect", key);
 			}
+
 			if (options != undefined) {
 				// TODO: check if table exists? return 404
 				const res = await fetch("/api/v1/db/tables?q=" + options).then((r) => r.json());
@@ -96,6 +97,7 @@ export class DataTable {
 						break;
 				}
 			}
+
 			const out = column.build();
 			return out;
 		});
