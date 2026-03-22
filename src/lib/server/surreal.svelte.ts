@@ -1,4 +1,6 @@
-import { type ConnectOptions, Surreal, type ConnectionStatus, ConnectionUnavailableError, UnexpectedConnectionError, BoundQuery, Table } from 'surrealdb';
+import { schemas } from '$lib/client/schemas';
+import { type ConnectOptions, Surreal, type ConnectionStatus,  BoundQuery, Table, RecordId, StringRecordId } from 'surrealdb';
+import { generateId } from './queries';
 
 // export async function isConnected() {
 // 	try {
@@ -118,6 +120,51 @@ export class DB {
 		} catch (e) {
 			console.error("select error", e);
 			return [];
+		}
+	}
+	async update(table: string, data: any) {
+		try {
+			if (this.status == 'disconnected') {
+				return {};
+			}
+			const schema = schemas.get(table) ?? null;
+			const parsed = schema!.parse(data)
+			if (parsed == null) return {};
+			const res = await this._db.update(parsed.id as StringRecordId).merge(parsed);
+			console.log("UPD: ", parsed);
+			return res;
+		} catch (e) {
+			console.error("update error", e);
+			return {};
+		}
+	}
+	async insert(table: string, data: any) {
+		try {
+			if (this.status == 'disconnected') {
+				return {};
+			}
+			const schema = schemas.get(table) ?? null;
+			const parsed = schema!.parse(data)
+			if (parsed == null) return {};
+			const res = await this._db.insert(parsed);
+			console.log("INS: ", parsed);
+			return res;
+		} catch (e) {
+			console.error("insert error", e);
+			return {};
+		}
+	}
+	async delete(table: string, id: string) {}
+	async generateId() {
+		try {
+			if (this.status == 'disconnected') {
+				throw new Error("trying to generate id while disconnected");
+			}
+			const res = await this._db.query(generateId);
+			return res;
+		}
+		catch (e) {
+			console.error("generateId error", e);
 		}
 	}
 }

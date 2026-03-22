@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { type Table } from "surrealdb";
-import type { IColumn, IColumnConfig, IHeaderCell, IHeaderFilter, IOption, TEditorType, TSortFunction } from "@svar-ui/svelte-grid";
+import type { IApi, IColumn, IColumnConfig, IHeaderCell, IHeaderFilter, IOption, TEditorType, TSortFunction } from "@svar-ui/svelte-grid";
 
 import { schemas } from "$lib/client/schemas";
 
@@ -39,6 +39,22 @@ export class DataTable {
 		return this.pagedData;
 	}
 
+	async getSort(api?: IApi) {
+		if (!api) return;
+		if (!this.schema) return;
+		const meta = this.schema.meta();
+		if (!meta) return;
+		const sort: { key: string, order: "asc" | "desc" } | undefined = meta.sort ?? undefined;
+		if (!sort) return;
+		if (Array.isArray(sort)) {
+			sort.forEach(async (s) => {
+				await api.exec("sort-rows", { add: true, ...s });
+			});
+		}
+		else {
+			await api.exec("sort-rows", sort);
+		}
+	}
 
 	async getColumns() {
 		if (!this.schema) return [];
