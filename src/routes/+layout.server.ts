@@ -1,10 +1,9 @@
-import { db } from "$lib/server/surreal.svelte";
-import { error, json } from "@sveltejs/kit";
 import type { PageServerData } from "./$types";
+import { getDbLocals } from "$lib/server/utils";
 
 
 export const load: PageServerData = async () => {
-	const connected = await db.connect();
+	const locals = getDbLocals();
 
-	return { db: db.status };
+	return { db: "", creds: locals };
 };
