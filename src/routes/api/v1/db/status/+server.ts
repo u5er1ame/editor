@@ -1,5 +1,5 @@
 import type { ConnectionStatus } from "surrealdb";
-import { db } from "$lib/server/surreal.svelte";
+// import { db } from "$lib/server/surreal.svelte";
 import type { RequestHandler } from './$types';
 import { json } from "@sveltejs/kit";
 
@@ -43,7 +43,8 @@ import { json } from "@sveltejs/kit";
 
 
 export const GET: RequestHandler = async () => {
-  return json({ status: db.status });
+  return json({ status: "disconnected" });
+  // return json({ status: db.status });
 };
 
 // export const GET: RequestHandler = ({ setHeaders }) => {
