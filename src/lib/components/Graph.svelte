@@ -258,7 +258,7 @@
 		position="bottom-left"
 	>
 		<!-- <ScrollArea class="w-fit max-w-xl h-fit max-h-1/3 bg-rose-200"> -->
-			<NodeDataTable />
+			<!-- <NodeDataTable /> -->
 		<!-- </ScrollArea> -->
 	</Panel>
 	<Background size={1} variant={BackgroundVariant.Dots} />

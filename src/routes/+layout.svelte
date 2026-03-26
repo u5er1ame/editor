@@ -3,6 +3,8 @@
 	import { twMerge } from 'tailwind-merge';
 	import { mode, ModeWatcher, toggleMode } from 'mode-watcher';
 	import { scale } from 'svelte/transition';
+	import { toast } from 'svelte-sonner';
+
 	import favicon from '$lib/assets/favicon.svg';
 	import { Toaster } from '$lib/components/ui/sonner/index';
 	import * as Nav from '$lib/components/ui/navigation-menu/index';
@@ -10,19 +12,22 @@
 	import DbStatusIcon from '$lib/components/DbStatusIcon.svelte';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { toast } from 'svelte-sonner';
+	import { getSurrealContext, setSurrealContext } from '$lib/client/db.context.svelte';
 
 	let { children, data, ...rest } = $props();
+
+	const isAuthenticated = $derived(data.creds.token != null);
+	if (data.creds.token != null) {
+		setSurrealContext(data.creds.url, data.creds.token);
+	}
+	let db = $derived(getSurrealContext());
 
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 
 	async function recconect(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
-		if (data.db == 'disconnected' || data.db == 'reconnecting') {
-			const res = await fetch('api/v1/db/connect').then((r) => r.json());
-			if (!res.connected) {
-				toast.error("DB reconnection error");
-			}
+		if (db.status == 'disconnected' || db.status == 'reconnecting') {
+			await db.reconnect();
 		}
 	}
 </script>
@@ -37,13 +42,13 @@
 <div class="flex size-full flex-col">
 	<Nav.Root
 		orientation="horizontal"
-		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-stone-400"
+		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-sidebar-border bg-sidebar"
 	>
 		<Nav.List>
 			{#await new Promise((r) => setTimeout(r, 200))}
 				<Spinner />
 			{:then}
-				<DbStatusIcon onclick={recconect} status={data.db} />
+				<DbStatusIcon />
 			{/await}
 			<Nav.Item>
 				<Nav.Link href="/">Home</Nav.Link>
@@ -52,14 +57,17 @@
 				<Nav.Link href="tables">Tables</Nav.Link>
 			</Nav.Item>
 		</Nav.List>
-		<Nav.List></Nav.List>
 		<Nav.List>
 			<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->
 			{#key mode.current}
 				<div in:scale>
-					<Button variant="ghost" class="cursor-pointer" onclick={toggleMode}>
-						<span class={twMerge(mode_icon, 'size-6 content-center p-4 align-middle')}></span>
-					</Button>
+					<Nav.Item>
+					<Nav.Link onclick={toggleMode}>
+						<!-- <Button variant="ghost" class="cursor-pointer" onclick={toggleMode}> -->
+							<span class={twMerge(mode_icon, 'content-center align-middle')}></span>
+						<!-- </Button> -->
+					</Nav.Link>
+					</Nav.Item>
 				</div>
 			{/key}
 		</Nav.List>
