@@ -14,22 +14,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (!event.locals.db) {
 			event.locals.db = {
 				token: null,
-				url: ""
+				username: "user"
 			}
 		}
 		const token = event.cookies.get("sr_token");
-		const url = event.cookies.get("sr_endpoint");
 
-		if (url != undefined) {
-			event.locals.db.url = JSON.parse(url);
-		}
 		if (token == undefined) {
 			return resolve(event);
 		}
 		event.locals.db.token = JSON.parse(token);
 		return resolve(event);
 	} catch (e) {
-		console.log("ERR", e);
+		console.log("ERR:", e);
 		return resolve(event);
 	}
 }

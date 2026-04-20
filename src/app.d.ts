@@ -10,7 +10,7 @@ declare global {
 		interface Locals {
 			db: {
 				token: Tokens | null;
-				url: string;
+				username: string
 			}
 		}
 		// interface PageData {}

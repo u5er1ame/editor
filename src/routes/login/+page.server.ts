@@ -25,6 +25,7 @@ const formSchema = z.object({
 
 export const actions = {
 	default: async ({ cookies, request }) => {
+		const url = request.url=="/login" ? "/" : request.url;
 		try {
 			const form = await request.formData();
 			const res = formSchema.safeParse(Object.fromEntries(form.entries()));
@@ -32,26 +33,26 @@ export const actions = {
 				console.log("ERR", res);
 				return fail(400, z.flattenError(res.error));
 			}
-			const connected = await db.connect(res.data.url);
-			if (!connected) {
-				return fail(400, { formErrors: ["DB connection error"] });
-			}
-			console.log(res.data)
-			await db.ready;
-			const token = await db.signin({
-				username: res.data.username,
-				password: res.data.password
-			});
-			if (!token) {
-				return fail(400, { formErrors: ["DB signin error"] });
-			}
-			cookies.set("sr_token", JSON.stringify(token), {
-				httpOnly: true,
-				path: "/",
-			});
-			cookies.set("sr_endpoint", JSON.stringify(res.data.url), {
-				path: "/",
-			});
+			// const connected = await db.connect(res.data.url);
+			// if (!connected) {
+			// 	return fail(400, { formErrors: ["DB connection error"] });
+			// }
+			// console.log(res.data)
+			// await db.ready;
+			// const token = await db.signin({
+			// 	username: res.data.username,
+			// 	password: res.data.password
+			// });
+			// if (!token) {
+			// 	return fail(400, { formErrors: ["DB signin error"] });
+			// }
+			// cookies.set("sr_token", JSON.stringify(token), {
+			// 	httpOnly: true,
+			// 	path: "/",
+			// });
+			// cookies.set("sr_endpoint", JSON.stringify(res.data.url), {
+			// 	path: "/",
+			// });
 		}
 		catch (e) {
 			console.log("ERR", e);
@@ -63,6 +64,6 @@ export const actions = {
 				password: undefined,
 			} });
 		}
-		return redirect(303,"/");
+		return redirect(303, url);
 	}
 } satisfies Actions;

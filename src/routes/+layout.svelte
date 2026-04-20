@@ -5,6 +5,7 @@
 	import { scale } from 'svelte/transition';
 	import { toast } from 'svelte-sonner';
 
+	import type { LayoutProps } from './$types';
 	import favicon from '$lib/assets/favicon.svg';
 	import { Toaster } from '$lib/components/ui/sonner/index';
 	import * as Nav from '$lib/components/ui/navigation-menu/index';
@@ -12,23 +13,17 @@
 	import DbStatusIcon from '$lib/components/DbStatusIcon.svelte';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { getSurrealContext, setSurrealContext } from '$lib/client/db.context.svelte';
+	import SurrealContextProvider from '$lib/components/SurrealContextProvider.svelte';
 
-	let { children, data, ...rest } = $props();
-
-	const isAuthenticated = $derived(data.creds.token != null);
-	if (data.creds.token != null) {
-		setSurrealContext(data.creds.url, data.creds.token);
-	}
-	let db = $derived(getSurrealContext());
+	let { children, data, params }: LayoutProps = $props();
 
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 
 	async function recconect(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
-		if (db.status == 'disconnected' || db.status == 'reconnecting') {
-			await db.reconnect();
-		}
+		// if (db.status == 'disconnected' || db.status == 'reconnecting') {
+		// 	await db.reconnect();
+		// }
 	}
 </script>
 
@@ -39,6 +34,7 @@
 <ModeWatcher />
 <Toaster richColors position="top-center" />
 
+<SurrealContextProvider db={data.db}>
 <div class="flex size-full flex-col">
 	<Nav.Root
 		orientation="horizontal"
@@ -51,7 +47,7 @@
 				<DbStatusIcon />
 			{/await}
 			<Nav.Item>
-				<Nav.Link href="/">Home</Nav.Link>
+				<Nav.Link href="/">Graph</Nav.Link>
 			</Nav.Item>
 			<Nav.Item>
 				<Nav.Link href="tables">Tables</Nav.Link>
@@ -74,3 +70,4 @@
 	</Nav.Root>
 	{@render children()}
 </div>
+</SurrealContextProvider>

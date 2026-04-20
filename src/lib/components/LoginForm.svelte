@@ -1,5 +1,6 @@
 <script lang="ts">
 import { toast } from 'svelte-sonner';
+import { goto } from '$app/navigation';
 import { enhance } from '$app/forms';
 
 import { page } from '$app/state';
@@ -7,10 +8,15 @@ import { page } from '$app/state';
 import * as Field from '$lib/components/ui/field/index';
 import Input from '$lib/components/ui/input/input.svelte';
 import Button from '$lib/components/ui/button/button.svelte';
-import { goto } from '$app/navigation';
+
+import { getSurrealContext } from '$lib/client/db.context.svelte';
+
 
 let { ...rest } = $props();
-const url = page.data.creds?.url
+
+const db = $derived(getSurrealContext());
+$inspect("db", db);
+const url = page.data.db?.url
 let form = $state();
 $effect(() => {
     if (form?.formErrors && form?.formErrors?.length > 0) {

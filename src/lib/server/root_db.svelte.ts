@@ -1,11 +1,12 @@
 import { env } from "$env/dynamic/private"
-import { Surreal } from "surrealdb"
+import { Surreal, type NamespaceDatabase } from "surrealdb"
 
 export class RootDb {
 	url = $state(new URL(env.SURREAL_URL))
 	_db = new Surreal()
 	isConnected = $state(false)
-	loadInfo = $state()
+	loadInfo: any = $state()
+	defaults?: NamespaceDatabase = $state()
 	constructor() {
 	}
 	async connect() {
@@ -15,7 +16,7 @@ export class RootDb {
 				username: "viewer",
 				password: "viewer",
 			}
-		}).catch(()=>this.isConnected = false);
+		}).catch(() => this.isConnected = false);
 	}
 	async getInfo() {
 		/* system: {
@@ -26,8 +27,9 @@ export class RootDb {
 	  memory_usage: 151969792,
 	  physical_cores: 4
 	} */
-		if(!this.isConnected) return
-		const [res] = await this._db.query<[{system: any}]>("info for root");
+		if (!this.isConnected) return
+		const [res] = await this._db.query<[{ system: any, defaults: { namespace: string, database: string } }]>("info for root");
 		this.loadInfo = res.system
+		this.defaults = res.defaults
 	}
 }

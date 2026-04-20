@@ -6,13 +6,12 @@
 	import { twMerge } from 'tailwind-merge';
 	import { Button } from './ui/button';
 	import Spinner from './ui/spinner/spinner.svelte';
+	import { page } from '$app/state';
 
 	const db = getSurrealContext();
 
-	let ns = $derived(db?.namespace);
 	let selectedDb = $derived(db?.database);
-	const rootInfo = $derived(await db?.rootInfo());
-	$inspect(rootInfo?.system);
+	const rootInfo = $derived(page.data.db.info);
 
 	const bg_color = $derived.by(() => {
 		if (db!.status == null) return 'bg-stone-600';
@@ -43,11 +42,29 @@
 </script>
 
 <Popover.Header class="flex size-full flex-row justify-between">
-	<Popover.Title>Database status</Popover.Title>
+	<Popover.Title>
+			<Field.Field>
+				<Field.Content class="flex flex-row justify-between gap-2">
+					<Field.Label for="username">Username</Field.Label>
+					<!-- {#if db.nsInfo()} -->
+					<!-- 	<Select.Root type="single" bind:value={db!.username} name="username"> -->
+					<!-- 		<Select.Trigger class="w-full" -->
+					<!-- 			>{db?.username}</Select.Trigger -->
+					<!-- 		> -->
+					<!-- 		<Select.Content> -->
+					<!-- 			{#each nsInfo?.users as user} -->
+					<!-- 				<Select.Item label={user} value={db}>{db}</Select.Item> -->
+					<!-- 			{/each} -->
+					<!-- 		</Select.Content> -->
+					<!-- 	</Select.Root> -->
+					<!-- {/if} -->
+				</Field.Content>
+			</Field.Field>
+	</Popover.Title>
 	<div class="flex flex-row gap-1">
-		{#if db.status == 'connected'}
+		{#if db && db.status == 'connected'}
 			<p>
-				{(rootInfo?.system.memory_usage / 1024 / 1024).toFixed(2)}MB
+				{(rootInfo?.memory_usage / 1024 / 1024).toFixed(2)}MB
 			</p>
 		{/if}
 		<p>
@@ -61,50 +78,31 @@
 		></div>
 	</div>
 </Popover.Header>
-{#if db.status == 'connected'}
+{#if db && db.status == 'connected'}
 	<div class="flex flex-col gap-1">
-		<Field.Field>
-			<Field.Content class="flex flex-row justify-between gap-2">
-				<Field.Label for="namespace">Namespace</Field.Label>
-				{#if rootInfo}
-					<Select.Root type="single" bind:value={db!.namespace} name="namespace">
-						<Select.Trigger class="w-full">{ns ? ns : 'Select namespace'}</Select.Trigger>
-						<Select.Content>
-							{#each rootInfo.namespaces as namespace}
-								<Select.Item label={namespace} value={namespace}>{namespace}</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				{:else}
-					<p>No namespaces found in main DB please create one</p>
-				{/if}
-			</Field.Content>
-		</Field.Field>
-		{#if ns}
-			{#await db?.nsInfo()}
-				<Spinner />
-			{:then nsInfo}
-				<Field.Field>
-					<Field.Content class="flex flex-row justify-between gap-2">
-						<Field.Label for="database">Database</Field.Label>
-						{#if nsInfo}
-							<Select.Root type="single" bind:value={db!.database} name="namespace">
-								<Select.Trigger class="w-full"
-									>{selectedDb ? selectedDb : 'Select database'}</Select.Trigger
-								>
-								<Select.Content>
-									{#each nsInfo?.databases as db}
-										<Select.Item label={db} value={db}>{db}</Select.Item>
-									{/each}
-								</Select.Content>
-							</Select.Root>
-						{:else}
-							<p>No namespaces found in main DB please create one</p>
-						{/if}
-					</Field.Content>
-				</Field.Field>
-			{/await}
-		{/if}
+		{#await db?.nsInfo()}
+			<Spinner />
+		{:then nsInfo}
+			<Field.Field>
+				<Field.Content class="flex flex-row justify-between gap-2">
+					<Field.Label for="database">Database</Field.Label>
+					{#if nsInfo}
+						<Select.Root type="single" bind:value={db!.database} name="database">
+							<Select.Trigger class="w-full"
+								>{selectedDb ? selectedDb : 'Select database'}</Select.Trigger
+							>
+							<Select.Content>
+								{#each nsInfo?.databases as db}
+									<Select.Item label={db} value={db}>{db}</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					{:else}
+						<p>No namespaces found in main DB please create one</p>
+					{/if}
+				</Field.Content>
+			</Field.Field>
+		{/await}
 		<Button variant="destructive" href="/api/v1/logout">Logout</Button>
 	</div>
 {/if}
