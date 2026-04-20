@@ -1,4 +1,4 @@
-import type { Tokens } from "surrealdb";
+import type { Token } from "surrealdb";
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
@@ -9,7 +9,7 @@ declare global {
 		}
 		interface Locals {
 			db: {
-				token: Tokens | null;
+				token: Token | null;
 				username: string
 			}
 		}
