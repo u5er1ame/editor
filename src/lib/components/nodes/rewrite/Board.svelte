@@ -20,7 +20,7 @@ let item: HTMLDivElement | undefined = $state();
 
 const { getZoom } = useSvelteFlow();
 const zoom = $derived.by(getZoom);
-const threshold = $derived(zoom<0.5);
+const threshold = $derived(zoom<1);
 const nodes = useNodes();
 
 let { id, type, data, class: className, width, height, ...rest }: Props = $props();

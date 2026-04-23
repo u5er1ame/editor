@@ -1,5 +1,4 @@
-import type { NamespaceDatabase, Tokens } from "surrealdb";
-import type { LayoutServerData, LayoutServerLoad } from "./$types";
+import type { LayoutServerLoad } from "./$types";
 
 import { RootDb } from "$lib/server/root_db.svelte";
 

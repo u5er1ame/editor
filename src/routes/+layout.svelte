@@ -38,7 +38,7 @@
 <div class="flex size-full flex-col">
 	<Nav.Root
 		orientation="horizontal"
-		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-sidebar-border bg-sidebar"
+		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-sidebar-border bg-sidebar py-1"
 	>
 		<Nav.List>
 			{#await new Promise((r) => setTimeout(r, 200))}
