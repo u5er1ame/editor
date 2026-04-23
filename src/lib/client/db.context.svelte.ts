@@ -186,9 +186,9 @@ class SurrealStore {
 		}
 	}
 
-	async signin(auth: Omit<NamespaceAuth,"namespace"> ): Promise<string | undefined> {
+	async signin(auth: Omit<NamespaceAuth, "namespace">): Promise<string | undefined> {
 		try {
-			const credentials: NamespaceAuth = {...auth, namespace: this.namespace!};
+			const credentials: NamespaceAuth = { ...auth, namespace: this.namespace! };
 			await this._db.signin(credentials);
 		}
 		catch (e: any) {
@@ -214,6 +214,47 @@ class SurrealStore {
 		};
 		try {
 			const [res] = await this._db.query<NamespaceInfo[]>("info for ns structure");
+			return res;
+		} catch (e) {
+			console.error("nsInfo error", e);
+		}
+	}
+	async dbInfo() {
+		if(!this.isAuthenticated) return;
+		interface DatabaseInfo {
+			accesses: Array<{}>
+			analyzers: Array<{}>
+			apis: Array<{}>
+			buckets: Array<{}>
+			configs: Array<{}>
+			functions: Array<{}>
+			models: Array<{}>
+			modules: Array<{}>
+			params: Array<{}>
+			sequences: Array<{}>
+			tables: Array<{
+				id: number;
+				name: string;
+				drop: boolean;
+				kind: { kind: "NORMAL" | "RELATION" };
+				schemafull: boolean;
+				permissions: Array<{
+					create: boolean;
+					delete: boolean;
+					select: boolean;
+					update: boolean;
+				}>
+			}>
+			users: Array<{
+				duration: { session: Duration; token: Duration };
+				hash: string;
+				name: string;
+				roles: "OWNER" | "EDITOR" | "VIEWER"[];
+			}>
+		};
+		try {
+			await this._db.ready;
+			const [res] = await this._db.query<DatabaseInfo[]>("info for db structure");
 			return res;
 		} catch (e) {
 			console.error("nsInfo error", e);

@@ -4,6 +4,8 @@ import type { IApi, IColumn, IColumnConfig, IHeaderCell, IHeaderFilter, IOption,
 
 import { schemas } from "$lib/client/schemas";
 
+import { getSurrealContext } from "$lib/client/db.context.svelte";
+
 export class DataTable {
 	table;
 	schema?;
@@ -23,8 +25,12 @@ export class DataTable {
 		// this.columns = this.getColumns(); // INFO: this should be done in runtime
 	}
 	async fetchData() {
-		const data = await fetch(`/api/v1/db/tables/?q=${this.table.name}`).then((r) => r.json());
-		this.data = data.data;
+		const db = getSurrealContext();
+		// TODO: handle error
+		const [data] = await db?._db.query<any[]>(`select * from ${this.table.name}`);
+		// const data = await fetch(`/api/v1/db/tables/?q=${this.table.name}`).then((r) => r.json());
+		console.log('data', data);
+		this.data = data
 		this.pageSize = this.usePagination ? this.pageSize : (this.data?.length ?? 15);
 		this.pagedData = this.paginate({ from: 0, to: this.pageSize });
 	}
