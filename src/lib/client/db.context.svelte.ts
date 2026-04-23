@@ -1,11 +1,10 @@
-import { goto } from "$app/navigation";
-import { redirect } from "@sveltejs/kit";
 import { watch } from "runed";
-import { ConnectionUnavailableError, NotAllowedError, Surreal, Table, UnexpectedConnectionError, Uuid, type ConnectionStatus, type NamespaceAuth, type NamespaceDatabase, type ProvidedAuth, type Tokens } from "surrealdb";
+import { ConnectionUnavailableError, Duration, Surreal, UnexpectedConnectionError, Uuid, type ConnectionStatus, type NamespaceAuth } from "surrealdb";
 import { createContext, onMount } from "svelte";
+
 import { toast } from "svelte-sonner";
+import { page } from "$app/state";
 import type { LayoutData } from "../../routes/$types";
-import { browser } from "$app/environment";
 
 class SurrealStore {
 	defaultAuth: NamespaceAuth = {
@@ -24,7 +23,7 @@ class SurrealStore {
 	isConnected: boolean = $state(false);
 	reconnectionAtempt: number = $state(1)
 
-	constructor(db: LayoutData["db"], fetchFunc: typeof fetch) {
+	constructor(db: LayoutData["db"]) {
 		this.url = db.url;
 		this.namespace = db.defaults?.namespace
 		this.database = db.defaults?.database
@@ -41,16 +40,6 @@ class SurrealStore {
 			toast.error(err.message);
 		});
 
-		this._db.subscribe("using", async (data) => {
-			console.log("using", data)
-			if (this.isAuthenticated) return
-			if (db.token == null) {
-				await this._db.signin(this.defaultAuth);
-			}
-			else {
-				await this._db.authenticate(db.token); // TODO: handle expire
-			}
-		})
 
 		$effect(() => {
 			this.status = this._db.status;
@@ -91,16 +80,39 @@ class SurrealStore {
 			await this._db.use({ namespace: this.namespace, database: this.database });
 		});
 
+		this._db.subscribe("using", async (data) => {
+			console.log("using", data)
+			if (this.isAuthenticated) return
+			if (db.token == null) {
+				await this._db.signin(this.defaultAuth);
+			}
+			else {
+				await this._db.authenticate(db.token); // TODO: handle expire
+			}
+		})
+
 		this._db.subscribe('disconnected', () => {
 			this.isConnected = false;
 			this.status = this._db.status;
 			toast.warning('Disconnected from DB');
 		});
 
+		this._db.subscribe('connecting', () => {
+			this.status = this._db.status;
+		});
+		this._db.subscribe('reconnecting', () => {
+			this.status = this._db.status;
+		});
+
 		watch(() => [this.namespace, this.database], (cur, prev) => {
 			if (this._db.status != 'connected') return;
 			if (prev && cur.every((val, idx) => val === prev[idx])) return;
 			this._db.use({ namespace: this.namespace, database: this.database });
+		});
+
+		watch(() => this.username, (cur, prev) => {
+			if (this._db.status != 'connected') return;
+			$inspect("new log", this.username);
 		});
 	}
 
@@ -119,7 +131,7 @@ class SurrealStore {
 				retryDelayMultiplier: 1.1,
 				retryDelayJitter: 0.0,
 				catch: (error) => {
-					console.log("ERR", error);
+					console.error(error);
 					if (error instanceof ConnectionUnavailableError || error instanceof UnexpectedConnectionError) {
 						if (this.reconnectionAtempt < attempts) {
 							console.error("reconnecting...", this.reconnectionAtempt);
@@ -151,18 +163,20 @@ class SurrealStore {
 
 	}
 
-	async reconnect() {
-		if (this._db.accessToken) {
-			await this._db.authenticate(this._db.accessToken);
-			return true;
-		}
-		else {
-			throw new Error("no access token");
-		}
+	async reconnect() { // TODO: handle errors
+		await this.connect();
+		// if (this._db.accessToken) {
+		// 	await this._db.authenticate(this._db.accessToken);
+		// 	return true;
+		// }
+		// else {
+		// 	throw new Error("no access token");
+		// }
 	}
 
 	async invalidate() {
 		await this._db.invalidate();
+		// TODO: delete cookie?
 	}
 
 	async close() {
@@ -172,11 +186,35 @@ class SurrealStore {
 		}
 	}
 
-	async nsInfo() {
+	async signin(auth: Omit<NamespaceAuth,"namespace"> ): Promise<string | undefined> {
 		try {
-			const res = await this._db.query("info for ns");
-			const { databases } = res[0];
-			return { databases: Object.keys(databases) };
+			const credentials: NamespaceAuth = {...auth, namespace: this.namespace!};
+			await this._db.signin(credentials);
+		}
+		catch (e: any) {
+			console.log("signin error", e.kind);
+			return e.message;
+		}
+	}
+
+	async nsInfo() {
+		interface NamespaceInfo {
+			accesses: Array<{}>
+			databases: Array<{
+				id: number;
+				name: string;
+				comment: string;
+			}>
+			users: Array<{
+				duration: { session: Duration; token: Duration };
+				hash: string;
+				name: string;
+				roles: "OWNER" | "EDITOR" | "VIEWER"[];
+			}>
+		};
+		try {
+			const [res] = await this._db.query<NamespaceInfo[]>("info for ns structure");
+			return res;
 		} catch (e) {
 			console.error("nsInfo error", e);
 		}
@@ -197,9 +235,9 @@ export function getSurrealContext() {
 	}
 }
 
-export function setSurrealContext(fn: () => LayoutData["db"], fetchFunc: typeof fetch) {
+export function setSurrealContext(fn: () => LayoutData["db"]) {
 	const opts = fn()
-	const SurrealContext = new SurrealStore(opts, fetchFunc);
+	const SurrealContext = new SurrealStore(opts);
 	setInternalGetSurrealContext(SurrealContext);
 	return SurrealContext;
 }
