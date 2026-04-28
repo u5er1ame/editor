@@ -1,5 +1,5 @@
 import { RecordId, StringRecordId } from "surrealdb";
-import z, { ZodObject } from "zod/v4";
+import z, { ZodObject, ZodType, type ZodTypeAny } from "zod/v4";
 
 // TODO: refactor into better builder for metadata
 const LevelSchema = z.object({
@@ -43,7 +43,7 @@ const BreakerSchema = z.object({
 }).meta({ sort: { key: "name", order: "asc" } });
 
 const BreakerConnectionSchema = z.object({
-	id: z.custom<RecordId<"connects">>().transform((v) => new StringRecordId(v))
+	id: z.custom<RecordId<"connects">>().transform((v) => new StringRecordId(v)).readonly()
 		.meta({ column: { hidden: true } }),
 	in: z.custom<RecordId<"breakers">>().transform((v) => new StringRecordId(v)),
 	cable: z.string().optional(),
@@ -81,3 +81,15 @@ export const schemas = new Map<string, ZodObject>([
 	["area_name", AreaNameSchema],
 	["shops", ShopSchema],
 ]);
+
+export type Schemas = typeof BreakerConnectionSchema | typeof LevelSchema | typeof ElectricRoomSchema | typeof BoardSchema | typeof BreakerSchema | typeof AreaNameSchema | typeof ShopSchema;
+export type Data = z.infer<Schemas>;
+// export const schemas = {
+// 	connects: BreakerConnectionSchema,
+// 	levels: LevelSchema,
+// 	electric_rooms: ElectricRoomSchema,
+// 	boards: BoardSchema,
+// 	breakers: BreakerSchema,
+// 	area_name: AreaNameSchema,
+// 	shops: ShopSchema,
+// }

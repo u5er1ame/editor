@@ -6,7 +6,39 @@ import { toast } from "svelte-sonner";
 import { page } from "$app/state";
 import type { LayoutData } from "../../routes/$types";
 
-class SurrealStore {
+export interface DatabaseInfo {
+	accesses: Array<{}>
+	analyzers: Array<{}>
+	apis: Array<{}>
+	buckets: Array<{}>
+	configs: Array<{}>
+	functions: Array<{}>
+	models: Array<{}>
+	modules: Array<{}>
+	params: Array<{}>
+	sequences: Array<{}>
+	tables: Array<{
+		id: number;
+		name: string;
+		drop: boolean;
+		kind: { kind: "NORMAL" | "RELATION" };
+		schemafull: boolean;
+		permissions: Array<{
+			create: boolean;
+			delete: boolean;
+			select: boolean;
+			update: boolean;
+		}>
+	}>
+	users: Array<{
+		duration: { session: Duration; token: Duration };
+		hash: string;
+		name: string;
+		roles: "OWNER" | "EDITOR" | "VIEWER"[];
+	}>
+};
+
+export class SurrealStore {
 	defaultAuth: NamespaceAuth = {
 		namespace: "main",
 		username: "user",
@@ -221,37 +253,6 @@ class SurrealStore {
 	}
 	async dbInfo() {
 		if(!this.isAuthenticated) return;
-		interface DatabaseInfo {
-			accesses: Array<{}>
-			analyzers: Array<{}>
-			apis: Array<{}>
-			buckets: Array<{}>
-			configs: Array<{}>
-			functions: Array<{}>
-			models: Array<{}>
-			modules: Array<{}>
-			params: Array<{}>
-			sequences: Array<{}>
-			tables: Array<{
-				id: number;
-				name: string;
-				drop: boolean;
-				kind: { kind: "NORMAL" | "RELATION" };
-				schemafull: boolean;
-				permissions: Array<{
-					create: boolean;
-					delete: boolean;
-					select: boolean;
-					update: boolean;
-				}>
-			}>
-			users: Array<{
-				duration: { session: Duration; token: Duration };
-				hash: string;
-				name: string;
-				roles: "OWNER" | "EDITOR" | "VIEWER"[];
-			}>
-		};
 		try {
 			await this._db.ready;
 			const [res] = await this._db.query<DatabaseInfo[]>("info for db structure");

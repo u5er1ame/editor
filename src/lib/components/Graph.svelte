@@ -37,11 +37,8 @@
 
 	import { Flow } from '$lib/utils';
 	import Toolbar from './Toolbar.svelte';
-	import { tick, untrack } from 'svelte';
-	import ScrollArea from './ui/scroll-area/scroll-area.svelte';
-	import { flatToNested } from '$lib/client/utls';
+	import { tick } from 'svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
-	import NodeDataTable from './NodeDataTable.svelte';
 
 	let {
 		nodes = $bindable([]),
