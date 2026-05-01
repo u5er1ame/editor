@@ -60,8 +60,9 @@ export class SurrealStore {
 		this.namespace = db.defaults?.namespace
 		this.database = db.defaults?.database
 		onMount(() => {
-			Promise.resolve().then(() => this.connect())
-			this.status = this._db.status; /// INFO: this is necessary for some reason effect stuck on 'connecting'
+			this.connect().then(()=>{
+				this.status = this._db.status; /// INFO: this is necessary for some reason effect stuck on 'connecting'
+			});
 			return () => {
 				this.close()
 			}
@@ -105,16 +106,16 @@ export class SurrealStore {
 		});
 
 		this._db.subscribe('connected', async (data) => {
+			await this._db.use({ namespace: this.namespace, database: this.database });
 			this.isConnected = true;
 			this.status = this._db.status;
 			this.version = data;
 			toast.info('Connected to DB');
-			await this._db.use({ namespace: this.namespace, database: this.database });
 		});
 
 		this._db.subscribe("using", async (data) => {
-			console.log("using", data)
 			if (this.isAuthenticated) return
+			console.log("using", data)
 			if (db.token == null) {
 				await this._db.signin(this.defaultAuth);
 			}
@@ -131,6 +132,7 @@ export class SurrealStore {
 
 		this._db.subscribe('connecting', () => {
 			this.status = this._db.status;
+			console.log("connecting")
 		});
 		this._db.subscribe('reconnecting', () => {
 			this.status = this._db.status;
@@ -252,13 +254,11 @@ export class SurrealStore {
 		}
 	}
 	async dbInfo() {
-		if(!this.isAuthenticated) return;
 		try {
-			await this._db.ready;
 			const [res] = await this._db.query<DatabaseInfo[]>("info for db structure");
 			return res;
 		} catch (e) {
-			console.error("nsInfo error", e);
+			console.error("dbInfo error", e);
 		}
 	}
 }

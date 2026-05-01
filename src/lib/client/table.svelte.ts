@@ -29,7 +29,6 @@ export class DataTable {
 		// TODO: handle error
 		const [data] = await db?._db.query<any[]>(`select * from ${this.table.name}`);
 		// const data = await fetch(`/api/v1/db/tables/?q=${this.table.name}`).then((r) => r.json());
-		console.log('data', data);
 		this.data = data
 		this.pageSize = this.usePagination ? this.pageSize : (this.data?.length ?? 15);
 		this.pagedData = this.paginate({ from: 0, to: this.pageSize });

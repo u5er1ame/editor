@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { mode } from 'mode-watcher';
-	import { jsonify, RecordId, StringRecordId, Table } from 'surrealdb';
-	import { Grid, Toolbar, ContextMenu, Willow, WillowDark, type IApi } from '@svar-ui/svelte-grid';
-	import { Toolbar as CustomToolbar, registerToolbarItem } from '@svar-ui/svelte-toolbar';
+	import { jsonify, RecordId, Table } from 'surrealdb';
+	import { Grid, Toolbar, Willow, WillowDark } from '@svar-ui/svelte-grid';
+	import { registerToolbarItem } from '@svar-ui/svelte-toolbar';
 	import { Pager, RichSelect, Combo } from '@svar-ui/svelte-core';
-	import { registerEditorItem, Editor } from '@svar-ui/svelte-editor';
+	import { registerEditorItem } from '@svar-ui/svelte-editor';
 	import { toast } from 'svelte-sonner';
 
 	import { browser } from '$app/environment';

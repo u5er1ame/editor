@@ -2,17 +2,20 @@ import type { Data, Schemas } from "$lib/client/schemas";
 
 export interface View {
 	name: string;
+	href: string;
 }
 
 export class TableView implements View {
-	name = "svar";
+	name = "Tables";
+	href = "/tables"
 	options: any[] = [];
 	constructor() {
 	}
 }
 
 export class GraphView implements View {
-	name = "flow";
+	name = "Graph";
+	href = "/graph"
 	options: any[] = [];
 	constructor(schema: Schemas) {
 		console.log('schema', schema.shape);
@@ -20,7 +23,8 @@ export class GraphView implements View {
 }
 
 export class MapView implements View {
-	name = "openlayers";
+	name = "Map";
+	href = "/map"
 	options: any[] = [];
 	constructor(schema: Schemas) {
 		console.log('schema', schema.shape);
