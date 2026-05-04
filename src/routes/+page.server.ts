@@ -6,17 +6,6 @@ import type { PageServerData, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, request }): Promise<PageServerData> => {
 	const table = new URL(request.url).searchParams.get('table');
-	console.log(table);
-	// const rootTable = new Table("breakers");
-	// try {
-	// 	const dbReady = await isConnected();
-	// }
-	// catch (e: any) {
-	// 	return { error: e.body.message, nodes: [] };
-	// }
-	//
-	// await surreal.ready;
-	// const res = await surreal.select<Prettify<Breaker>>(rootTable);
 
 	const rooms = fakeElectricRooms.map((r) => {
 		return toNode(r);

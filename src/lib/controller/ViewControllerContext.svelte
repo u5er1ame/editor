@@ -11,7 +11,9 @@
 	const ctx = getSurrealContext();
 	$inspect(views);
 	const controller = new ViewController();
-	controller.registerViews(views);
+	$effect(() => {
+		controller.registerViews(views);
+	});
 	let info: DatabaseInfo | undefined = $state();
 	setContext('viewsController', controller);
 

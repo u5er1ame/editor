@@ -16,13 +16,14 @@
 
 	import ViewList from '$lib/components/header/ViewList.svelte';
 	import { DefaultView } from '$lib/view/default.svelte';
+	import { GraphView } from '$lib/view/graph.svelte';
 
 	let { children, data, params }: LayoutProps = $props();
 
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 
-	const defaultView = new DefaultView();
+	const views = [new DefaultView(), new GraphView()];
 </script>
 
 <svelte:head>
@@ -33,7 +34,7 @@
 <Toaster richColors position="top-center" />
 
 <SurrealContextProvider db={data.db}>
-	<ViewControllerContext views={[defaultView]}>
+	<ViewControllerContext {views}>
 		<div class="flex size-full flex-col">
 			<Nav.Root
 				orientation="horizontal"

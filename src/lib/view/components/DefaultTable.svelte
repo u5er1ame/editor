@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { mode } from 'mode-watcher';
-	import { Grid, Willow, WillowDark } from '@svar-ui/svelte-grid';
+	import { Grid, Willow, WillowDark, type IColumnConfig } from '@svar-ui/svelte-grid';
 	import { toast } from 'svelte-sonner';
 
 	import { browser } from '$app/environment';
@@ -57,7 +57,7 @@
 						{#if data.data.length == 0}
 							<div class="text-xl">Table is empty</div>
 						{:else}
-							<Grid data={data.data} {autoConfig} bind:this={tbl} />
+							<Grid data={data.data} columns={[] as IColumnConfig[]} {autoConfig} bind:this={tbl} />
 						{/if}
 					{/if}
 				{:catch error}
