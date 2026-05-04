@@ -6,7 +6,6 @@
 	import type { ViewController } from '$lib/controller/table.svelte';
 
 	const controller: ViewController = getContext('viewsController');
-	$inspect(controller.availableViews);
 </script>
 
 {#each controller.availableViews as view}

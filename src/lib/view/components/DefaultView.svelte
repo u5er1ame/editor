@@ -6,7 +6,14 @@
 	import { browser } from '$app/environment';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import Table from '$lib/components/Table.svelte';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import type { View } from '../table.svelte';
+	import type { ViewController } from '$lib/controller/table.svelte';
+	import { Table } from 'surrealdb';
+
+	import { page } from '$app/state';
+	import DefaultTable from './DefaultTable.svelte';
 
 	function isWriteable(table: any) {
 		if (table.drop) {
@@ -38,11 +45,22 @@
 	let tbl: any | undefined = $state();
 
 	let new_row_id: string[] = $state([]);
+	let { controller, ...rest }: { controller: ViewController } = $props();
 
-	let { controller, ...rest } = $props();
-
-	const autoConfig = { flexgrow: 1 };
-
+	const tables = $derived(controller.getTables());
+	const { selected_tab } = page.data;
+	let current_tab: string = $state('');
+	const readonly = $derived.by(() => {
+		return controller.tablesInfo?.findLast((table) => table.name == current_tab)?.drop ?? false;
+	});
+	$inspect(selected_tab);
+	onMount(() => {
+		if (tables && tables.length > 0) {
+			current_tab = tables.includes(selected_tab) ? selected_tab : tables[0];
+			goto(`?table=${current_tab}`);
+		}
+		return () => {};
+	});
 	// const table_state = new DataTable(new Table(table));
 </script>
 
@@ -51,24 +69,28 @@
 {/snippet}
 
 {#if controller.tablesInfo}
-	<div class="size-full p-1">
+	<div class="h-fit w-full p-1">
 		{#if controller.tablesInfo.length > 0}
-			<Tabs.Root value={controller.tablesInfo[0].name}>
+			<Tabs.Root value={current_tab}>
 				<Tabs.List class="size-full">
 					{#each controller.tablesInfo as table, i}
 						<Tabs.Trigger
+							onclick={() => {
+								goto(`?table=${table.name}`, { replaceState: true });
+								current_tab = table.name;
+							}}
 							value={table.name}
 							title={table.name + (table.drop ? ' Writes disabled' : '')}
 						>
-							{@html isWriteable(table)}{table.name}{@html getKind(table)}
+							{@html isWriteable(table)}
+							{controller.store.getTableMeta(table.name)?.title}
+							{@html getKind(table)}
 						</Tabs.Trigger>
 					{/each}
 				</Tabs.List>
-				{#each controller.tablesInfo as table}
-					<Tabs.Content value={table.name}>
-						<Table table={table.name} isWriteable={!table.drop} />
-					</Tabs.Content>
-				{/each}
+				<Tabs.Content value={current_tab}>
+					<DefaultTable {controller} table={current_tab} isWriteable={readonly} />
+				</Tabs.Content>
 			</Tabs.Root>
 		{:else}
 			<div class="size-full">
@@ -77,29 +99,6 @@
 				</div>
 			</div>
 		{/if}
-	</div>
-{/if}
-{#if browser}
-	<div class="size-full max-w-svw">
-		<Style>
-			<!-- {#await controller.fetchData()} -->
-			<!-- 	<Skeleton class="size-full" /> -->
-			<!-- {:then} -->
-			<!-- 	{#if table_state.data != null} -->
-			<!-- 		{#if isWriteable == false} -->
-			<!-- 			<div class="size-full text-start"> -->
-			<!-- 				<div class="text-xl text-red-400">Table is read-only! Writes disabled</div> -->
-			<!-- 			</div> -->
-			<!-- 		{/if} -->
-			<!-- 		<Grid -->
-			<!--                      {autoConfig} -->
-			<!-- 			bind:this={tbl} -->
-			<!-- 		/> -->
-			<!-- 	{/if} -->
-			<!-- {:catch error} -->
-			<!-- 	{toast.error(error)} -->
-			<!-- {/await} -->
-		</Style>
 	</div>
 {/if}
 

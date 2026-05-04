@@ -13,13 +13,8 @@
 	import type { ViewController } from '$lib/controller/table.svelte.js';
 
 	let { data } = $props();
-	if (data.error != null)
-		setTimeout(() => {
-			toast.error(data.error, {});
-		}, 100);
-	// if (data.error != null) setTimeout(()=>{toast.error(data.error, { action: { label: "retry", onClick: invalidateAll }  });}, 1000);
+
 	const controller: ViewController = getContext('viewsController');
-	$inspect('page', controller);
 	// INFO: svelte files run both on server and client
 	let elk: Elk | null = $state(null);
 	if (browser) {
@@ -29,9 +24,6 @@
 		});
 	}
 
-	// INFO: use mode-watcher to resolve system color on startup
-	let colorMode: ColorMode = $derived(mode.current ?? 'system');
-
 	$effect(() => {
 		return () => {
 			if (elk) {
@@ -39,11 +31,11 @@
 			}
 		};
 	});
+	// 	<!-- <SvelteFlowProvider> -->
+	// <!--   <!-- {#if data.error == null} --> -->
+	// <!--     <Graph {elk} nodes={data.nodes} bind:colorMode /> -->
+	// <!--   <!-- {/if} --> -->
+	// <!-- </SvelteFlowProvider> -->
 </script>
 
 <DefaultView {controller} />
-<!-- <SvelteFlowProvider> -->
-<!--   <!-- {#if data.error == null} --> -->
-<!--     <Graph {elk} nodes={data.nodes} bind:colorMode /> -->
-<!--   <!-- {/if} --> -->
-<!-- </SvelteFlowProvider> -->

@@ -17,17 +17,16 @@ export class ViewController {
 		watch(
 			() => this.tablesInfo,
 			(cur, pre) => {
-				$inspect('WATCHING INFO', cur);
 				if (cur == undefined || pre == undefined) return;
 				const real = new Set(cur.map((t) => t.name));
 				const allSchemasId = new Set(tables.map((t) => t.name));
 				const missing = real.difference(allSchemasId);
-				$inspect('real', real, 'allSchemasId', allSchemasId, 'missing', missing);
 				const names = missing
 					.values()
 					// .map((t) => t.name)
 					.toArray();
 				if (missing.size > 0) throw new Error(`missing schemas: ${names}`);
+				this.store.registerSchemas();
 			}
 		);
 	}
@@ -45,16 +44,19 @@ export class ViewController {
 		this.tablesInfo = info.tables ?? [];
 	}
 
-	getTables() {
-		if (this.tablesInfo == undefined) throw new Error('no tables info');
-		return this.tablesInfo?.map((table) => new Table(table.name));
+	getTableInfo(table: string) {
+		return this.tablesInfo?.findLast((t) => t.name === table);
 	}
 
-	getViewsForTable(table: Table): Set<View> {
+	getTables() {
+		if (this.tablesInfo == undefined) throw new Error('no tables info');
+		return this.tablesInfo?.map((table) => table.name);
+	}
+
+	getViewsForTable(table: string): Set<View> {
 		if (this.availableViews.size == 0) throw new Error('no views registered');
-		const views = this.store.getViews(table);
-		const { id, title } = this.store.getTableMeta(table);
-		if (views == undefined) return new Set([DefaultView]); // FIXME: should i do this?
-		return this.availableViews.intersection(new Set(views));
+		const meta = this.store.getTableMeta(table);
+		if (meta?.views == undefined) return new Set([new DefaultView()]); // FIXME: should i do this?
+		return this.availableViews.intersection(new Set(meta.views));
 	}
 }
