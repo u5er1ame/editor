@@ -1,29 +1,28 @@
 <script lang="ts">
-import './layout.css';
-import { twMerge } from 'tailwind-merge';
-import { mode, ModeWatcher, toggleMode } from 'mode-watcher';
-import { scale } from 'svelte/transition';
+	import './layout.css';
+	import { twMerge } from 'tailwind-merge';
+	import { mode, ModeWatcher, toggleMode } from 'mode-watcher';
+	import { scale } from 'svelte/transition';
 
-import type { LayoutProps } from './$types';
-import favicon from '$lib/assets/favicon.svg';
-import { Toaster } from '$lib/components/ui/sonner/index';
-import * as Nav from '$lib/components/ui/navigation-menu/index';
-import { icons } from '$lib/client/color_mode.svelte';
-import DbStatusIcon from '$lib/components/DbStatusIcon.svelte';
-import Spinner from '$lib/components/ui/spinner/spinner.svelte';
-import SurrealContextProvider from '$lib/components/SurrealContextProvider.svelte';
-import ViewControllerContext from '$lib/controller/ViewControllerContext.svelte';
+	import type { LayoutProps } from './$types';
+	import favicon from '$lib/assets/favicon.svg';
+	import { Toaster } from '$lib/components/ui/sonner/index';
+	import * as Nav from '$lib/components/ui/navigation-menu/index';
+	import { icons } from '$lib/client/color_mode.svelte';
+	import DbStatusIcon from '$lib/components/DbStatusIcon.svelte';
+	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
+	import SurrealContextProvider from '$lib/components/SurrealContextProvider.svelte';
+	import ViewControllerContext from '$lib/controller/ViewControllerContext.svelte';
 
-import ViewList from '$lib/components/header/ViewList.svelte';
-import { DefaultView } from '$lib/view/default.svelte';
-import DefaultViewComponent from '$lib/view/components/DefaultView.svelte';
+	import ViewList from '$lib/components/header/ViewList.svelte';
+	import { DefaultView } from '$lib/view/default.svelte';
 
-let { children, data, params }: LayoutProps = $props();
+	let { children, data, params }: LayoutProps = $props();
 
-const current_mode = $derived(mode.current ?? 'system');
-const mode_icon = $derived(icons.get(current_mode));
+	const current_mode = $derived(mode.current ?? 'system');
+	const mode_icon = $derived(icons.get(current_mode));
 
-const defaultView = new DefaultView(DefaultViewComponent);
+	const defaultView = new DefaultView();
 </script>
 
 <svelte:head>
@@ -43,7 +42,7 @@ const defaultView = new DefaultView(DefaultViewComponent);
 				<Nav.List>
 					{#await new Promise((r) => setTimeout(r, 200))}
 						<Spinner />
-						{:then}
+					{:then}
 						<DbStatusIcon />
 					{/await}
 					<!-- <Nav.Item> -->

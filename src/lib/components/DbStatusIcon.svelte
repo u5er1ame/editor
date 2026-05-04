@@ -1,24 +1,23 @@
 <script lang="ts">
-import { getSurrealContext } from '$lib/client/db.context.svelte';
+	import { getSurrealContext } from '$lib/client/db.context.svelte';
 
-import ChevronDown from '@lucide/svelte/icons/chevron-down';
-import Button from './ui/button/button.svelte';
-import * as Nav from '$lib/components/ui/navigation-menu/index';
-import * as Popover from '$lib/components/ui/popover/index';
-import DbMenu from './DbMenu.svelte';
-import DbLoader from './DbLoader.svelte';
-import { getContext, onMount } from 'svelte';
-import type { ViewController } from '$lib/controller/table.svelte';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import Button from './ui/button/button.svelte';
+	import * as Nav from '$lib/components/ui/navigation-menu/index';
+	import * as Popover from '$lib/components/ui/popover/index';
+	import DbMenu from './DbMenu.svelte';
+	import DbLoader from './DbLoader.svelte';
+	import { getContext, onMount } from 'svelte';
+	import type { ViewController } from '$lib/controller/table.svelte';
 	import { browser } from '$app/environment';
 
-let { ...rest } = $props();
+	let { ...rest } = $props();
 
-const db = getSurrealContext();
+	const db = getSurrealContext();
 
-let controller: ViewController | undefined = $state();
+	let controller: ViewController | undefined = $state();
 
-controller = getContext('viewController');
-
+	controller = getContext('viewsController');
 </script>
 
 {#key db?.status}

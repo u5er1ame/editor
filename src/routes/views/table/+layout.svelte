@@ -1,10 +1,8 @@
 <script lang="ts">
-import type { ModelStore } from '$lib/model/table.svelte.js';
-import { getContext } from 'svelte';
+	import type { SchemaStore } from '$lib/model/schema_store';
+	import { getContext } from 'svelte';
 
-let { children, data, ...rest } = $props();
+	let { children, data, ...rest } = $props();
 
-const model = getContext<ModelStore>("model");
-model.addView("svar");
-
+	const model = getContext<SchemaStore>('model');
 </script>
