@@ -15,7 +15,8 @@
 	import ViewControllerContext from '$lib/controller/ViewControllerContext.svelte';
 
 	import ViewList from '$lib/components/header/ViewList.svelte';
-	import { DefaultView } from '$lib/view/default.svelte';
+	import { DefaultView } from '$lib/view/default/view.svelte';
+	import { TableView } from '$lib/view/table/view.svelte';
 	import { GraphView } from '$lib/view/graph.svelte';
 
 	let { children, data, params }: LayoutProps = $props();
@@ -23,7 +24,7 @@
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 
-	const views = [new DefaultView(), new GraphView()];
+	const views = [new DefaultView(), new TableView(), new GraphView()];
 </script>
 
 <svelte:head>

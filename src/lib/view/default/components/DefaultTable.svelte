@@ -45,7 +45,7 @@
 
 {#if browser}
 	<div class="size-full max-w-svw">
-		<Style>
+		<Style fonts={false}>
 			{#if table != undefined}
 				{#await controller.store.getData(table)}
 					<Skeleton class="size-full" />
@@ -57,7 +57,7 @@
 						{#if data.data.length == 0}
 							<div class="text-xl">Table is empty</div>
 						{:else}
-							<Grid data={data.data} columns={[] as IColumnConfig[]} {autoConfig} bind:this={tbl} />
+								<Grid filterValues={{}} data={data.data} columns={[] as IColumnConfig[]} {autoConfig} bind:this={tbl} />
 						{/if}
 					{/if}
 				{:catch error}

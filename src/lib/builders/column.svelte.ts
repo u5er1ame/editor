@@ -1,20 +1,34 @@
-import type { Data } from "$lib/client/schemas";
-import type { IColumnConfig, IHeaderCell, TColumnHeaderConfig } from "@svar-ui/svelte-grid";
+import type { Schemas } from "$lib/model/schemas";
+import type { IColumnConfig, TSortFunction } from "@svar-ui/svelte-grid";
+import z from "zod/v4";
 
 type AllKeys<T> = T extends any ? keyof T : never;
 
 export class ColumnBuilder {
-	column: IColumnConfig = {};
-	constructor(key: AllKeys<Data>, options: any) {
-		this.column.id = key;
+	private _config: IColumnConfig[] = [];
+	private _schema: Schemas;
+	private _registry = z.registry<IColumnConfig>();
+	autoConfig = { flexgrow: 1 };
+	constructor(schema: Schemas) {
+		this._schema = schema;
+		Object.entries(schema.shape).forEach(([key, value]) => {
+			this._config.push({
+				id: key,
+			});
+			console.log(value.type);
+		});
 	}
-
-	hidden() {
-		this.column.hidden = true;
+	get config() {
+		return this._config;
+	}
+	hidden(key: AllKeys<Schemas["shape"]>) {
+		// INFO: ! valid because it created in constructor
+		this._config.find((c) => c.id == key)!.hidden = true;
 		return this;
 	}
-
-	header(header?: TColumnHeaderConfig) {
-		if (header == undefined) return this;
+	sort(key: AllKeys<Schemas["shape"]>, fn?: TSortFunction) {
+		// INFO: ! valid because it created in constructor
+		this._config.find((c) => c.id == key)!.sort = fn ?? true;
+		return this;
 	}
 }

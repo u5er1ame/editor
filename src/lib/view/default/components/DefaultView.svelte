@@ -1,18 +1,14 @@
 <script lang="ts">
 	import { mode } from 'mode-watcher';
-	import { Grid, Willow, WillowDark } from '@svar-ui/svelte-grid';
-	import { toast } from 'svelte-sonner';
-
-	import { browser } from '$app/environment';
-	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
-	import * as Tabs from '$lib/components/ui/tabs';
-	import { goto } from '$app/navigation';
+	import { Willow, WillowDark } from '@svar-ui/svelte-grid';
 	import { onMount } from 'svelte';
-	import type { View } from '../table.svelte';
-	import type { ViewController } from '$lib/controller/table.svelte';
-	import { Table } from 'surrealdb';
 
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+
+	import * as Tabs from '$lib/components/ui/tabs';
+	import type { ViewController } from '$lib/controller/table.svelte';
+
 	import DefaultTable from './DefaultTable.svelte';
 
 	function isWriteable(table: any) {
@@ -34,17 +30,7 @@
 				return '';
 		}
 	}
-	const Style = $derived.by(() => {
-		if (mode.current && mode.current == 'dark') {
-			return WillowDark;
-		} else {
-			return Willow;
-		}
-	});
 
-	let tbl: any | undefined = $state();
-
-	let new_row_id: string[] = $state([]);
 	let { controller, ...rest }: { controller: ViewController } = $props();
 
 	const tables = $derived(controller.getTables());
@@ -53,7 +39,7 @@
 	const readonly = $derived.by(() => {
 		return controller.tablesInfo?.findLast((table) => table.name == current_tab)?.drop ?? false;
 	});
-	$inspect(selected_tab);
+
 	onMount(() => {
 		if (tables && tables.length > 0) {
 			current_tab = tables.includes(selected_tab) ? selected_tab : tables[0];
@@ -61,7 +47,6 @@
 		}
 		return () => {};
 	});
-	// const table_state = new DataTable(new Table(table));
 </script>
 
 {#snippet PrintIcon()}

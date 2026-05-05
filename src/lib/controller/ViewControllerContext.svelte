@@ -9,7 +9,6 @@
 	let { children, views, ...rest }: { children: Snippet<[]>; views: View[] } = $props();
 
 	const ctx = getSurrealContext();
-	$inspect(views);
 	const controller = new ViewController();
 	$effect(() => {
 		controller.registerViews(views);

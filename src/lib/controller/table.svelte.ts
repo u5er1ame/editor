@@ -1,10 +1,9 @@
 import { SvelteSet } from 'svelte/reactivity';
-import { Table } from 'surrealdb';
 
 import type { DatabaseInfo } from '$lib/client/db.context.svelte';
 import type { View } from '$lib/view/table.svelte';
 import { SchemaStore } from '$lib/model/schema_store';
-import { DefaultView } from '$lib/view/default.svelte';
+import { DefaultView } from '$lib/view/default/view.svelte';
 import { tables } from '$lib/model/schemas';
 import { watch } from 'runed';
 

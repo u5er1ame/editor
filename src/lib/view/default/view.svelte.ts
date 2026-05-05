@@ -1,4 +1,4 @@
-import type { View } from './table.svelte';
+import type { View } from '../table.svelte';
 
 export class DefaultView implements View {
 	name = 'Tables';
