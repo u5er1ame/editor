@@ -16,7 +16,7 @@ export const table_registry = z.registry<TablesMeta>();
 
 const LevelSchema = z
 	.object({
-		id: z.custom<RecordId<'levels'>>().transform((v) => new StringRecordId(v)),
+		id: z.custom<RecordId<'levels'>>().transform((v) => new StringRecordId(v)).readonly(),
 		name: z.string()
 	})
 	.register(table_registry, { id: 'levels', title: 'Level' });

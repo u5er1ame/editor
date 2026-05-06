@@ -5,6 +5,9 @@
 
 	import { browser } from '$app/environment';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
+	import { ColumnBuilder } from '$lib/builders/column.svelte';
+	import { getContext } from 'svelte';
+	import type { ViewController } from '$lib/controller/table.svelte';
 
 	// registerEditorItem('richselect', RichSelect);
 	// registerEditorItem('combo', Combo);
@@ -35,7 +38,10 @@
 		};
 	});
 
-	let { controller, table, isWriteable, ...rest } = $props();
+	let { table, isWriteable, ...rest } = $props();
+	const controller: ViewController = getContext('viewsController');
+	const schema = controller.store.getSchema(table)
+	const builder = new ColumnBuilder(schema);
 	const autoConfig = { flexgrow: 1 };
 </script>
 
@@ -57,7 +63,7 @@
 						{#if data.data.length == 0}
 							<div class="text-xl">Table is empty</div>
 						{:else}
-								<Grid filterValues={{}} data={data.data} columns={[] as IColumnConfig[]} {autoConfig} bind:this={tbl} />
+								<Grid filterValues={{}} data={data.data} columns={[]} {autoConfig} bind:this={tbl} />
 						{/if}
 					{/if}
 				{:catch error}

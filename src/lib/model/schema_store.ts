@@ -16,11 +16,12 @@ export class SchemaStore {
 				this.#schemas.set(tbl, schema); // TODO: how to verify id in schema for sure?
 			}
 		});
+		console.log('registered schemas', this.#schemas);
 	}
 
 	getSchema(table: string): Schemas {
 		const out = this.#schemas.get(table);
-		if (out == undefined) throw new Error('Schema not found');
+		if (out == undefined) throw new Error('Schema not found:' + table);
 		return out;
 	}
 
@@ -42,7 +43,7 @@ export class SchemaStore {
 
 	getTableMeta(table: string): TablesMeta | undefined {
 		const schema = this.getSchema(table);
-		if (schema == undefined) throw new Error('Schema not found');
+		if (schema == undefined) throw new Error('Schema not found for' + table);
 		const meta = this.metadata_registry.get(schema);
 		return meta;
 	}

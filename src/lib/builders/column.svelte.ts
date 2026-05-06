@@ -14,9 +14,10 @@ export class ColumnBuilder {
 		Object.entries(schema.shape).forEach(([key, value]) => {
 			this._config.push({
 				id: key,
+				header: key,
 			});
-			console.log(value.type);
 		});
+			console.log(schema);
 	}
 	get config() {
 		return this._config;

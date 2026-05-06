@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { mode } from 'mode-watcher';
-	import { Willow, WillowDark } from '@svar-ui/svelte-grid';
 	import { onMount } from 'svelte';
 
 	import { page } from '$app/state';
@@ -35,7 +33,7 @@
 
 	const tables = $derived(controller.getTables());
 	const { selected_tab } = page.data;
-	let current_tab: string = $state('');
+	let current_tab: string = $state(selected_tab);
 	const readonly = $derived.by(() => {
 		return controller.tablesInfo?.findLast((table) => table.name == current_tab)?.drop ?? false;
 	});
@@ -43,7 +41,7 @@
 	onMount(() => {
 		if (tables && tables.length > 0) {
 			current_tab = tables.includes(selected_tab) ? selected_tab : tables[0];
-			goto(`?table=${current_tab}`);
+			goto(`?table=${current_tab}`, { replaceState: true });
 		}
 		return () => {};
 	});
@@ -56,13 +54,14 @@
 {#if controller.tablesInfo}
 	<div class="h-fit w-full p-1">
 		{#if controller.tablesInfo.length > 0}
-			<Tabs.Root value={current_tab}>
+			<Tabs.Root bind:value={current_tab}>
 				<Tabs.List class="size-full">
 					{#each controller.tablesInfo as table, i}
 						<Tabs.Trigger
 							onclick={() => {
-								goto(`?table=${table.name}`, { replaceState: true });
 								current_tab = table.name;
+								console.log("clck");
+								goto(`?table=${table.name}`, { replaceState: true });
 							}}
 							value={table.name}
 							title={table.name + (table.drop ? ' Writes disabled' : '')}
@@ -73,9 +72,13 @@
 						</Tabs.Trigger>
 					{/each}
 				</Tabs.List>
-				<Tabs.Content value={current_tab}>
-					<DefaultTable {controller} table={current_tab} isWriteable={readonly} />
-				</Tabs.Content>
+				{#if current_tab != undefined}
+					<Tabs.Content value={current_tab}>
+						{#key current_tab}
+							<DefaultTable {controller} table={current_tab} isWriteable={readonly} />
+						{/key}
+					</Tabs.Content>
+				{/if}
 			</Tabs.Root>
 		{:else}
 			<div class="size-full">
