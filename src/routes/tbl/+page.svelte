@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import DefaultView from '$lib/view/table/components/DefaultView.svelte';
+	import Tabs from '$lib/view/table/components/Tabs.svelte';
 	import type { ViewController } from '$lib/controller/table.svelte.js';
 
-	let { data } = $props();
+	let { data, ...rest } = $props();
 
 	const controller: ViewController = getContext('viewsController');
 </script>
 
-<DefaultView {controller} />
+<Tabs {controller} />

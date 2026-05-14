@@ -16,16 +16,16 @@ export const table_registry = z.registry<TablesMeta>();
 
 const LevelSchema = z
 	.object({
-		id: z.custom<RecordId<'levels'>>().transform((v) => new StringRecordId(v)).readonly(),
+		id: z.custom<RecordId<"levels">>().transform((v) => new StringRecordId(v)).readonly().meta({ type: "record" }),
 		name: z.string()
 	})
 	.register(table_registry, { id: 'levels', title: 'Level' });
 
 const ElectricRoomSchema = z
 	.object({
-		id: z.custom<string>().transform((v) => new StringRecordId(v)),
+		id: z.custom<RecordId<"electric_rooms">>().transform((v) => new StringRecordId(v)).readonly().meta({ type: "record" }),
 		name: z.string(),
-		level: z.custom<RecordId<'levels'>>().transform((v) => new StringRecordId(v))
+		level: z.custom<RecordId<"levels">>().transform((v) => new StringRecordId(v)).meta({ type: "record", table: "levels" }),
 	})
 	.register(table_registry, {
 		id: 'electric_rooms',

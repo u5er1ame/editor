@@ -1,8 +1,7 @@
 import { Table } from 'surrealdb';
-import { z, type GlobalMeta, type ZodSafeParseResult } from 'zod/v4';
-import { type Data, type Schemas } from '$lib/client/schemas';
+import { z, type ZodSafeParseResult } from 'zod/v4';
+import { type Data, type Schemas } from '$lib/model/schemas';
 import type { View } from '$lib/view/table.svelte';
-import type { SurrealStore } from '$lib/client/db.context.svelte';
 import { getSurrealContext } from '$lib/client/db.context.svelte';
 import { schemas, table_registry, type TablesMeta } from './schemas';
 
@@ -25,14 +24,23 @@ export class SchemaStore {
 		return out;
 	}
 
-	async getData(table: string): Promise<ZodSafeParseResult<Data[]>> {
+	async getData(table: string, fetchFields?: string[]): Promise<ZodSafeParseResult<Data[]>> {
 		const schema = this.getSchema(table);
 		const ctx = getSurrealContext();
 		if (ctx == null) throw new Error('No DB context available');
-		const res = await ctx._db.select<Data[]>(new Table(table)).catch((e) => {
-			throw new Error('something wrong with data fetch');
-		});
+		let res = [];
+		if (fetchFields == undefined) {
+			res = await ctx._db.select<Data[]>(new Table(table)).catch((e) => {
+				throw new Error(e);
+			});
+		}
+		else {
+			res = await ctx._db.select<Data[]>(new Table(table)).fetch(fetchFields).catch((e) => {
+				throw new Error('something wrong with data fetch');
+			});
+		}
 		const out = z.array(schema).safeParse(res);
+		console.log('parsed', out);
 		return out;
 	}
 

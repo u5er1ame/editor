@@ -7,7 +7,7 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import type { ViewController } from '$lib/controller/table.svelte';
 
-	import DefaultTable from './DefaultTable.svelte';
+	import Table from './Table.svelte';
 
 	function isWriteable(table: any) {
 		if (table.drop) {
@@ -75,7 +75,7 @@
 				{#if current_tab != undefined}
 					<Tabs.Content value={current_tab}>
 						{#key current_tab}
-							<DefaultTable {controller} table={current_tab} isWriteable={readonly} />
+							<Table table={current_tab} isWriteable={readonly} />
 						{/key}
 					</Tabs.Content>
 				{/if}

@@ -42,6 +42,7 @@
 	const controller: ViewController = getContext('viewsController');
 	const schema = controller.store.getSchema(table)
 	const builder = new ColumnBuilder(schema);
+	$inspect("builder", builder.config);
 	const autoConfig = { flexgrow: 1 };
 </script>
 
@@ -53,7 +54,7 @@
 	<div class="size-full max-w-svw">
 		<Style fonts={false}>
 			{#if table != undefined}
-				{#await controller.store.getData(table)}
+				{#await controller.store.getData(table, builder.getFields())}
 					<Skeleton class="size-full" />
 				{:then data}
 					{#if data.success}
@@ -63,7 +64,7 @@
 						{#if data.data.length == 0}
 							<div class="text-xl">Table is empty</div>
 						{:else}
-								<Grid filterValues={{}} data={data.data} columns={[]} {autoConfig} bind:this={tbl} />
+								<Grid filterValues={{}} columns={builder.config} data={data.data} bind:this={tbl} />
 						{/if}
 					{/if}
 				{:catch error}

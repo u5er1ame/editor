@@ -24,7 +24,7 @@
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 
-	const views = [new DefaultView(), new TableView(), new GraphView()];
+	const views = [new DefaultView(), new GraphView(), new TableView()];
 </script>
 
 <svelte:head>
@@ -47,12 +47,6 @@
 					{:then}
 						<DbStatusIcon />
 					{/await}
-					<!-- <Nav.Item> -->
-					<!-- 	<Nav.Link href="/">Graph</Nav.Link> -->
-					<!-- </Nav.Item> -->
-					<!-- <Nav.Item> -->
-					<!-- 	<Nav.Link href="tables">Tables</Nav.Link> -->
-					<!-- </Nav.Item> -->
 					<ViewList />
 				</Nav.List>
 				<Nav.List>

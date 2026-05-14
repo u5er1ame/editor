@@ -21,6 +21,7 @@ export interface DatabaseInfo {
 		id: number;
 		name: string;
 		drop: boolean;
+		view: boolean;
 		kind: { kind: "NORMAL" | "RELATION" };
 		schemafull: boolean;
 		permissions: Array<{
