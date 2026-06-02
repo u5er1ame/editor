@@ -15,8 +15,8 @@ export class ColumnBuilder {
 	constructor(schema: Schemas) {
 		this._schema = schema;
 		Object.entries(schema.shape).forEach(([key, value]) => {
-			const meta = value.meta;
-			if (meta.table != undefined && typeof meta.table == "string") {
+			const meta = value.meta();
+			if (meta?.fetch) {
 				this.fieldsToFetch.add(key);
 			}
 			this._config.push({

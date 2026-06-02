@@ -29,14 +29,15 @@ export class SchemaStore {
 		const ctx = getSurrealContext();
 		if (ctx == null) throw new Error('No DB context available');
 		let res = [];
-		if (fetchFields == undefined) {
+		if (fetchFields == undefined || fetchFields.length == 0) {
 			res = await ctx._db.select<Data[]>(new Table(table)).catch((e) => {
-				throw new Error(e);
+				throw new Error("something wrong with data fetch");
 			});
 		}
 		else {
-			res = await ctx._db.select<Data[]>(new Table(table)).fetch(fetchFields).catch((e) => {
-				throw new Error('something wrong with data fetch');
+			console.log('fetching', fetchFields);
+			res = await ctx._db.select<Data[]>(new Table(table)).fetch(...fetchFields).json().catch((e) => {
+				throw new Error(e);
 			});
 		}
 		const out = z.array(schema).safeParse(res);

@@ -42,7 +42,7 @@
 	const controller: ViewController = getContext('viewsController');
 	const schema = controller.store.getSchema(table)
 	const builder = new ColumnBuilder(schema);
-	$inspect("builder", builder.config);
+	$inspect("builder", builder.fieldsToFetch);
 	const autoConfig = { flexgrow: 1 };
 </script>
 

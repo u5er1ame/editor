@@ -25,7 +25,7 @@ const ElectricRoomSchema = z
 	.object({
 		id: z.custom<RecordId<"electric_rooms">>().transform((v) => new StringRecordId(v)).readonly().meta({ type: "record" }),
 		name: z.string(),
-		level: z.custom<RecordId<"levels">>().transform((v) => new StringRecordId(v)).meta({ type: "record", table: "levels" }),
+		level: z.custom<RecordId<"levels">>().transform((v) => new StringRecordId(v)).meta({ type: "record", fetch: true }),
 	})
 	.register(table_registry, {
 		id: 'electric_rooms',
