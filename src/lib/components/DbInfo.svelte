@@ -1,19 +1,24 @@
 <script lang="ts">
 import { page } from '$app/state';
-import { getSurrealContext } from '$lib/client/db.context.svelte';
-import * as Popover from '$lib/components/ui/popover/index';
 import * as Field from '$lib/components/ui/field/index';
 import * as Select from '$lib/components/ui/select/index';
 import * as Dialog from './ui/dialog/index';
+import Skeleton from './ui/skeleton/skeleton.svelte';
 import { Button } from './ui/button';
-import Spinner from './ui/spinner/spinner.svelte';
 import Badge from './ui/badge/badge.svelte';
 import Input from './ui/input/input.svelte';
 
-const db = getSurrealContext();
+import { getNamespaceInfo, getDatabaseInfo, invalidate } from '$lib/db.remote';
+import MemInfo from './MemInfo.svelte';
+import { toast } from 'svelte-sonner';
+import { goto } from '$app/navigation';
 
-let selectedDb = $derived(db!.database);
-let currentUser = $derived(db!.username);
+let { username, rootInfo, noderedInfo, ...rest } = $props();
+const nsInfo = getNamespaceInfo();
+const dbInfo = getDatabaseInfo();
+
+let selectedDb = $derived(rootInfo.defaults?.database ?? "main");
+let currentUser = $derived(username);
 let showPassPrompt = $state(false);
 
 // svelte-ignore state_referenced_locally
@@ -22,13 +27,11 @@ let passInputRef: HTMLInputElement | null = $state(null);
 let pass: string | undefined = $state();
 let errorMsg: string | undefined = $state();
 
-const rootInfo = $derived(page.data.db.systeminfo);
 
 function changeUser(e: string) {
 	showPassPrompt = true;
-	console.log('CHANGE USER', e);
 }
-$inspect(currentUser);
+
 function badgeVariant(role: string) {
 	switch (role) {
 		case 'OWNER':
@@ -41,36 +44,37 @@ function badgeVariant(role: string) {
 			return 'outline';
 	}
 }
-$effect(() => {
-	if (!db) return;
-	// if (ns) {
-	// 	db.namespace = ns;
-	// }
-	// if (selectedDb) {
-	// 	db.database = selectedDb;
-	// }
-});
 
 async function onsubmit(e: Event) {
 	e.preventDefault();
-	console.log(e);
-	console.log('submit', selectedUser, pass);
-	errorMsg = await db?.signin({ username: selectedUser, password: pass! });
-	if (errorMsg == undefined) {
+	const result = await fetch("/api/v1/db/signin", { method: "POST", body: JSON.stringify({ username: selectedUser, password: pass, namespace: rootInfo.defaults?.namespace ?? "main" }) });
+	if (result.status == 200) {
 		showPassPrompt = false;
+		pass = undefined;
+		toast.success('Login successful');
+	    await goto(page.url, { invalidateAll: true });
 	}
-
+	else {
+		const res = await result.json();
+		errorMsg = res.message;
+	}
 }
 function getUsername() {
 	return currentUser;
 }
+
 function setUsername(value: string) {
 	showPassPrompt = true;
 	selectedUser = value;
 }
+
+async function changeDb(val: string) {
+	await fetch("/api/v1/db/use", { method: "POST", body: JSON.stringify({ database: val }) }).then((res)=>res.json());
+}
+
 </script>
 
-<Dialog.Root bind:open={showPassPrompt} onOpenChangeComplete={() => console.log('close')}>
+<Dialog.Root bind:open={showPassPrompt}>
 	<Dialog.Portal>
 		<Dialog.Overlay />
 		<Dialog.Content
@@ -104,28 +108,19 @@ function setUsername(value: string) {
 	</Dialog.Portal>
 </Dialog.Root>
 
-{#await db?.nsInfo()}
-	<Spinner />
-	{:then nsInfo}
-	<Popover.Header class="flex size-full flex-row justify-between">
-		<Popover.Title>
-			<p>{db!.status}</p>
-		</Popover.Title>
-		<div class="flex flex-row gap-1">
-			<p>
-				RAM {(rootInfo?.memory_usage / 1024 / 1024).toFixed(2)}MB
-			</p>
-			<div
-				class="icon-[solar--database-bold-duotone] size-4 content-center bg-emerald-600 align-bottom"
-			></div>
-		</div>
-	</Popover.Header>
-	<div class="flex flex-col gap-1">
-		<Field.Field>
+<MemInfo system={rootInfo.system} nodejs={noderedInfo.nodejs} />
+<div class="flex flex-col gap-1">
+	{#if nsInfo.error}
+		<p class="text-rose-500">{nsInfo.error.message}</p>
+	{:else if nsInfo.loading}
+		<Skeleton class="w-full min-h-1/3" />
+	{/if}
+	{#if nsInfo.ready}
+		<Field.Field name="username">
 			<Field.Content class="flex flex-row justify-between gap-2">
-				<Field.Label for="username">Username</Field.Label>
-				{#if nsInfo}
+				<Field.Label>Username</Field.Label>
 					<Select.Root
+						autocomplete="off"
 						onValueChange={(e) => changeUser(e)}
 						type="single"
 						bind:value={getUsername, setUsername}
@@ -135,7 +130,7 @@ function setUsername(value: string) {
 						>{currentUser ? currentUser : 'Select user'}</Select.Trigger
 						>
 						<Select.Content>
-							{#each nsInfo?.users as user}
+							{#each nsInfo.current?.users as user}
 								<Select.Item label={user.name} value={user.name}>
 									{user.name}
 									{#each user.roles as role}
@@ -145,30 +140,23 @@ function setUsername(value: string) {
 							{/each}
 						</Select.Content>
 					</Select.Root>
-				{:else}
-					<p>No users found. How did you get here?</p>
-				{/if}
 			</Field.Content>
 		</Field.Field>
-		<Field.Field>
+		<Field.Field name="database">
 			<Field.Content class="flex flex-row justify-between gap-2">
-				<Field.Label for="database">Database</Field.Label>
-				{#if nsInfo}
-					<Select.Root type="single" bind:value={db!.database} name="database">
+				<Field.Label>Database</Field.Label>
+					<Select.Root type="single" bind:value={selectedDb} name="database" onValueChange={(val)=>{ changeDb(val) }}>
 						<Select.Trigger class="w-full"
 						>{selectedDb ? selectedDb : 'Select database'}</Select.Trigger
 						>
 						<Select.Content>
-							{#each nsInfo?.databases as db}
+							{#each nsInfo.current?.databases as db}
 								<Select.Item label={db.name} value={db.name}>{db.name}</Select.Item>
 							{/each}
 						</Select.Content>
 					</Select.Root>
-				{:else}
-					<p>No databases found in main DB please create one</p>
-				{/if}
 			</Field.Content>
 		</Field.Field>
-		<Button onclick={()=>db?.invalidate()} variant="destructive" href="/api/v1/logout">Reset login to default user</Button>
-	</div>
-{/await}
+	{/if}
+	<Button onclick={()=>invalidate()} variant="destructive" href="/api/v1/logout">Reset login to default user</Button>
+</div>

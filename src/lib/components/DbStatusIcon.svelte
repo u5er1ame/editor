@@ -9,10 +9,8 @@
 	import DbLoader from './DbLoader.svelte';
 	import { getContext, onMount } from 'svelte';
 	import type { ViewController } from '$lib/controller/table.svelte';
-	import { browser } from '$app/environment';
 
-	let { ...rest } = $props();
-
+	let { status, ...rest } = $props();
 	const db = getSurrealContext();
 
 	let controller: ViewController | undefined = $state();
@@ -25,10 +23,10 @@
 		<DbLoader withReconnectButton>
 			<Popover.Root>
 				<Popover.Trigger>
-					<Button variant="outline" class="size-sm cursor-pointer">
+					<!-- <Button variant="outline" class="size-sm cursor-pointer"> -->
 						<p>{db?.username}</p>
 						<ChevronDown />
-					</Button>
+					<!-- </Button> -->
 				</Popover.Trigger>
 				<Popover.Content>
 					<DbMenu />

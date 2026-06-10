@@ -15,7 +15,6 @@ import { getSurrealContext } from '$lib/client/db.context.svelte';
 let { ...rest } = $props();
 
 const db = $derived(getSurrealContext());
-$inspect("db", db);
 const url = page.data.db?.url
 let form = $state();
 $effect(() => {

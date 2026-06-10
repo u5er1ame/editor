@@ -5,7 +5,7 @@ declare global {
 	namespace App {
 		interface Error {
 			message: string;
-			cause: string;
+			cause?: string;
 		}
 		interface Locals {
 			db: {

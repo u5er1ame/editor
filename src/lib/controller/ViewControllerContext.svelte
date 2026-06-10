@@ -5,10 +5,11 @@
 	import { getSurrealContext, type DatabaseInfo } from '$lib/client/db.context.svelte';
 	import { ViewController } from './table.svelte';
 	import type { View } from '$lib/view/table.svelte';
+	import { connect, getDatabaseInfo } from '$lib/db.remote';
 
 	let { children, views, ...rest }: { children: Snippet<[]>; views: View[] } = $props();
 
-	const ctx = getSurrealContext();
+	// const ctx = getSurrealContext();
 	const controller = new ViewController();
 	$effect(() => {
 		controller.registerViews(views);
@@ -17,8 +18,8 @@
 	setContext('viewsController', controller);
 
 	async function init() {
-		if (!ctx || !ctx.isConnected) return;
-		info = await ctx?.dbInfo();
+		// if (connect().ready && connect().current) return;
+		info = await getDatabaseInfo();
 	}
 
 	$effect(() => {

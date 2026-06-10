@@ -8,4 +8,7 @@
 	const controller: ViewController = getContext('viewsController');
 </script>
 
-<DefaultView {controller} />
+<div class="size-svw">
+	<p>Content</p>
+</div>
+<!-- <DefaultView {controller} /> -->
