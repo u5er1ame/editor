@@ -1,9 +1,8 @@
 import type { Handle } from "@sveltejs/kit";
-import type { Token } from "surrealdb";
 import { toast } from "svelte-sonner";
-import z from "zod/v4";
 
 export const handleError = (e: ErrorEvent) => {
+	console.log(e,e.message);
 	toast.error(e.message);
 	return e
 };
