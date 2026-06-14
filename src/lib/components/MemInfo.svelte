@@ -29,7 +29,7 @@
 <style>
 .icon-surrealdb {
   background-image: url('https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/surrealdb/default.svg');
-  background-size: contain;
+  background-size: 100% 100%;
   background-repeat: no-repeat;
   width: 20px;
   height: 20px;
