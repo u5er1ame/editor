@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import DefaultView from '$lib/view/default/components/DefaultView.svelte';
-	import type { ViewController } from '$lib/controller/table.svelte.js';
+	import { page } from '$app/state';
+	import Tabs from '$lib/view/table/components/Tabs.svelte';
+	import { type PageProps } from './$types';
 
-	let { data } = $props();
-
-	const controller: ViewController = getContext('viewsController');
+	let { data, ...rest }: PageProps = $props();
+	// $inspect(page.state.table); // TODO: create config builder from here?
 </script>
 
-<div class="size-svw">
-	<p>Content</p>
+<div class="size-full">
+	<Tabs tables={data.tables} />
 </div>
-<!-- <DefaultView {controller} /> -->

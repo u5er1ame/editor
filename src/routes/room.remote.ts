@@ -1,7 +1,6 @@
-import { RecordId, type Prettify } from "surrealdb";
+import { RecordId } from "surrealdb";
 import { query } from "$app/server";
 
-import { isConnected, surreal } from "$lib/server/surreal.svelte";
 import type { Board } from "$lib/server/schemas";
 import { error } from "@sveltejs/kit";
 

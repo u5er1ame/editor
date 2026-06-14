@@ -85,6 +85,7 @@
     --wx-background-hover: var(--muted) !important;
 
     --wx-border: 1px solid var(--border) !important;
+    --wx-border-radius: var(--radius) !important;
 
     --wx-table-header-background: var(--muted) !important;
 
@@ -116,6 +117,10 @@
 
 .wx-willow-dark-theme .wx-cell:focus {
     outline: 1px solid var(--color-emerald-500) !important;
+};
+
+.wx-table-box {
+    border-radius: var(--radius) !important;
 };
 
 @theme inline {

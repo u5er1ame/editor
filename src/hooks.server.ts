@@ -15,7 +15,7 @@ export const handleError = (e: ErrorEvent) => {
 
 
 export const handle: Handle = async ({ event, resolve }) => {
-	console.log(colors.blue, "[REQ]",colors.green, event.route.id, event.params.page?event.params.page:"", colors.reset);
+	console.log(colors.blue, "[REQ]",colors.green, event.route.id, event.params.page?event.params.page:"", colors.reset, event.url?.searchParams.toString());
 	try {
 		if (!event.locals.db) {
 			event.locals.db = {
@@ -33,7 +33,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.db.username = username ?? "user"
 		return resolve(event);
 	} catch (e) {
-		console.log(colors.red, "[ERROR]", colors.reset, e.message);
+		console.log(colors.red, "[COOKIE ERROR]", colors.reset, e.message);
 		return resolve(event);
 	}
 }

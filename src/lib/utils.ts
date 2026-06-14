@@ -163,6 +163,16 @@ export function toNode(item: ActionResult<{}>, parentId_filedName?: string): Nod
 	}
 }
 
+export function toEdge(item: ActionResult<{}>): Edge {
+	return {
+		id: item.id.toString(),
+		type: item.id.table,
+		data: item,
+		source: item.in.toJSON(),
+		target: item.out.toJSON(),
+	}
+}
+
 export function splitByParent(nodes: Node[]): Record<string, Node[]> {
 	const out: Record<string, Node[]> = {};
 	for (const node of nodes) {

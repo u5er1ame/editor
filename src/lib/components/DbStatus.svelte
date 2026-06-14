@@ -4,14 +4,13 @@
 	import * as Nav from '$lib/components/ui/navigation-menu/index';
 	import * as Popover from '$lib/components/ui/popover/index';
 	import DbInfo from './DbInfo.svelte';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import { untrack } from 'svelte';
 
 	let { db, nodered, ...rest } = $props();
 
 	async function onclick() {
-	    await goto(page.url, { invalidateAll: true });
+		invalidateAll().then(async () => await  goto(page.url));
 	}
 </script>
 

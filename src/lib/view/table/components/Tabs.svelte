@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { tick } from 'svelte';
+	import { watch } from 'runed';
 
-	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { pushState } from '$app/navigation';
 
 	import * as Tabs from '$lib/components/ui/tabs';
-	import type { ViewController } from '$lib/controller/table.svelte';
+	import NewTable from '$lib/components/NewTable.svelte';
+	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 
-	import Table from './Table.svelte';
+	import { type DatabaseInfo } from '$lib/server/root_db.svelte';
+	import { getTable } from '$lib/db.remote';
+	import { page } from '$app/state';
 
 	function isWriteable(table: any) {
 		if (table.drop) {
@@ -29,56 +32,55 @@
 		}
 	}
 
-	let { controller, ...rest }: { controller: ViewController } = $props();
+	let { tables, ...rest } = $props();
 
-	const tables = $derived(controller.getTables());
-	const { selected_tab } = page.data;
-	let current_tab: string = $state(selected_tab);
-	const readonly = $derived.by(() => {
-		return controller.tablesInfo?.findLast((table) => table.name == current_tab)?.drop ?? false;
+	let current_tab: string = $derived(page.state.table?.selected_tab?page.state.table?.selected_tab: tables.selected_tab);
+
+	watch(()=>current_tab, (cur,pre)=>{
+		if (cur == pre) return;
+		tick().then(()=>{ pushState(`?table=${cur}`, { table: { selected_tab: cur } })})
+		// goto(`?table=${cur}`, { keepFocus: true });
 	});
 
-	onMount(() => {
-		if (tables && tables.length > 0) {
-			current_tab = tables.includes(selected_tab) ? selected_tab : tables[0];
-			goto(`?table=${current_tab}`, { replaceState: true });
-		}
-		return () => {};
-	});
 </script>
 
 {#snippet PrintIcon()}
 	<span class="icon-[material-symbols--print-rounded] size-5 align-middle"></span>
 {/snippet}
 
-{#if controller.tablesInfo}
+{#if tables.info}
 	<div class="h-fit w-full p-1">
-		{#if controller.tablesInfo.length > 0}
+		{#if tables.info.length > 0}
 			<Tabs.Root bind:value={current_tab}>
 				<Tabs.List class="size-full">
-					{#each controller.tablesInfo as table, i}
+					{#each tables.info as table, i}
 						<Tabs.Trigger
-							onclick={() => {
-								current_tab = table.name;
-								console.log("clck");
-								goto(`?table=${table.name}`, { replaceState: true });
-							}}
 							value={table.name}
 							title={table.name + (table.drop ? ' Writes disabled' : '')}
+							class="w-full"
 						>
 							{@html isWriteable(table)}
-							{controller.store.getTableMeta(table.name)?.title}
+							<!-- {controller.store.getTableMeta(table.name)?.title} -->
+							{table.name}
 							{@html getKind(table)}
 						</Tabs.Trigger>
 					{/each}
 				</Tabs.List>
-				{#if current_tab != undefined}
-					<Tabs.Content value={current_tab}>
-						{#key current_tab}
-							<Table table={current_tab} isWriteable={readonly} />
-						{/key}
-					</Tabs.Content>
-				{/if}
+					{#each tables.info as table, i}
+						{#if tables.selected_tab != undefined}
+							<Tabs.Content value={table.name} class="size-full">
+								{#if getTable(table.name).error}
+									<div class="size-full text-red-400">
+										{getTable(table.name).error}
+									</div>
+								{:else if getTable(table.name).loading}
+									<Skeleton class="size-full animate-pulse" />
+								{:else}
+									<NewTable data={getTable(table.name).current} table={table.name} readonly={table.drop?table.drop:false} config={tables.config} />
+								{/if}
+							</Tabs.Content>
+						{/if}
+					{/each}
 			</Tabs.Root>
 		{:else}
 			<div class="size-full">

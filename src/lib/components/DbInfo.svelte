@@ -28,7 +28,7 @@ let pass: string | undefined = $state();
 let errorMsg: string | undefined = $state();
 
 
-function changeUser(e: string) {
+function changeUser(_: string) {
 	showPassPrompt = true;
 }
 

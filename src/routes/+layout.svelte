@@ -10,9 +10,7 @@
 	import * as Nav from '$lib/components/ui/navigation-menu/index';
 	import { icons } from '$lib/client/color_mode.svelte';
 	import DbStatus from '$lib/components/DbStatus.svelte';
-	import ViewControllerContext from '$lib/controller/ViewControllerContext.svelte';
-
-	import ViewList from '$lib/components/header/ViewList.svelte';
+	import Views from '$lib/components/Views.svelte';
 
 	let { children, data, params }: LayoutProps = $props();
 
@@ -36,7 +34,7 @@
 	>
 		<Nav.List>
 			<DbStatus db={data.db} nodered={data.nodered} />
-			<!-- <ViewList /> -->
+			<Views views={data.views} />
 		</Nav.List>
 		<Nav.List>
 			<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->

@@ -16,6 +16,6 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
             path: "/",
         });
     }).catch((e)=>{ body.message = e.message; code = 400; });
-    console.log(body, code);
+    console.log("auth",body, code);
     return new Response(JSON.stringify(body), { status: code });
 }

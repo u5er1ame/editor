@@ -25,8 +25,10 @@ const NoderedDiagnostic = z.object({
 	})
 });
 
+export type NoderedDiagnostic = z.infer<typeof NoderedDiagnostic>;
+
 export const getDiagnostics = query(async () => {
-	const data: z.infer<typeof NoderedDiagnostic> = await fetch(env.NODERED_URL + "/diagnostics").then((r) => r.json()).catch(()=>{});
+	const data: NoderedDiagnostic = await fetch(env.NODERED_URL + "/diagnostics").then((r) => r.json()).catch(()=>{});
 	if (!data) return;
 	const result = NoderedDiagnostic.safeParse(data);
 	if (!result.success) return;
