@@ -1,27 +1,40 @@
 import type { PageServerData, PageServerLoad } from './$types';
-import type { ViewConfig } from '$lib/rewrite/views/base';
 import { getDatabaseInfo } from '$lib/db.remote';
 import { error, redirect } from '@sveltejs/kit';
+import { schemaStore, type Schemas } from '$lib/model/schemas';
+import { baseConfigStore } from '$lib/controller/config_store.svelte';
+import type { BaseConfig } from '$lib/model/types';
 
-
-const config: ViewConfig<"/"> = {
-
-}
 
 export const load: PageServerLoad = async ({ params, request, url }): Promise<PageServerData> => {
-	let config = undefined;
-	const tables = await getDatabaseInfo();
-	if (!tables) return error(500,"Cant get database info. Are you connected to DB?");
+	const config: BaseConfig[] = []
+	const info = await getDatabaseInfo().catch((e)=>{ return error(500, "Page Error")});;
+	if (!info) return error(500,"Cant get database info. Are you connected to DB?");
 	if (!url.searchParams.has('table')) {
-		if (tables?.tables.length == 0) {
+		if (info.tables && info.tables.length == 0) {
 			return error(404,"Cant find any table. Create one first!");
 		}
-		const selected_tab = tables?.tables[0]?.name;
+		const selected_tab = info.tables[0].name;
+
 		if (!selected_tab) {
 			return error(500,"Cant find any table. Something went wrong!");
 		}
 		return redirect(307, `/?table=${selected_tab}`);
 	}
 	const selected_tab = url.searchParams.get('table');
-	return { tables: { selected_tab, info: tables?.tables, config } };
+	for (const table of info.tables) {
+		if (!schemaStore.store.has(table.name)) {
+			error(404, "Cant find schema for table: " + table.name);
+		}
+		else {
+			const schema: Schemas = schemaStore.store.get(table.name)!;
+			const default_config = schemaStore.defaultConfig(table.name);
+			// TODO: create config beforehand with view list
+			if (!baseConfigStore.store.has(schema)) {
+				baseConfigStore.addConfig(schema, default_config); // WARN: idk should i do it?
+			}
+			config.push(baseConfigStore.store.get(schema)!)
+		}
+	}
+	return { tables: { selected_tab, info: info.tables, config } };
 };

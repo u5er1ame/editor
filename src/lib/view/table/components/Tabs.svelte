@@ -6,10 +6,8 @@
 
 	import * as Tabs from '$lib/components/ui/tabs';
 	import NewTable from '$lib/components/NewTable.svelte';
-	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 
-	import { type DatabaseInfo } from '$lib/server/root_db.svelte';
-	import { getTable } from '$lib/db.remote';
+	import { getAllTables } from '$lib/db.remote';
 	import { page } from '$app/state';
 
 	function isWriteable(table: any) {
@@ -36,12 +34,15 @@
 
 	let current_tab: string = $derived(page.state.table?.selected_tab?page.state.table?.selected_tab: tables.selected_tab);
 
+
+	$effect(()=>{
+
+	});
 	watch(()=>current_tab, (cur,pre)=>{
 		if (cur == pre) return;
 		tick().then(()=>{ pushState(`?table=${cur}`, { table: { selected_tab: cur } })})
-		// goto(`?table=${cur}`, { keepFocus: true });
+		// tick().then(()=>{ goto(`?table=${cur}`, { replaceState: true, state: { table: { selected_tab: cur } }})})
 	});
-
 </script>
 
 {#snippet PrintIcon()}
@@ -50,45 +51,47 @@
 
 {#if tables.info}
 	<div class="h-fit w-full p-1">
-		{#if tables.info.length > 0}
 			<Tabs.Root bind:value={current_tab}>
 				<Tabs.List class="size-full">
 					{#each tables.info as table, i}
+					{@const label = tables.config.find((c)=>c.id == table.name)?.label ?? table.name}
 						<Tabs.Trigger
 							value={table.name}
-							title={table.name + (table.drop ? ' Writes disabled' : '')}
+							title={label + (table.drop ? ' Writes disabled' : '')}
 							class="w-full"
 						>
 							{@html isWriteable(table)}
 							<!-- {controller.store.getTableMeta(table.name)?.title} -->
-							{table.name}
+							{label}
 							{@html getKind(table)}
 						</Tabs.Trigger>
+					{:else}
+						<div class="size-full">
+							<div class="text-center">
+								<div class="text-xl">No tables found</div>
+							</div>
+						</div>
 					{/each}
 				</Tabs.List>
 					{#each tables.info as table, i}
 						{#if tables.selected_tab != undefined}
-							<Tabs.Content value={table.name} class="size-full">
-								{#if getTable(table.name).error}
-									<div class="size-full text-red-400">
-										{getTable(table.name).error}
-									</div>
-								{:else if getTable(table.name).loading}
-									<Skeleton class="size-full animate-pulse" />
-								{:else}
-									<NewTable data={getTable(table.name).current} table={table.name} readonly={table.drop?table.drop:false} config={tables.config} />
-								{/if}
+							<Tabs.Content value={tables.info[i].name} class="size-full">
+								<!-- {#if getTable(table.name).error} -->
+								<!-- 	<div class="size-full text-red-400"> -->
+								<!-- 		{getTable(table.name).error} -->
+								<!-- 	</div> -->
+								<!-- {#if getTable(table.name).loading} -->
+								<!-- 	<Skeleton class="size-full animate-pulse" /> -->
+								<!-- {:else} -->
+									<!-- {#if browser} -->
+								{@const data = await getAllTables(table.name)}
+								<NewTable data={data} table={table.name} readonly={table?.drop ?? false} config={{}} />
+									<!-- {/if} -->
+								<!-- {/if} -->
 							</Tabs.Content>
 						{/if}
 					{/each}
 			</Tabs.Root>
-		{:else}
-			<div class="size-full">
-				<div class="text-center">
-					<div class="text-xl">No tables found</div>
-				</div>
-			</div>
-		{/if}
 	</div>
 {/if}
 

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { mode } from 'mode-watcher';
-	import { Grid, Toolbar, Willow, WillowDark } from '@svar-ui/svelte-grid';
+	import { Grid, Toolbar, Willow, WillowDark, type IApi, type IColumnConfig } from '@svar-ui/svelte-grid';
 	import { registerToolbarItem } from '@svar-ui/svelte-toolbar';
 	import { RichSelect, Combo } from '@svar-ui/svelte-core';
 	import { registerEditorItem } from '@svar-ui/svelte-editor';
 
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/svar/Button.svelte';
+	import Header from './svar/Header.svelte';
+	import { getTable } from '$lib/db.remote';
 
 	registerEditorItem('richselect', RichSelect);
 	registerEditorItem('combo', Combo);
@@ -21,7 +23,7 @@
 		}
 	});
 
-	let tbl: any | undefined = $state();
+	let tbl: IApi | undefined = $state();
 
 	let new_row_id: string[] = $state([]);
 
@@ -95,8 +97,13 @@
 	// });
 
 	let { data, table=$bindable(), readonly=$bindable(), config, ...rest } = $props();
-
-	const autoConfig = { editor: readonly?undefined:'text', flexgrow: 1 };
+$effect(() => {
+	if (tbl == undefined) return;
+	tbl.on("filter-rows", (ev) => {
+		console.log("filter", ev);
+	});
+});
+	const autoConfig: IColumnConfig = { editor: readonly?undefined:'text', flexgrow: 1, header: [{ cell: Header }, {filter: "richselect"}] };
 	// const data = $derived(getTable(table));
 </script>
 
@@ -112,19 +119,19 @@
 						<div class="text-xl text-red-400">Table is read-only! Writes disabled</div>
 					</div>
 				{/if}
-				{#if data.length == 0}
-							<div class="size-full text-start">
-								<div class="text-xl text-sky-400">Table is empty</div>
-							</div>
-				{:else}
+				<!-- {#if data.length == 0} -->
+				<!-- 			<div class="size-full text-start"> -->
+				<!-- 				<div class="text-xl text-sky-400">Table is empty</div> -->
+				<!-- 			</div> -->
+				<!-- {:else} -->
 					<Grid
 						data={data}
 						columns={[]}
 						autoConfig={autoConfig}
 						bind:this={tbl}
-						filterValues={{}}
+						filterValues={{ name: "test" }}
 					/>
-				{/if}
+				<!-- {/if} -->
 			</Style>
 	</div>
 {/if}

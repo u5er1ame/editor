@@ -8,12 +8,14 @@ declare global {
 	namespace App {
 		interface Error {
 			message: string;
-			cause?: string;
+			code?: number | string;
+			path?: PropertyKey[]
 		}
 		interface Locals {
 			db: {
 				token: Token | null;
-				username: string
+				username: string;
+				isConnected: boolean;
 			}
 		}
 		interface PageData {

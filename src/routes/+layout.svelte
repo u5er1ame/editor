@@ -11,6 +11,8 @@
 	import { icons } from '$lib/client/color_mode.svelte';
 	import DbStatus from '$lib/components/DbStatus.svelte';
 	import Views from '$lib/components/Views.svelte';
+	import { toast } from 'svelte-sonner';
+	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 
 	let { children, data, params }: LayoutProps = $props();
 
@@ -30,7 +32,7 @@
 <div class="flex size-full flex-col">
 	<Nav.Root
 		orientation="horizontal"
-		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-sidebar-border bg-sidebar py-1"
+		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-sidebar-border bg-sidebar py-1 sticky top-0"
 	>
 		<Nav.List>
 			<DbStatus db={data.db} nodered={data.nodered} />
