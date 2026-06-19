@@ -10,6 +10,7 @@ export const load: PageServerLoad = async ({ params, request, url }): Promise<Pa
 	const config: BaseConfig[] = []
 	const info = await getDatabaseInfo().catch((e)=>{ return error(500, "Page Error")});;
 	if (!info) return error(500,"Cant get database info. Are you connected to DB?");
+	if (info.tables == undefined) { return error(500,"Cant get tables. Something went wrong!"); }
 	if (!url.searchParams.has('table')) {
 		if (info.tables && info.tables.length == 0) {
 			return error(404,"Cant find any table. Create one first!");
@@ -31,6 +32,7 @@ export const load: PageServerLoad = async ({ params, request, url }): Promise<Pa
 			const default_config = schemaStore.defaultConfig(table.name);
 			// TODO: create config beforehand with view list
 			if (!baseConfigStore.store.has(schema)) {
+				console.warn('no config for schema', schema, "using default");
 				baseConfigStore.addConfig(schema, default_config); // WARN: idk should i do it?
 			}
 			config.push(baseConfigStore.store.get(schema)!)

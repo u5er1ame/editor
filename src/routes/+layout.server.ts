@@ -24,7 +24,6 @@ const views: View[] = [
 
 export const load: LayoutServerLoad = async ({ locals, fetch }) => {
 		const nodered = await getDiagnostics();
-		await root_access.ready
 		// const hp = await root_access.health();
 		// console.log(hp);
 		// await connect_system().catch((e)=>{ error(500,"cant connect to db as root level user") }); // INFO: need root level auth to get system info (viewer role from envs)
