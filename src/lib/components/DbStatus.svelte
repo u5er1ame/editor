@@ -10,7 +10,7 @@
 	let { db, nodered, ...rest } = $props();
 
 	async function onclick() {
-		invalidateAll().then(async () => await  goto(page.url));
+		invalidateAll().then(async () => await goto(page.url));
 	}
 </script>
 
