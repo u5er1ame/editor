@@ -5,20 +5,23 @@
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 
 	let { data, ...rest }: PageProps = $props();
-
 </script>
 
-<svelte:boundary onerror={(e)=>{ toast.error(e.body.message)} }>
+<svelte:boundary onerror={(e)=>{ toast.error(e)} }>
 	{#snippet pending()}
-		<Skeleton class="size-full animate-pulse"/>
+		<Skeleton class="w-svw h-svh animate-pulse m-1"/>
 	{/snippet}
 	{#snippet failed(e: unknown)}
 		<div class="size-full text-center flex flex-row gap-2 justify-center">
-			<div class="text-xl text-rose-400">{e.status}</div>
 			<div class="text-xl">{e.body.message}</div>
+			<div class="text-xl text-rose-400">{e.status}</div>
 		</div>
 	{/snippet}
 <div class="size-full">
-	<Tabs tables={data.tables} />
+	{#await fetch("/api/v1/db/ready")}
+		<Skeleton class="w-full h-full animate-pulse m-1"/>
+	{:then}
+		<Tabs tables={data.tables} />
+	{/await}
 </div>
 </svelte:boundary>

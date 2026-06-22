@@ -6,12 +6,16 @@
 	import DbInfo from './DbInfo.svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { DBContext } from '../../routes/+layout.svelte';
+	import { getContext } from 'svelte';
 
-	let { db, nodered, ...rest } = $props();
+	let { ...rest } = $props();
 
 	async function onclick() {
 		invalidateAll().then(async () => await goto(page.url));
 	}
+
+	const db = getContext<DBContext>("db");
 </script>
 
 {#key db.isConnected}
@@ -25,7 +29,7 @@
 					<!-- </Button> -->
 				</Popover.Trigger>
 				<Popover.Content>
-					<DbInfo username={db.username} rootInfo={db.systeminfo} noderedInfo={nodered.diagnostics} />
+					<DbInfo />
 				</Popover.Content>
 			</Popover.Root>
 		{:else}

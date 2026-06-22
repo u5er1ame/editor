@@ -14,20 +14,20 @@ declare global {
 		interface Locals {
 			db: {
 				token: Token | null;
-				username: string;
+				isAuth: boolean;
 				isConnected: boolean;
+				username?: string;
+				namespace?: string;
+				database?: string;
 			}
 		}
 		interface PageData {
-			nodered: {
-				diagnostics: NoderedDiagnostic
-			},
 			db: {
-				isConnected: boolean,
-				systeminfo: { system: SystemInfo, defaults: { namespace: string, database: string } }
-				token: Token | null;
-				username: string
-
+				isConnected: boolean;
+				isAuth: boolean;
+				username?: string;
+				namespace?: string;
+				database?: string;
 			},
 			tables: {
 				selected_tab: string,
@@ -37,6 +37,10 @@ declare global {
 			},
 		}
 		interface PageState {
+			db?: {
+				namespace?: string,
+				database?: string,
+			},
 			table?: {
 				selected_tab: string,
 			}

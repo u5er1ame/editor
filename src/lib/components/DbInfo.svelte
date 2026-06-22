@@ -8,21 +8,22 @@ import { Button } from './ui/button';
 import Badge from './ui/badge/badge.svelte';
 import Input from './ui/input/input.svelte';
 
-import { getNamespaceInfo, getDatabaseInfo, invalidate } from '$lib/db.remote';
+import { getNamespaceInfo, expire, getSystemInfo } from '$lib/db.remote';
 import MemInfo from './MemInfo.svelte';
 import { toast } from 'svelte-sonner';
-import { goto } from '$app/navigation';
+import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import type { DBContext } from '../../routes/+layout.svelte';
+	import { getContext } from 'svelte';
 
-let { username, rootInfo, noderedInfo, ...rest } = $props();
+let { ...rest } = $props();
+
+const db = getContext<DBContext>("db");
+
 const nsInfo = getNamespaceInfo();
-const dbInfo = getDatabaseInfo();
-
-let selectedDb = $derived(rootInfo.defaults?.database ?? "main");
-let currentUser = $derived(username);
+const systeminfo = await getSystemInfo();
 let showPassPrompt = $state(false);
 
-// svelte-ignore state_referenced_locally
-let selectedUser: string = $state(currentUser);
+let selectedUser: string = $state(db.username);
 let passInputRef: HTMLInputElement | null = $state(null);
 let pass: string | undefined = $state();
 let errorMsg: string | undefined = $state();
@@ -47,10 +48,11 @@ function badgeVariant(role: string) {
 
 async function onsubmit(e: Event) {
 	e.preventDefault();
-	const result = await fetch("/api/v1/db/signin", { method: "POST", body: JSON.stringify({ username: selectedUser, password: pass, namespace: rootInfo.defaults?.namespace ?? "main" }) });
+	const result = await fetch("/api/v1/db/signin", { method: "POST", body: JSON.stringify({ username: selectedUser, password: pass, namespace: systeminfo?.defaults?.namespace ?? "main" }) });
 	if (result.status == 200) {
 		showPassPrompt = false;
 		pass = undefined;
+		db.username = selectedUser;
 		toast.success('Login successful');
 	    await goto(page.url, { invalidateAll: true });
 	}
@@ -60,7 +62,7 @@ async function onsubmit(e: Event) {
 	}
 }
 function getUsername() {
-	return currentUser;
+	return db.username;
 }
 
 function setUsername(value: string) {
@@ -69,9 +71,9 @@ function setUsername(value: string) {
 }
 
 async function changeDb(val: string) {
-	await fetch("/api/v1/db/use", { method: "POST", body: JSON.stringify({ database: val }) }).then((res)=>res.json());
+	// await fetch("/api/v1/db/use", { method: "POST", body: JSON.stringify({ database: val }) }).then((res)=>res.json());
+	await invalidateAll();
 }
-
 </script>
 
 <Dialog.Root bind:open={showPassPrompt}>
@@ -108,7 +110,7 @@ async function changeDb(val: string) {
 	</Dialog.Portal>
 </Dialog.Root>
 
-<MemInfo system={rootInfo.system} nodejs={noderedInfo.nodejs} />
+<MemInfo system={systeminfo?.system} />
 <div class="flex flex-col gap-1">
 	{#if nsInfo.error}
 		<p class="text-rose-500">{nsInfo.error.message}</p>
@@ -127,7 +129,7 @@ async function changeDb(val: string) {
 						name="username"
 					>
 						<Select.Trigger class="w-full"
-						>{currentUser ? currentUser : 'Select user'}</Select.Trigger
+						>{db.username ? db.username : 'Select user'}</Select.Trigger
 						>
 						<Select.Content>
 							{#each nsInfo.current?.users as user}
@@ -145,18 +147,18 @@ async function changeDb(val: string) {
 		<Field.Field name="database">
 			<Field.Content class="flex flex-row justify-between gap-2">
 				<Field.Label>Database</Field.Label>
-					<Select.Root type="single" bind:value={selectedDb} name="database" onValueChange={(val)=>{ changeDb(val) }}>
+					<Select.Root type="single" bind:value={db.database.current} name="database" onValueChange={(val)=>{ changeDb(val) }}>
 						<Select.Trigger class="w-full"
-						>{selectedDb ? selectedDb : 'Select database'}</Select.Trigger
+						>{db.database.current ? db.database.current : 'Select database'}</Select.Trigger
 						>
 						<Select.Content>
-							{#each nsInfo.current?.databases as db}
-								<Select.Item label={db.name} value={db.name}>{db.name}</Select.Item>
+							{#each nsInfo.current?.databases as database}
+								<Select.Item label={database.name} value={database.name}>{database.name}</Select.Item>
 							{/each}
 						</Select.Content>
 					</Select.Root>
 			</Field.Content>
 		</Field.Field>
 	{/if}
-	<Button onclick={()=>invalidate()} variant="destructive" href="/api/v1/logout">Reset login to default user</Button>
+	<Button onclick={()=>expire()} variant="destructive" href="/api/v1/logout">Reset login to default user</Button>
 </div>

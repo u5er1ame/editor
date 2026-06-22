@@ -1,6 +1,7 @@
 import { type RequestHandler } from "@sveltejs/kit";
 
 import { db } from "$lib/server/root_db.svelte";
+import { decodeJWT } from "$lib/utils";
 
 export const POST: RequestHandler = async ({ request, cookies, locals }) => {
     const data = await request.json()
@@ -11,11 +12,15 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
             httpOnly: true,
             path: "/",
         });
-        cookies.set("sr_user", data.username, {
-            httpOnly: true,
-            path: "/",
-        });
+        const decoded = decodeJWT(tokens.access);
+        locals.db = {
+            ...locals.db,
+            isAuth: true,
+            token: tokens.access,
+            username: decoded.ID,
+            namespace: decoded.NS,
+            database: decoded.DB,
+        };
     }).catch((e)=>{ body.message = e.message; code = 400; });
-    console.log("auth",body, code);
     return new Response(JSON.stringify(body), { status: code });
 }

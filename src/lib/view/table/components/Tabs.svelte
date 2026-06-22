@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { getContext, tick } from 'svelte';
 	import { watch } from 'runed';
+	import { error } from '@sveltejs/kit';
 
-	import { pushState } from '$app/navigation';
+	import { page } from '$app/state';
+	import { invalidate, pushState } from '$app/navigation';
 
 	import * as Tabs from '$lib/components/ui/tabs';
 	import NewTable from '$lib/components/NewTable.svelte';
 
-	import { getAllTables } from '$lib/db.remote';
-	import { page } from '$app/state';
+	import { getAllTables, getDatabaseInfo } from '$lib/db.remote';
+	import type { DBContext } from '../../../../routes/+layout.svelte';
 
 	function isWriteable(table: any) {
 		if (table.drop) {
@@ -34,6 +36,9 @@
 
 	let current_tab: string = $derived(page.state.table?.selected_tab?page.state.table?.selected_tab: tables.selected_tab);
 
+	const db = getContext<DBContext>("db");
+
+	const info = await getDatabaseInfo().catch((e)=>{ error(400,e) });
 
 	$effect(()=>{
 
@@ -43,18 +48,23 @@
 		tick().then(()=>{ pushState(`?table=${cur}`, { table: { selected_tab: cur } })})
 		// tick().then(()=>{ goto(`?table=${cur}`, { replaceState: true, state: { table: { selected_tab: cur } }})})
 	});
+	watch(()=>db.database.current, (cur,pre)=>{
+		if (cur == pre) return;
+		getDatabaseInfo().refresh();
+		invalidate("/");
+	});
 </script>
 
 {#snippet PrintIcon()}
 	<span class="icon-[material-symbols--print-rounded] size-5 align-middle"></span>
 {/snippet}
 
-{#if tables.info}
+{#if info}
 	<div class="h-fit w-full p-1">
 			<Tabs.Root bind:value={current_tab}>
 				<Tabs.List class="size-full">
-					{#each tables.info as table, i}
-					{@const label = tables.config.find((c)=>c.id == table.name)?.label ?? table.name}
+					{#each info.tables as table, i}
+						{@const label = tables.config.find((c)=>c.id == table.name)?.label ?? table.name}
 						<Tabs.Trigger
 							value={table.name}
 							title={label + (table.drop ? ' Writes disabled' : '')}
@@ -73,21 +83,11 @@
 						</div>
 					{/each}
 				</Tabs.List>
-					{#each tables.info as table, i}
+					{#each info.tables as table, i}
 						{#if tables.selected_tab != undefined}
-							<Tabs.Content value={tables.info[i].name} class="size-full">
-								<!-- {#if getTable(table.name).error} -->
-								<!-- 	<div class="size-full text-red-400"> -->
-								<!-- 		{getTable(table.name).error} -->
-								<!-- 	</div> -->
-								<!-- {#if getTable(table.name).loading} -->
-								<!-- 	<Skeleton class="size-full animate-pulse" /> -->
-								<!-- {:else} -->
-									<!-- {#if browser} -->
+							<Tabs.Content value={table.name} class="size-full">
 								{@const data = await getAllTables(table.name)}
 								<NewTable data={data} table={table.name} readonly={table?.drop ?? false} config={{}} />
-									<!-- {/if} -->
-								<!-- {/if} -->
 							</Tabs.Content>
 						{/if}
 					{/each}

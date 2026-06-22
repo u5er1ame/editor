@@ -28,7 +28,7 @@ function changeUser(e: string) {
 	showPassPrompt = true;
 	console.log('CHANGE USER', e);
 }
-$inspect(currentUser);
+
 function badgeVariant(role: string) {
 	switch (role) {
 		case 'OWNER':

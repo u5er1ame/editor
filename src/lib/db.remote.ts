@@ -11,8 +11,8 @@ import type { Data } from "./model/types";
 export const connect_system = query(async () => {
 	const isConnected = await root_access.connect(env.SURREAL_URL, {
 		authentication: {
-			username: env.SURREAL_VIEWER_USER,
-			password: env.SURREAL_VIEWER_PASS,
+			username: env.SURREAL_ROOT_VIEWER_USER,
+			password: env.SURREAL_ROOT_VIEWER_PASS,
 		}
 	}).catch(() => false);
 	return { isConnected }
@@ -42,9 +42,8 @@ export const getNamespaceInfo = query(async () => {
 });
 
 export const getDatabaseInfo = query(async () => {
-	if (!db.isConnected) return
-	await db.ready.catch(()=>{});
-	const [res] = await db.query<[DatabaseInfo]>("info for db structure").catch(()=>[]);
+	await db.ready.catch(()=>{ return error(500,"DB not ready") });
+	const [res] = await db.query<[DatabaseInfo]>("info for db structure")
 	return res ?? {}
 });
 
@@ -72,7 +71,7 @@ export const getAllTables = query.batch(z.string().refine((v)=>schemaStore.store
 		}
 });
 
-export const invalidate = query(async () => {
+export const expire = query(async () => {
 	if (!db.isConnected) return
 	await db.invalidate();
 	goto("/",{ invalidateAll: true });

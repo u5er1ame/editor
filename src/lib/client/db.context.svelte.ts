@@ -7,16 +7,16 @@ import { page } from "$app/state";
 import type { LayoutData } from "../../routes/$types";
 
 export interface DatabaseInfo {
-	accesses: Array<{}>
-	analyzers: Array<{}>
-	apis: Array<{}>
-	buckets: Array<{}>
-	configs: Array<{}>
-	functions: Array<{}>
-	models: Array<{}>
-	modules: Array<{}>
-	params: Array<{}>
-	sequences: Array<{}>
+	accesses: Array<any>
+	analyzers: Array<any>
+	apis: Array<any>
+	buckets: Array<any>
+	configs: Array<any>
+	functions: Array<any>
+	models: Array<any>
+	modules: Array<any>
+	params: Array<any>
+	sequences: Array<any>
 	tables: Array<{
 		id: number;
 		name: string;

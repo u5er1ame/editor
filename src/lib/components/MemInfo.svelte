@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { getSystemInfo } from "$lib/db.remote";
+    import { getDiagnostics } from "$lib/nodered.remote";
     import * as Popover from "./ui/popover";
 
-    let { system, nodejs,...rest } = $props();
+    let { system, ...rest } = $props();
+
+    const noderedInfo = await getDiagnostics();
 
     const dbRam = $derived((system?.memory_usage / 1024 / 1024).toFixed(2))
-    const noderedRam= $derived((nodejs.memoryUsage.rss/ 1024 / 1024).toFixed(2))
+    const noderedRam= $derived((noderedInfo?.nodejs.memoryUsage.rss!/ 1024 / 1024).toFixed(2))
 </script>
 <Popover.Header class="flex size-full flex-col gap-1">
     <div class="flex flex-row justify-between">
