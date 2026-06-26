@@ -14,7 +14,6 @@ declare global {
 		interface Locals {
 			db: {
 				token: Token | null;
-				isAuth: boolean;
 				isConnected: boolean;
 				username?: string;
 				namespace?: string;

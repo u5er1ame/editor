@@ -22,10 +22,9 @@ export const load: LayoutServerLoad = async ({ locals, fetch }) => {
 		return {
 			db: {
 				isConnected: db.isConnected,
-				isAuth: locals.db.isAuth,
 				username: locals.db.username,
-				namespace: locals.db.namespace ?? db.namespace,
-				database: locals.db.database ?? db.database,
+				namespace: locals.db.namespace,
+				database: locals.db.database,
 			},
 			views,
 		}

@@ -8,6 +8,7 @@
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/svar/Button.svelte';
 	import Header from './svar/Header.svelte';
+	import { getTable } from '$lib/db.remote';
 
 	registerEditorItem('richselect', RichSelect);
 	registerEditorItem('combo', Combo);
@@ -95,7 +96,8 @@
 	// 	};
 	// });
 
-	let { data, table=$bindable(), readonly=$bindable(), config, ...rest } = $props();
+	let { table=$bindable(), readonly=$bindable(), config, ...rest } = $props();
+	const data = await getTable(table);
 	$effect(() => {
 		if (tbl == undefined) return;
 		tbl.on("filter-rows", (ev) => {

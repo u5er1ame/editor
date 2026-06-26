@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { getContext, tick } from 'svelte';
 	import { watch } from 'runed';
-	import { error } from '@sveltejs/kit';
 
 	import { page } from '$app/state';
-	import { invalidate, pushState } from '$app/navigation';
+	import { invalidateAll, pushState } from '$app/navigation';
 
 	import * as Tabs from '$lib/components/ui/tabs';
 	import NewTable from '$lib/components/NewTable.svelte';
 
-	import { getAllTables, getDatabaseInfo } from '$lib/db.remote';
+	import { getDatabaseInfo, getTable } from '$lib/db.remote';
 	import type { DBContext } from '../../../../routes/+layout.svelte';
 
 	function isWriteable(table: any) {
@@ -33,12 +32,11 @@
 	}
 
 	let { tables, ...rest } = $props();
-
 	let current_tab: string = $derived(page.state.table?.selected_tab?page.state.table?.selected_tab: tables.selected_tab);
 
 	const db = getContext<DBContext>("db");
-
-	const info = await getDatabaseInfo().catch((e)=>{ error(400,e) });
+	// const info = await getDatabaseInfo().catch((e)=>{ error(400,e) });
+	const info = tables.info;
 
 	$effect(()=>{
 
@@ -48,11 +46,13 @@
 		tick().then(()=>{ pushState(`?table=${cur}`, { table: { selected_tab: cur } })})
 		// tick().then(()=>{ goto(`?table=${cur}`, { replaceState: true, state: { table: { selected_tab: cur } }})})
 	});
-	watch(()=>db.database.current, (cur,pre)=>{
+
+	watch(()=>db.database, (cur,pre)=>{
 		if (cur == pre) return;
 		getDatabaseInfo().refresh();
-		invalidate("/");
+		invalidateAll();
 	});
+$inspect(tables.config);
 </script>
 
 {#snippet PrintIcon()}
@@ -86,8 +86,11 @@
 					{#each info.tables as table, i}
 						{#if tables.selected_tab != undefined}
 							<Tabs.Content value={table.name} class="size-full">
-								{@const data = await getAllTables(table.name)}
-								<NewTable data={data} table={table.name} readonly={table?.drop ?? false} config={{}} />
+								{#key current_tab}
+									{#if table.name == current_tab}
+										<NewTable table={table.name} readonly={table?.drop ?? false} config={{}} />
+									{/if}
+								{/key}
 							</Tabs.Content>
 						{/if}
 					{/each}

@@ -1,6 +1,6 @@
 import { Table } from "surrealdb";
 import { error } from "@sveltejs/kit";
-import { query } from "$app/server";
+import { getRequestEvent, query } from "$app/server";
 import { env } from "$env/dynamic/private";
 import { db, root_access, type DatabaseInfo, type NamespaceInfo, type SystemInfo } from "$lib/server/root_db.svelte";
 import { goto } from "$app/navigation";
@@ -43,6 +43,8 @@ export const getNamespaceInfo = query(async () => {
 
 export const getDatabaseInfo = query(async () => {
 	await db.ready.catch(()=>{ return error(500,"DB not ready") });
+	const { locals } = getRequestEvent();
+	db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
 	const [res] = await db.query<[DatabaseInfo]>("info for db structure")
 	return res ?? {}
 });
@@ -51,12 +53,16 @@ export const getTable = query(z.string().refine((v)=>schemaStore.store.has(v), {
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
-		const res = await db.select<Data>(new Table(table)).catch(()=>{ return error(500,"cant get table") });
+		const { locals } = getRequestEvent();
+		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
+		const res = await db.select<Data>(new Table(table)).catch((e)=>{ return error(500,e) });
 		return res ?? []
 });
 
 export const getAllTables = query.batch(z.string().refine((v)=>schemaStore.store.has(v), { error: ({input})=>"Cant find schema for table: "+input }),
 	async (tables) => {
+		const { locals } = getRequestEvent();
+		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
 
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });

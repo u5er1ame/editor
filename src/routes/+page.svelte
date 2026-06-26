@@ -7,13 +7,13 @@
 	let { data, ...rest }: PageProps = $props();
 </script>
 
-<svelte:boundary onerror={(e)=>{ toast.error(e)} }>
+<svelte:boundary onerror={(e)=>{ console.error(e); toast.error(e.message ?? "Error")} }>
 	{#snippet pending()}
 		<Skeleton class="w-svw h-svh animate-pulse m-1"/>
 	{/snippet}
 	{#snippet failed(e: unknown)}
 		<div class="size-full text-center flex flex-row gap-2 justify-center">
-			<div class="text-xl">{e.body.message}</div>
+			<div class="text-xl">{e.body?.message}</div>
 			<div class="text-xl text-rose-400">{e.status}</div>
 		</div>
 	{/snippet}

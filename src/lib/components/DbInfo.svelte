@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getContext } from 'svelte';
 import { page } from '$app/state';
 import * as Field from '$lib/components/ui/field/index';
 import * as Select from '$lib/components/ui/select/index';
@@ -12,8 +13,8 @@ import { getNamespaceInfo, expire, getSystemInfo } from '$lib/db.remote';
 import MemInfo from './MemInfo.svelte';
 import { toast } from 'svelte-sonner';
 import { goto, invalidate, invalidateAll } from '$app/navigation';
-	import type { DBContext } from '../../routes/+layout.svelte';
-	import { getContext } from 'svelte';
+
+import type { DBContext } from '../../routes/+layout.svelte';
 
 let { ...rest } = $props();
 
@@ -147,9 +148,9 @@ async function changeDb(val: string) {
 		<Field.Field name="database">
 			<Field.Content class="flex flex-row justify-between gap-2">
 				<Field.Label>Database</Field.Label>
-					<Select.Root type="single" bind:value={db.database.current} name="database" onValueChange={(val)=>{ changeDb(val) }}>
+					<Select.Root type="single" bind:value={db.database} name="database" onValueChange={(val)=>{ changeDb(val) }}>
 						<Select.Trigger class="w-full"
-						>{db.database.current ? db.database.current : 'Select database'}</Select.Trigger
+						>{db.database? db.database: 'Select database'}</Select.Trigger
 						>
 						<Select.Content>
 							{#each nsInfo.current?.databases as database}

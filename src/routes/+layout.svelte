@@ -1,19 +1,15 @@
 <script lang="ts" module>
-import { PersistedState } from "runed";
 export class DBContext {
 	isConnected: boolean = $state(false);
-	isAuth: boolean = $state(false);
 	username?: string = $state();
 	namespace?: string = $state();
-	database = new PersistedState<string | undefined>("database", undefined);
+	database?: string = $state();
 	constructor(data: LayoutProps["data"]) {
 		this.isConnected = data.db.isConnected;
-		this.isAuth = data.db.isAuth;
 		this.username = data.db.username;
 		this.namespace = data.db.namespace;
-		if (this.database.current == undefined) this.database.current = data.db.database;
-
-		watch(()=>[this.namespace, this.database.current], (cur,pre)=>{
+		this.database = data.db.database;
+		watch(()=>[this.namespace, this.database], (cur,pre)=>{
 			const [ns, db] = cur;
 			const [pre_ns, pre_db] = pre ?? [];
 			if (!cur) return;
@@ -27,32 +23,30 @@ export class DBContext {
 			}).catch((e) => {
 				error(500, "Error setting namespace/database");
 			});
-			console.log("using", ns, db);
 		});
 	}
 }
 </script>
 <script lang="ts">
-	import './layout.css';
 	import { twMerge } from 'tailwind-merge';
+	import { watch } from 'runed';
 	import { mode, ModeWatcher, toggleMode } from 'mode-watcher';
+	import { setContext } from 'svelte';
 	import { scale } from 'svelte/transition';
+	import { error } from '@sveltejs/kit';
+	import './layout.css';
+	import favicon from '$lib/assets/favicon.svg';
 
 	import type { LayoutProps, PageData } from './$types';
-	import favicon from '$lib/assets/favicon.svg';
 	import { Toaster } from '$lib/components/ui/sonner/index';
 	import * as Nav from '$lib/components/ui/navigation-menu/index';
 	import { icons } from '$lib/client/color_mode.svelte';
 	import DbStatus from '$lib/components/DbStatus.svelte';
 	import Views from '$lib/components/Views.svelte';
-	import { setContext } from 'svelte';
-	import { watch } from 'runed';
-	import { error } from '@sveltejs/kit';
 
 	let { children, data, params }: LayoutProps = $props();
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
-
 	const db = setContext("db", new DBContext(data));
 </script>
 
