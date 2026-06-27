@@ -9,6 +9,7 @@
 	import Button from '$lib/components/svar/Button.svelte';
 	import Header from './svar/Header.svelte';
 	import { getTable } from '$lib/db.remote';
+	import { RecordId, StringRecordId } from 'surrealdb';
 
 	registerEditorItem('richselect', RichSelect);
 	registerEditorItem('combo', Combo);
@@ -98,13 +99,20 @@
 
 	let { table=$bindable(), readonly=$bindable(), config, ...rest } = $props();
 	const data = await getTable(table);
+	let id = $state();
+	$effect(() => {
+		if (tbl == undefined || id == undefined) return;
+		const data = tbl.getRow(id);
+		console.log("row", id ,data);
+	});
 	$effect(() => {
 		if (tbl == undefined) return;
-		tbl.on("filter-rows", (ev) => {
-			console.log("filter", ev);
+		tbl.on("select-row", (ev) => {
+			const d = data.findLast((itm)=>itm.id.toString() == ev.id)
+			id = d.id;
 		});
 	});
-	const autoConfig: IColumnConfig = { editor: readonly?undefined:'text', flexgrow: 1, header: [{ cell: Header }, {filter: "richselect"}] };
+	const autoConfig: IColumnConfig = { editor: readonly?undefined:'text', flexgrow: 1, template: (val, row,col)=>{if (typeof val == "object") {return val.name} return val}, header: [{ filter: "text"},{text: "HEELO"}]  };
 </script>
 
 {#snippet PrintIcon()}
@@ -119,19 +127,19 @@
 						<div class="text-xl text-red-400">Table is read-only! Writes disabled</div>
 					</div>
 				{/if}
-				<!-- {#if data.length == 0} -->
-				<!-- 			<div class="size-full text-start"> -->
-				<!-- 				<div class="text-xl text-sky-400">Table is empty</div> -->
-				<!-- 			</div> -->
-				<!-- {:else} -->
+				{#if data?.length == 0}
+							<div class="size-full text-start">
+								<div class="text-xl text-sky-400">Table is empty</div>
+							</div>
+				{:else}
 					<Grid
 						data={data}
 						columns={[]}
 						autoConfig={autoConfig}
 						bind:this={tbl}
-						filterValues={{ name: "test" }}
+						filterValues={[]}
 					/>
-				<!-- {/if} -->
+				{/if}
 			</Style>
 	</div>
 {/if}

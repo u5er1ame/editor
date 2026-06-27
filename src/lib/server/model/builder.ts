@@ -1,16 +1,16 @@
-import type { Data, Schemas } from "$lib/model/schemas";
+import type { ServerData, ServerSchemas } from "$lib/model/schemas";
 import { BoundQuery } from "surrealdb";
 
 class ConfigBuilder {
-	schema: Schemas
+	schema: ServerSchemas
 	config: any = {}
-	constructor(schema: Schemas) {
+	constructor(schema: ServerSchemas) {
 		this.schema = schema;
 	}
 	build() {
 	}
 	createFetchQuery() {
-		const query = new BoundQuery<Data[]>("select * from ${table} fetch ${fetch}");
+		const query = new BoundQuery<ServerData[]>("select * from ${table} fetch ${fetch}");
 		console.log(this.schema.shape);
 	}
 }

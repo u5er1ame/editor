@@ -6,7 +6,7 @@ import { db, root_access, type DatabaseInfo, type NamespaceInfo, type SystemInfo
 import { goto } from "$app/navigation";
 import z from "zod/v4";
 import { schemaStore } from "./model/schemas";
-import type { Data } from "./model/types";
+import { getInfoForTable } from "./server/queries";
 
 export const connect_system = query(async () => {
 	const isConnected = await root_access.connect(env.SURREAL_URL, {
@@ -55,27 +55,29 @@ export const getTable = query(z.string().refine((v)=>schemaStore.store.has(v), {
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
 		const { locals } = getRequestEvent();
 		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
-		const res = await db.select<Data>(new Table(table)).catch((e)=>{ return error(500,e) });
+		const query = schemaStore.store.get(table)!.query;
+		// const res = await db.select<Data>(new Table(table)).catch((e)=>{ return error(500,e) });
+		const [res] = await db.query(query)
 		return res ?? []
 });
 
-export const getAllTables = query.batch(z.string().refine((v)=>schemaStore.store.has(v), { error: ({input})=>"Cant find schema for table: "+input }),
-	async (tables) => {
-		const { locals } = getRequestEvent();
-		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
-
-		if (!db.isConnected) return
-		await db.ready.catch(()=>{ return error(500,"DB not ready") });
-		const queries = new Map<string, Data[]>(); // little happy cache
-		for (const table of schemaStore.store.keys()) {
-			if (queries.has(table)) continue;
-			const data = await db.select<Data[]>(new Table(table)).catch(()=>{ return error(500,"cant get table") });
-			queries.set(table, data ?? []);
-		}
-		return (table)=>{
-			return queries.get(table) ?? []
-		}
-});
+// export const getAllTables = query.batch(z.string().refine((v)=>schemaStore.store.has(v), { error: ({input})=>"Cant find schema for table: "+input }),
+// 	async (tables) => {
+// 		const { locals } = getRequestEvent();
+// 		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
+//
+// 		if (!db.isConnected) return
+// 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
+// 		const queries = new Map<string, Data[]>(); // little happy cache
+// 		for (const table of schemaStore.store.keys()) {
+// 			if (queries.has(table)) continue;
+// 			const data = await db.select<Data[]>(new Table(table)).catch(()=>{ return error(500,"cant get table") });
+// 			queries.set(table, data ?? []);
+// 		}
+// 		return (table)=>{
+// 			return queries.get(table) ?? []
+// 		}
+// });
 
 export const expire = query(async () => {
 	if (!db.isConnected) return

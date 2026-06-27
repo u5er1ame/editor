@@ -1,3 +1,4 @@
+import type { ServerSchemas } from '$lib/model/schemas';
 import { BoundQuery, Table } from 'surrealdb';
 
 export const getTables = new BoundQuery("info for db structure.tables");
