@@ -1,4 +1,4 @@
-import { Table } from "surrealdb";
+import { surql, Table } from "surrealdb";
 import { error } from "@sveltejs/kit";
 import { getRequestEvent, query } from "$app/server";
 import { env } from "$env/dynamic/private";
@@ -7,6 +7,7 @@ import { goto } from "$app/navigation";
 import z from "zod/v4";
 import { schemaStore } from "./model/schemas";
 import { getInfoForTable } from "./server/queries";
+import type { Data } from "./client/schemas";
 
 export const connect_system = query(async () => {
 	const isConnected = await root_access.connect(env.SURREAL_URL, {
@@ -49,7 +50,7 @@ export const getDatabaseInfo = query(async () => {
 	return res ?? {}
 });
 
-export const getTable = query(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
+export const getTable = query<z.ZodString, Data[]>(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
@@ -58,6 +59,16 @@ export const getTable = query(z.string().refine((v)=>schemaStore.store.has(v), {
 		const query = schemaStore.store.get(table)!.query;
 		// const res = await db.select<Data>(new Table(table)).catch((e)=>{ return error(500,e) });
 		const [res] = await db.query(query)
+		return res ?? []
+});
+
+export const getTableStructure = query(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
+	async (table) => {
+		if (!db.isConnected) return
+		await db.ready.catch(()=>{ return error(500,"DB not ready") });
+		const { locals } = getRequestEvent();
+		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
+		const [res] = await db.query(surql`info for table ${table} structure`)
 		return res ?? []
 });
 

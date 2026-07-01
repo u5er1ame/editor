@@ -15,13 +15,19 @@ export class ConfigStore {
 		this.base.add(schema, config);
 		return this
 	}
+	addViewConfig(schema: ClientSchemas, config: Partial<Record<Views, any>>) {
+		let base = this.base.get(schema)!
+		base = {...base, ...config};
+		this.base.add(schema, base);
+		return this
+	}
 }
 
 export const baseConfigStore = new ConfigStore();
-baseConfigStore.addConfig(ClientBreakerSchema, { id: 'breakers', label: 'Breakers', views: new Set(["table", "graph"]) });
-baseConfigStore.addConfig(ClientBreakerConnectionSchema, { id: 'connects', label: 'Breaker Connections', views: new Set(["table", "graph"])  });
-baseConfigStore.addConfig(ClientBoardSchema, { id: 'boards', label: 'Boards', views: new Set(["table", "graph"])  });
-baseConfigStore.addConfig(ClientElectricRoomSchema, { id: 'electric_rooms', label: 'Electric Rooms', views: new Set(["table", "graph", "map"])  });
-baseConfigStore.addConfig(LevelSchema, { id: 'levels', label: 'Levels', views: new Set(["table", "graph"])  });
-baseConfigStore.addConfig(ShopSchema, { id: 'shops', label: 'Shops', views: new Set(["table", "graph"])  });
-baseConfigStore.addConfig(ClientAreaNameSchema, { id: 'area_name', label: 'Areas', views: new Set(["table", "graph", "map"])  });
+baseConfigStore.addConfig(ClientBreakerSchema, { id: 'breakers', label: 'Breakers' });
+baseConfigStore.addConfig(ClientBreakerConnectionSchema, { id: 'connects', label: 'Breaker Connections' });
+baseConfigStore.addConfig(ClientBoardSchema, { id: 'boards', label: 'Boards' });
+baseConfigStore.addConfig(ClientElectricRoomSchema, { id: 'electric_rooms', label: 'Electric Rooms' });
+baseConfigStore.addConfig(LevelSchema, { id: 'levels', label: 'Levels' });
+baseConfigStore.addConfig(ShopSchema, { id: 'shops', label: 'Shops' });
+baseConfigStore.addConfig(ClientAreaNameSchema, { id: 'area_name', label: 'Areas' });

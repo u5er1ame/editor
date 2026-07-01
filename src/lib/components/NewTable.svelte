@@ -9,7 +9,6 @@
 	import Button from '$lib/components/svar/Button.svelte';
 	import Header from './svar/Header.svelte';
 	import { getTable } from '$lib/db.remote';
-	import { RecordId, StringRecordId } from 'surrealdb';
 
 	registerEditorItem('richselect', RichSelect);
 	registerEditorItem('combo', Combo);
@@ -109,10 +108,10 @@
 		if (tbl == undefined) return;
 		tbl.on("select-row", (ev) => {
 			const d = data.findLast((itm)=>itm.id.toString() == ev.id)
-			id = d.id;
+			id = d?.id;
 		});
 	});
-	const autoConfig: IColumnConfig = { editor: readonly?undefined:'text', flexgrow: 1, template: (val, row,col)=>{if (typeof val == "object") {return val.name} return val}, header: [{ filter: "text"},{text: "HEELO"}]  };
+	const autoConfig: IColumnConfig = { editor: readonly?undefined:'text', flexgrow: 1, template: (val, row,col)=>{if (typeof val == "object") {return val.name} return val} }
 </script>
 
 {#snippet PrintIcon()}
@@ -127,15 +126,14 @@
 						<div class="text-xl text-red-400">Table is read-only! Writes disabled</div>
 					</div>
 				{/if}
-				{#if data?.length == 0}
+				{#if data && data.length == 0}
 							<div class="size-full text-start">
 								<div class="text-xl text-sky-400">Table is empty</div>
 							</div>
 				{:else}
 					<Grid
 						data={data}
-						columns={[]}
-						autoConfig={autoConfig}
+						columns={config.table}
 						bind:this={tbl}
 						filterValues={[]}
 					/>

@@ -8,8 +8,8 @@ export type Views = "table" | "graph" | "map";
 export type BaseConfig = {
 	id: string,
 	label: string,
-	views: Set<Views>,
-};
+	// views: Set<Views>,
+} & Partial<Record<Views, any>>;
 
 export type ColumnConfig<T extends ClientSchemas> = Omit<IColumn, 'id'> & { id:  TableKeys<T> };
 

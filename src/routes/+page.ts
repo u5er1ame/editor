@@ -3,6 +3,8 @@ import { error } from '@sveltejs/kit';
 import type { BaseConfig } from '$lib/model/types';
 import { schemaStore, type ModelRegistry } from '$lib/model/schemas';
 import { baseConfigStore } from '$lib/controller/config_store.svelte';
+import { addMetadata } from '$lib/builder';
+import type { IColumn } from '@svar-ui/svelte-grid';
 
 
 export const load: PageLoad = async ({data, params,  url,  fetch }): Promise<PageServerData> => {
@@ -18,6 +20,9 @@ export const load: PageLoad = async ({data, params,  url,  fetch }): Promise<Pag
 				console.warn('no config for schema', table.name, "using default");
 				baseConfigStore.addConfig(schemas.client, default_config); // WARN: idk should i do it?
 			}
+			const upd = addMetadata(schemas.client);
+			// WARN: base config should exist at this point add only view config
+			baseConfigStore.addViewConfig(schemas.client, upd);
 			config.push(baseConfigStore.base.get(schemas.client)!)
 		}
 	}

@@ -39,7 +39,6 @@
 	const info = tables.info;
 
 	$effect(()=>{
-
 	});
 	watch(()=>current_tab, (cur,pre)=>{
 		if (cur == pre) return;
@@ -52,7 +51,6 @@
 		getDatabaseInfo().refresh();
 		invalidateAll();
 	});
-$inspect(tables.config);
 </script>
 
 {#snippet PrintIcon()}
@@ -88,7 +86,8 @@ $inspect(tables.config);
 							<Tabs.Content value={table.name} class="size-full">
 								{#key current_tab}
 									{#if table.name == current_tab}
-										<NewTable table={table.name} readonly={table?.drop ?? false} config={{}} />
+										{@const config = tables.config.find((c)=>c.id == table.name)}
+										<NewTable table={table.name} readonly={table?.drop ?? false} config={config} />
 									{/if}
 								{/key}
 							</Tabs.Content>
