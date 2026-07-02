@@ -38,7 +38,6 @@ export function sortByProperty<T extends Record<string, any>>(
 		if (isNumA && isNumB) {
 			let sign = Math.sign(+valA - +valB);
 			sign = isNaN(sign)?0:sign;
-			if (sign == -0) sign = 0;
 			return isAsc ? sign as -1 | 0 | 1: -sign as -1 | 0 | 1
 		}
 
@@ -53,7 +52,6 @@ export function sortByProperty<T extends Record<string, any>>(
 		const compareResult = collator.compare(strA, strB);
 		let sign = Math.sign(compareResult);
 		sign = isNaN(sign)?0:sign;
-		if (sign == -0) sign = 0;
 		return isAsc ? sign as -1 | 0 | 1: -sign as -1 | 0 | 1
 	};
 }
@@ -79,7 +77,6 @@ function defaultSort(key: string, order: "asc" | "desc" = "asc") {
 		if (isNumA && isNumB) {
 			let sign = Math.sign(+valA - +valB);
 			sign = isNaN(sign)?0:sign;
-			if (sign == -0) sign = 0;
 			return isAsc ? sign as -1 | 0 | 1: -sign as -1 | 0 | 1
 		}
 
@@ -93,14 +90,13 @@ function defaultSort(key: string, order: "asc" | "desc" = "asc") {
 		const compareResult = collator.compare(strA, strB);
 		let sign = Math.sign(compareResult);
 		sign = isNaN(sign)?0:sign;
-		if (sign == -0) sign = 0;
 		return isAsc ? sign as -1 | 0 | 1: -sign as -1 | 0 | 1
 	};
 
 }
 
 export class ColumnBuilder {
-	private _config: IColumn
+	private _config: IColumn & { fetchTable?: string }
 
 	constructor(id: string) {
 		this._config = { id };
@@ -116,6 +112,10 @@ export class ColumnBuilder {
 	}
 	resize() {
 		this._config.resize = true;
+		return this;
+	}
+	editor(comp: string) {
+		this._config.editor = comp;
 		return this;
 	}
 
@@ -150,6 +150,11 @@ export class ColumnBuilder {
 		return this;
 	}
 
+	fetchTable(table: string) {
+		this._config.fetchTable = table;
+		return this;
+	}
+
 	grow() {
 		this._config.flexgrow = 1;
 		return this;
@@ -177,9 +182,9 @@ export class ColumnBuilder {
 		return new ColumnBuilder(id).hidden()
 	}
 	static default(id: string) {
-		return new ColumnBuilder(id).defaultHeader().grow().sort(defaultSort(id))
+		return new ColumnBuilder(id).defaultHeader().grow().sort(defaultSort(id)).editor("text")
 	}
 	static defaultWithKey(id: string, key: string) {
-		return new ColumnBuilder(id).defaultHeader().grow().sort(sortByProperty(id, key)).template((val)=>val[key]??"")
+		return new ColumnBuilder(id).defaultHeader().grow().sort(sortByProperty(id, key)).template((val)=>val[key]??"").editor("text")
 	}
 }

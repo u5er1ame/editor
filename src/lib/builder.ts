@@ -1,6 +1,7 @@
 import type { ClientSchemas } from "$lib/model/schemas";
 import { ColumnBuilder } from "$lib/builders/column.svelte";
 import type { IColumn } from "@svar-ui/svelte-grid";
+import { transport } from "../hooks";
 
 export function addMetadata(schema: ClientSchemas) {
 	const meta: { table: IColumn[] } = {
@@ -10,7 +11,7 @@ export function addMetadata(schema: ClientSchemas) {
 		let col: IColumn;
 		switch (key) {
 			case "id":
-					col = ColumnBuilder.hidden(key).getter((val)=>val.toString()).build()
+				col = ColumnBuilder.hidden(key).build()
 				break;
 			case "name":
 				if (schema.shape[key].type != "string") throw new Error(`${key} type isnt string?`);
@@ -18,7 +19,7 @@ export function addMetadata(schema: ClientSchemas) {
 				break;
 			case "level":
 				if (schema.shape[key].type == "object") {
-							col = ColumnBuilder.defaultWithKey(key, "name").build()
+							col = ColumnBuilder.defaultWithKey(key, "name").fetchTable("levels").editor("select").build()
 				}
 				else {
 							col = ColumnBuilder.default(key).build()

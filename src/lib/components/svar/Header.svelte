@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { type ICellProps } from "@svar-ui/svelte-grid";
 	import { Text } from "@svar-ui/svelte-core";
-	import NavigationMenuItem from "../ui/navigation-menu/navigation-menu-item.svelte";
 
 	let { onaction, column, row, api }: ICellProps = $props();
 

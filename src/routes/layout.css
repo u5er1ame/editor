@@ -6,6 +6,7 @@
 @plugin "@iconify/tailwind4";
 
 @custom-variant dark (&:is(.dark *));
+
 :root {
     --selected-border: var(--color-emerald-500);
     --selected-border-locked: var(--color-rose-300);
@@ -45,7 +46,6 @@
 
 
 .dark {
-    /*--background: oklch(0.147 0.004 49.25);*/
     --background: var(--color-stone-900);
     --foreground: oklch(0.985 0.001 106.423);
     --card: oklch(0.216 0.006 56.043);
@@ -79,49 +79,7 @@
     --sidebar-ring: oklch(0.553 0.013 58.071);
 };
 
-.wx-willow-dark-theme {
-    /* overrides because it dynamic i suppose */
-    --wx-background: var(--background) !important;
-    --wx-background-hover: var(--muted) !important;
 
-    --wx-border: 1px solid var(--border) !important;
-    --wx-border-radius: var(--radius) !important;
-
-    --wx-table-header-background: var(--muted) !important;
-
-    --wx-table-select-background: --alpha(var(--color-emerald-900)/5%) !important;
-    --wx-table-select-color: var(--foreground) !important;
-    --wx-table-select-border: inset 3px 0 var(--color-emerald-500) !important;
-
-    --wx-button-background: var(--secondary) !important;
-    --wx-button-font-color: var(--primary-foreground) !important;
-
-    --wx-color-disabled: var(--muted) !important;
-    --wx-color-font-disabled: var(--muted-foreground) !important;
-
-    --wx-color-font: var(--foreground) !important;
-    --wx-color-font-alt: var(--primary-foreground) !important;
-    --wx-color-font-disabled: var(--muted-foreground) !important;
-
-    --wx-color-primary: var(--primary) !important;
-    --wx-color-primary-font: var(--primary-foreground) !important;
-
-    --wx-color-secondary: var(--secondary) !important;
-    --wx-color-secondary-font: var(--secondary-foreground) !important;
-
-    --wx-color-link: var(--accent-foreground) !important;
-    --wx-background-hover: var(--secondary) !important;
-
-    --wx-input-placeholder-color: var(--secondary) !important;
-};
-
-.wx-willow-dark-theme .wx-cell:focus {
-    outline: 1px solid var(--color-emerald-500) !important;
-};
-
-.wx-table-box {
-    border-radius: var(--radius) !important;
-};
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

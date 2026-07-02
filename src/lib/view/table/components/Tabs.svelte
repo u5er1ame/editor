@@ -86,7 +86,7 @@
 							<Tabs.Content value={table.name} class="size-full">
 								{#key current_tab}
 									{#if table.name == current_tab}
-										{@const config = tables.config.find((c)=>c.id == table.name)}
+										{@const config = tables?.config.find((c)=>c.id == table.name)}
 										<NewTable table={table.name} readonly={table?.drop ?? false} config={config} />
 									{/if}
 								{/key}
