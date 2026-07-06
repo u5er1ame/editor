@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { mode } from 'mode-watcher';
-	import { getEditorConfig, Grid, Willow, WillowDark, type IApi, type IColumn, type IHeaderCell, type IRow, type TColumnHeader } from '@svar-ui/svelte-grid';
+	import { Grid, Willow, WillowDark, type IApi, type IColumn, type IHeaderCell, type IRow } from '@svar-ui/svelte-grid';
 	import { registerToolbarItem } from '@svar-ui/svelte-toolbar';
 
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/svar/Button.svelte';
 	import { getTable } from '$lib/db.remote';
 	import Skeleton from './ui/skeleton/skeleton.svelte';
-	import Editor from './Editor.svelte';
-	import type { Component, SvelteComponent } from 'svelte';
+	import Editor from './editor/Root.svelte';
+	import type { Component } from 'svelte';
 
 
 	registerToolbarItem('print', Button);
@@ -99,18 +99,22 @@
 	let id = $state();
 	let selection: IRow | null = $state(null);
 	let showEditor = $state(false);
-	function createEditorConfig(columns: [IColumn & { fetchTable?: string }]) {
-		type Config = {
+	function createEditorConfig(columns: [IColumn & { props?: any }]) {
+		interface Config {
 			id?: string | number;
 			editor?: string;
 			label?: string;
-			fetchTable?: string;
+			props?: {
+				fetchTable?: string;
+				labelKey?: string;
+				valueKey?: string;
+			};
 		};
 		const out: Config[]  = columns.map((col)=>{
 			const out: Partial<Config> = {};
 			out.id = col.id;
 			out.editor = col.editor as string ?? "none";
-			out.fetchTable = col.fetchTable;
+			out.props = col.props;
 			if (!col.header && !col.hidden) {
 				out.label = col.id as string;
 			}
@@ -130,7 +134,6 @@
 		return out;
 	}
 	const editorConfig = createEditorConfig(config.table);
-		console.log("editorconf", editorConfig);
 	$effect(() => {
 		// if (tbl == undefined || id == undefined) return;
 		// const data = tbl.getRow(id);
@@ -153,7 +156,7 @@
 			return false;
 		});
 		api.on("close-editor", (ev) => {
-			console.log("close-editor", ev);
+			console.log("close-editor");
 		});
 	};
 	$effect(() => {
@@ -178,26 +181,18 @@
 	<div class="size-full max-w-svw p-2">
 			{#await getTable(table)}
 				<Skeleton class="w-full h-full animate-pulse m-1"/>
-			{:catch e}
-				<div class="size-full text-start">
-					<div class="text-xl text-rose-400">{e.error.message}</div>
-				</div>
-			{:then raw}
-			{@const data = raw.map((itm)=>{
-				itm.id = itm.id.toString();
-				return itm;
-			})}
-			{#if data && data.length == 0}
-				<div class="size-full text-start">
-					<div class="text-xl text-sky-400">Table is empty</div>
-				</div>
-			{:else}
-				<Style>
-					{#if readonly == true}
-						<div class="size-full text-start">
-							<div class="text-xl text-red-400">Table is read-only! Writes disabled</div>
-						</div>
-					{/if}
+			{:then data}
+				{#if data && data.length == 0}
+					<div class="size-full text-start">
+						<div class="text-xl text-sky-400">Table is empty</div>
+					</div>
+				{:else}
+					<Style>
+						{#if readonly == true}
+							<div class="size-full text-start">
+								<div class="text-xl text-red-400">Table is read-only! Writes disabled</div>
+							</div>
+						{/if}
 						<Grid
 							{init}
 							bind:this={tbl}
@@ -205,11 +200,15 @@
 							columns={config.table}
 							filterValues={[]}
 						/>
-				</Style>
-			{/if}
+					</Style>
+				{/if}
+			{:catch e}
+				<div class="size-full text-start">
+					<div class="text-xl text-rose-400">{e.error.message}</div>
+				</div>
 		{/await}
 	</div>
-	<Editor bind:show={showEditor} onsave={()=>{}} onclose={(e)=>{ tbl.exec("close-editor",e)}} values={selection} config={config.table} />
+	<Editor bind:show={showEditor} onsave={(e)=>{console.log(e)}} onclose={(e: any)=>{ tbl?.exec("close-editor",e)}} bind:values={selection} config={editorConfig} />
 {/if}
 
 <style>

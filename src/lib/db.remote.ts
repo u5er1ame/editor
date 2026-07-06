@@ -1,4 +1,4 @@
-import { surql, Table } from "surrealdb";
+import { jsonify, surql, Table } from "surrealdb";
 import { error } from "@sveltejs/kit";
 import { getRequestEvent, query } from "$app/server";
 import { env } from "$env/dynamic/private";
@@ -59,7 +59,7 @@ export const getTable = query<z.ZodString, Data[]>(z.string().refine((v)=>schema
 		const query = schemaStore.store.get(table)!.query;
 		// const res = await db.select<Data>(new Table(table)).catch((e)=>{ return error(500,e) });
 		const [res] = await db.query(query)
-		return res ?? []
+		return jsonify(res ?? [])
 });
 
 export const getTableStructure = query(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),

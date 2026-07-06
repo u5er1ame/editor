@@ -19,7 +19,7 @@ export function addMetadata(schema: ClientSchemas) {
 				break;
 			case "level":
 				if (schema.shape[key].type == "object") {
-							col = ColumnBuilder.defaultWithKey(key, "name").fetchTable("levels").editor("select").build()
+							col = ColumnBuilder.defaultWithKey(key, "name").editor("select").addEditorProps({fetchTable: "levels", labelKey: "name", valueKey: "id"}).build()
 				}
 				else {
 							col = ColumnBuilder.default(key).build()
@@ -27,7 +27,7 @@ export function addMetadata(schema: ClientSchemas) {
 			break;
 			case "shop":
 				if (schema.shape[key].type == "object") {
-							col = ColumnBuilder.defaultWithKey(key, "name").build()
+							col = ColumnBuilder.defaultWithKey(key, "name").editor("combo").addEditorProps({fetchTable: "shops", labelKey: "name", valueKey: "id"}).build()
 				}
 				else {
 							col = ColumnBuilder.default(key).build()

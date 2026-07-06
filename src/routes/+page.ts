@@ -4,7 +4,6 @@ import type { BaseConfig } from '$lib/model/types';
 import { schemaStore, type ModelRegistry } from '$lib/model/schemas';
 import { baseConfigStore } from '$lib/controller/config_store.svelte';
 import { addMetadata } from '$lib/builder';
-import type { IColumn } from '@svar-ui/svelte-grid';
 
 
 export const load: PageLoad = async ({data, params,  url,  fetch }): Promise<PageServerData> => {

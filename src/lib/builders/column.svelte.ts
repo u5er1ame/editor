@@ -96,7 +96,7 @@ function defaultSort(key: string, order: "asc" | "desc" = "asc") {
 }
 
 export class ColumnBuilder {
-	private _config: IColumn & { fetchTable?: string }
+	private _config: IColumn & { props?: any }
 
 	constructor(id: string) {
 		this._config = { id };
@@ -150,8 +150,17 @@ export class ColumnBuilder {
 		return this;
 	}
 
+	addEditorProps(props: any) {
+		if (this._config.props) {
+			this._config.props = {...this._config.props, ...props};
+		}
+		else {
+			this._config.props = props;
+		}
+		return this;
+	}
 	fetchTable(table: string) {
-		this._config.fetchTable = table;
+		this._config.props.fetchTable = table;
 		return this;
 	}
 

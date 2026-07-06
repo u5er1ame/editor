@@ -1,9 +1,6 @@
-import type { PageServerData, PageServerLoad } from './$types';
+import type { Actions, PageServerData, PageServerLoad } from './$types';
 import { error, redirect } from '@sveltejs/kit';
-import type { BaseConfig } from '$lib/model/types';
 import { getDatabaseInfo } from '$lib/db.remote';
-import { schemaStore, type ModelRegistry, type ServerSchemas } from '$lib/model/schemas';
-import { baseConfigStore } from '$lib/controller/config_store.svelte';
 
 
 export const load: PageServerLoad = async ({ params, request, url, locals, fetch }): Promise<PageServerData> => {
@@ -29,3 +26,11 @@ export const load: PageServerLoad = async ({ params, request, url, locals, fetch
 	const selected_tab = url.searchParams.get('table');
 	return { tables: { info, selected_tab } };
 };
+
+export const actions = {
+	editor: async ({ request }) => {
+		const form = await request.formData();
+		console.log("FORM",form);
+		return redirect(303, `?table=${form.get('table')}`);
+	},
+} satisfies Actions;
