@@ -1,4 +1,5 @@
 <script lang="ts">
+import { enhance } from "$app/forms";
 import * as Dialog from "$lib/components/ui/dialog";
 import * as Field from "$lib/components/ui/field"
 
@@ -6,20 +7,28 @@ import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
 import { Input } from "$lib/components/ui/input";
 import Select from "$lib/components/editor/Select.svelte";
 import Text from "$lib/components/editor/Text.svelte";
+import Combo from "$lib/components/editor/Combo.svelte";
 import { getTable } from "$lib/db.remote";
 import Button from "$lib/components/ui/button/button.svelte"
-	import { enhance } from "$app/forms";
 
-let { onsave, onclose, show=$bindable(false), values=$bindable(null), config, ...rest } = $props();
+let { onsave, onclose, show=$bindable(false), values=$bindable(null), config, fieldRef=$bindable(null), ...rest } = $props();
 
 const editors = {
     text: Input,
     select: Select,
-    combo: Select,
+    combo: Combo,
     checkbox: Checkbox,
     none: Text,
 }
 
+function validationState(element, formData, action, cancel, submitter) {
+    console.log("enhance", formData, action, cancel, submitter);
+    return async ({result, update})=>{
+	console.log("result", result);
+	show = false;
+	await update(result);
+    }
+}
 </script>
 
 {#if values}
@@ -40,7 +49,7 @@ const editors = {
 		<Dialog.Header>
 		    <Dialog.Title>Edit record</Dialog.Title>
 		</Dialog.Header>
-		<form use:enhance method="POST" action="?/editor" class="size-full flex flex-1 flex-col gap-2">
+		<form use:enhance={validationState} method="POST" action="?/save" class="size-full flex flex-1 flex-col gap-2">
 		    <Field.Set class="size-full">
 			{#each config as fieldConf}
 			    <Field.Field class="size-full">
@@ -55,6 +64,7 @@ const editors = {
 					    bind:value={values[fieldConf.id]}
 					    data={data?data:[]}
 					    props={fieldConf.props}
+					    name={fieldConf.id}
 					    {...rest}
 					/>
 				    {:else}
@@ -63,6 +73,7 @@ const editors = {
 					    data={[]}
 					    label={fieldConf.label}
 					    {fieldConf}
+					    name={fieldConf.id}
 					    {...rest}
 					/>
 				    {/if}

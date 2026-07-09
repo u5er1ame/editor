@@ -98,6 +98,8 @@
 
 	let id = $state();
 	let selection: IRow | null = $state(null);
+	let column: string | null = $state(null);
+	let ref: HTMLElement | null = $state(null);
 	let showEditor = $state(false);
 	function createEditorConfig(columns: [IColumn & { props?: any }]) {
 		interface Config {
@@ -152,6 +154,7 @@
 
 		api.intercept("open-editor", (ev) => {
 			selection = api.getRow(ev.id);
+			column = ev.column as string;
 			showEditor = true;
 			return false;
 		});
@@ -208,7 +211,7 @@
 				</div>
 		{/await}
 	</div>
-	<Editor bind:show={showEditor} onsave={(e)=>{console.log(e)}} onclose={(e: any)=>{ tbl?.exec("close-editor",e)}} bind:values={selection} config={editorConfig} />
+	<Editor bind:show={showEditor} onsave={(e)=>{console.log(e)}} onclose={(e: any)=>{ tbl?.exec("close-editor",e)}} bind:values={selection} config={editorConfig}  />
 {/if}
 
 <style>

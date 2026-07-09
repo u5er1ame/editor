@@ -23,7 +23,7 @@ let {
     props,
     data = [],
     placeholder,
-    id,
+    id="editor-select",
     ...restProps
 }: SelectProps = $props();
 $inspect(value);
@@ -49,7 +49,7 @@ const label = $derived.by(()=>{
 </script>
 
     <Select.Root type="single" {open} bind:value={val} {...restProps} >
-	<Select.Trigger  class="w-full" {id}>
+	<Select.Trigger class="w-full" {id}>
 	    {label}
 	</Select.Trigger>
 	<Select.Content>

@@ -58,7 +58,7 @@ const editors = {
 			    {:else}
 				{@const Component = editors[fieldConf.editor]}
 				{#if fieldConf.fetchTable}
-				    {@const data = await getTable(fieldConf.fetchTable)}
+				    {@const data = (await getTable(fieldConf.fetchTable)).map(i=>}
 				    <Component
 					bind:value={values[fieldConf.id]}
 					data={data?data:[]}

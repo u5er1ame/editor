@@ -78,7 +78,7 @@ const reccon: Handle = async ({ event, resolve }) => {
 		// }
 		return await resolve(event);
 	} catch (e) {
-		console.error(colors.red, "[CHECK CONNECTION]", colors.reset, e);
+		console.error(colors.red, "[CHECK CONNECTION]", colors.reset, e.message);
 		event.locals.db.isConnected = false;
 		return await resolve(event);
 	}

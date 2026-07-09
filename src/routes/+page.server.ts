@@ -1,5 +1,5 @@
 import type { Actions, PageServerData, PageServerLoad } from './$types';
-import { error, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { getDatabaseInfo } from '$lib/db.remote';
 
 
@@ -28,9 +28,12 @@ export const load: PageServerLoad = async ({ params, request, url, locals, fetch
 };
 
 export const actions = {
-	editor: async ({ request }) => {
+	save: async ({ request }) => {
 		const form = await request.formData();
+		const id = form.get('id');
+		if (!id) return fail(400,"Cant find id");
+
 		console.log("FORM",form);
-		return redirect(303, `?table=${form.get('table')}`);
+		return { success: true };
 	},
 } satisfies Actions;
