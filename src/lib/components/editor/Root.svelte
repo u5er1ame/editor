@@ -8,7 +8,7 @@ import { Input } from "$lib/components/ui/input";
 import Select from "$lib/components/editor/Select.svelte";
 import Text from "$lib/components/editor/Text.svelte";
 import Combo from "$lib/components/editor/Combo.svelte";
-import { getTable } from "$lib/db.remote";
+import { getDataClient } from "$lib/db.remote";
 import Button from "$lib/components/ui/button/button.svelte"
 
 let { onsave, onclose, show=$bindable(false), values=$bindable(null), config, fieldRef=$bindable(null), ...rest } = $props();
@@ -59,7 +59,7 @@ function validationState(element, formData, action, cancel, submitter) {
 				    {/if}
 				    {@const Component = editors[fieldConf.editor]}
 				    {#if fieldConf.props?.fetchTable}
-					{@const data = await getTable(fieldConf.props.fetchTable)}
+					{@const data = await getDataClient(fieldConf.props.fetchTable)}
 					<Component
 					    bind:value={values[fieldConf.id]}
 					    data={data?data:[]}

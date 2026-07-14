@@ -10,7 +10,7 @@ import TestEditorItem from './TestEditorItem.svelte';
 import Checkbox from "./ui/checkbox/checkbox.svelte";
 import { Input } from "./ui/input";
 import Select from "$lib/components/Select.svelte";
-import { getTable } from "$lib/db.remote";
+import { getDataClient } from "$lib/db.remote";
 
 let { onsave, onclose, show=$bindable(false), values=$bindable(null), config, ...rest } = $props();
 
@@ -58,10 +58,10 @@ const editors = {
 			    {:else}
 				{@const Component = editors[fieldConf.editor]}
 				{#if fieldConf.fetchTable}
-				    {@const data = (await getTable(fieldConf.fetchTable)).map(i=>}
+				    {@const data = (await getDataClient(fieldConf.fetchTable))}
 				    <Component
 					bind:value={values[fieldConf.id]}
-					data={data?data:[]}
+					data={data?data:-[]}
 					{fieldConf}
 					{...rest}
 				    />

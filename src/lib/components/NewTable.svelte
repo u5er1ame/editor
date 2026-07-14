@@ -5,7 +5,7 @@
 
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/svar/Button.svelte';
-	import { getTable } from '$lib/db.remote';
+	import { getDataClient } from '$lib/db.remote';
 	import Skeleton from './ui/skeleton/skeleton.svelte';
 	import Editor from './editor/Root.svelte';
 	import type { Component } from 'svelte';
@@ -182,7 +182,7 @@
 
 {#if browser}
 	<div class="size-full max-w-svw p-2">
-			{#await getTable(table)}
+			{#await getDataClient(table)}
 				<Skeleton class="w-full h-full animate-pulse m-1"/>
 			{:then data}
 				{#if data && data.length == 0}

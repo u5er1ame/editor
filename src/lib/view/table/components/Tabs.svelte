@@ -8,7 +8,7 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import NewTable from '$lib/components/NewTable.svelte';
 
-	import { getDatabaseInfo, getTable } from '$lib/db.remote';
+	import { getDatabaseInfo } from '$lib/db.remote';
 	import type { DBContext } from '../../../../routes/+layout.svelte';
 
 	function isWriteable(table: any) {
