@@ -80,15 +80,22 @@ const BreakerConnectionQuery = new BoundQuery("select *, in.*, out.* from connec
 
 
 
-export type ServerSchemas =
+export type EdgesSchemas =
 	| typeof BreakerConnectionSchema
+
+export type TableSchemas =
 	| typeof LevelSchema
 	| typeof ElectricRoomSchema
 	| typeof BoardSchema
 	| typeof BreakerSchema
 	| typeof AreaNameSchema
 	| typeof ShopSchema;
-export type ServerData = z.infer<ServerSchemas>;
+export type ServerSchemas = TableSchemas | EdgesSchemas;
+
+export type EdgeData = z.infer<EdgesSchemas>;
+export type TableData = z.infer<TableSchemas>;
+export type ServerData = TableData | EdgeData;
+
 export type ClientSchemas =
 	| typeof ClientBreakerConnectionSchema
 	| typeof LevelSchema
@@ -120,7 +127,6 @@ export class SchemaRegistry {
 		return {
 			id: name,
 			label: name.charAt(0).toUpperCase() + name.slice(1),
-			views: new Set(["table"]),
 		};
 	}
 }

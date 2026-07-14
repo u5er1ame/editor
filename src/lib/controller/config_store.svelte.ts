@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
-import type { BaseConfig, ColumnConfig, TableViewConfig, Views } from '$lib/model/types';
-import { ClientAreaNameSchema, ClientBoardSchema, ClientBreakerConnectionSchema, ClientBreakerSchema, ClientElectricRoomSchema, LevelSchema, ShopSchema, type ClientSchemas, type ServerSchemas } from '$lib/model/schemas';
+import type { BaseConfig, Views } from '$lib/model/types';
+import { ClientAreaNameSchema, ClientBoardSchema, ClientBreakerConnectionSchema, ClientBreakerSchema, ClientElectricRoomSchema, LevelSchema, ShopSchema, type ClientSchemas } from '$lib/model/schemas';
 import type { IColumn } from '@svar-ui/svelte-grid';
 
 

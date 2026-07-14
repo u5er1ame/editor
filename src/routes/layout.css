@@ -12,6 +12,7 @@
     --selected-border-locked: var(--color-rose-300);
     --radius: 0.625rem;
     --background: oklch(1 0 0);
+    --blueprint: var(--color-sky-300);
     --foreground: oklch(0.147 0.004 49.25);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.147 0.004 49.25);
@@ -85,8 +86,10 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
+  --text-xsm: var(--text-[10px]);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
+  --color-blueprint: var(--blueprint);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -136,7 +139,7 @@
 /*    --xy-node-background-color-default: var(--color-slate-200);*/
     --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%);
     --xy-controls-button-background-color-default: var(--color-stone-50);
-    --xy-controls-button-background-color-hover: var(--color-emerald-200);
+    --xy-controls-button-background-color-hover: var(--color-blueprint);
     --xy-resize-background-color-default: var(--color-orange-200);
     --xy-edge-stroke: var(--color-orange-300);
 /*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
@@ -166,6 +169,10 @@
 }
 
 .svelte-flow__node {
+    height: fit-content;
+    width: fit-content;
+    display: flex;
+    /* align-items: center; */
     border: 1px solid var(--color-stone-400);
 }
 .svelte-flow__node.selectable {
@@ -174,9 +181,9 @@
 
 .svelte-flow__node.selectable:hover {
     box-shadow: var(--shadow-lg);
-    border: 1px solid --alpha(var(--color-emerald-100)/30%);
+    border: 1px solid --alpha(var(--color-blueprint)/50%);
 }
 
 .svelte-flow__node.selected {
-    border: 1px solid var(--selected-border);
+    border: 1px solid var(--color-blueprint);
 }

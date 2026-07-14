@@ -63,7 +63,7 @@ export class CrumbBuilder {
 		if (item.length > 1) {
 			return 'выбрано ' + item.length;
 		} else {
-			return item[0].data.name;
+			return item[0].data.raw[item[0].data.labelKey];
 		}
 		});
 	});

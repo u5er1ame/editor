@@ -5,9 +5,7 @@ import { env } from "$env/dynamic/private";
 import { db, root_access, type DatabaseInfo, type NamespaceInfo, type SystemInfo } from "$lib/server/root_db.svelte";
 import { goto } from "$app/navigation";
 import z from "zod/v4";
-import { schemaStore } from "./model/schemas";
-import { getInfoForTable } from "./server/queries";
-import type { Data } from "./client/schemas";
+import { schemaStore, type ClientData, type ServerData } from "./model/schemas";
 
 export const connect_system = query(async () => {
 	const isConnected = await root_access.connect(env.SURREAL_URL, {
@@ -50,7 +48,7 @@ export const getDatabaseInfo = query(async () => {
 	return res ?? {}
 });
 
-export const getTable = query<z.ZodString, Data[]>(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
+export const getDataClient = query<string, ClientData[]>(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
@@ -59,6 +57,16 @@ export const getTable = query<z.ZodString, Data[]>(z.string().refine((v)=>schema
 		const query = schemaStore.store.get(table)!.query;
 		// const res = await db.select<Data>(new Table(table)).catch((e)=>{ return error(500,e) });
 		const [res] = await db.query(query)
+		return jsonify(res ?? [])
+});
+
+export const getData = query<string, ServerData[]>(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
+	async (table) => {
+		if (!db.isConnected) return
+		await db.ready.catch(()=>{ return error(500,"DB not ready") });
+		const { locals } = getRequestEvent();
+		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
+		const res = await db.select<ServerData>(new Table(table)).catch((e)=>{ return error(500,e) });
 		return jsonify(res ?? [])
 });
 

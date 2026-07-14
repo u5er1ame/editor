@@ -10,7 +10,3 @@ export type BaseConfig = {
 	label: string,
 	// views: Set<Views>,
 } & Partial<Record<Views, any>>;
-
-export type ColumnConfig<T extends ClientSchemas> = Omit<IColumn, 'id'> & { id:  TableKeys<T> };
-
-export type TableViewConfig<T extends ClientSchemas> = ColumnConfig<T>[]

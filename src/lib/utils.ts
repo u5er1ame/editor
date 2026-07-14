@@ -1,13 +1,9 @@
-import * as Custom from "$lib/components/nodes";
-import { default as Edges } from "$lib/components/edges";
-import type { Node, Dimensions, Edge, NodeTypes, XYPosition, NodeProps, EdgeTypes } from "@xyflow/svelte";
+import type { Node, Dimensions, NodeTypes, XYPosition, EdgeTypes } from "@xyflow/svelte";
 import type { NodeBase } from "@xyflow/system";
-import type { ElkLayoutAlgorithmDescription, ElkNode, LayoutOptions } from "elkjs/lib/elk-api";
-import { xy2elk } from "./client/utls";
+import type { LayoutOptions } from "elkjs/lib/elk-api";
 
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { r, RecordId, Table, type ActionResult } from "surrealdb";
 import type { IColumn } from "@svar-ui/svelte-grid";
 
 export function cn(...inputs: ClassValue[]) {
@@ -62,122 +58,101 @@ export type FlowOptions = {
 	layoutOptions: { [key: string]: LayoutOptions },
 };
 // TODO: create builder for this
-export const Flow: FlowOptions = {
-	nodeTypes: {
-		electric_rooms: Custom.Rewrite.Room,
-		boards: Custom.Rewrite.Board,
-		breakers: Custom.Rewrite.Breaker,
-		root_breakers: Custom.Rewrite.Breaker,
-		// INFO: these nodes created by user and not saved in db yet
-		unsaved_boards: Custom.Rewrite.Board,
-		unsaved_breakers: Custom.Rewrite.Breaker,
-		unsaved_root_breakers: Custom.Rewrite.Breaker,
-	},
-	tableLayout: {
-		electric_rooms: [{
-			id: "name",
-			header: "Name",
-			width: 200,
-			editor: "text",
-		}],
-		boards: defaultBoardDescription,
-		// INFO: these nodes created by user and not saved in db yet
-		unsaved_boards: [{
-			id: "name",
-			header: "Name",
-			width: 200,
-			editor: "text",
-		}],
-	},
-	edgeTypes: {
-		inbound: Edges.Inbound,
-		outbound: Edges.Outbound,
-	},
-	dimensions: {
-		electric_rooms: roomDimensions,
-		boards: boardDimensions,
-		breakers: breakerDimensions,
-		root_breakers: breakerDimensions,
-		unsaved_boards: boardDimensions,
-		unsaved_breakers: breakerDimensions,
-		unsaved_root_breakers: breakerDimensions,
-	},
-	flowOptions: {
-		electric_rooms: {
-			connectable: false,
-			deletable: false,
-			expandParent: true,
-			extent: "parent",
-			ariaLabel: "Room",
-			zIndex: 1,
-		},
-		boards: {
-			connectable: false,
-			draggable: true,
-			expandParent: true,
-			extent: "parent",
-			zIndex: 2,
-		},
-		breakers: {
-			connectable: true,
-			draggable: true,
-			expandParent: true,
-			extent: "parent",
-			zIndex: 9,
-		},
-		root_breakers: {
-			connectable: true,
-			draggable: false,
-			expandParent: true,
-			extent: "parent",
-			zIndex: 9,
-		},
-	},
-	layoutOptions: {
-		electric_rooms: {
-			"elk.algorithm": "rectpacking",
-			"elk.direction": "DOWN",
-			"hierarchyHandling": "INCLUDE_CHILDREN"
-		},
-		boards: {
-			"elk.algorithm": "layered",
-			"elk.direction": "RIGHT",
-			"hierarchyHandling": "INCLUDE_CHILDREN"
-		},
-		breakers: {
-			"elk.algorithm": "layered",
-			"hierarchyHandling": "INCLUDE_CHILDREN"
-		},
-		root_breakers: {
-			"elk.algorithm": "layered",
-			"elk.direction": "DOWN",
-			"hierarchyHandling": "INCLUDE_CHILDREN"
-		},
-	},
-};
+// export const Flow: FlowOptions = {
+// 	nodeTypes: {
+// 		electric_rooms: Rewrite.Room,
+// 		boards: Rewrite.Board,
+// 		breakers: Rewrite.Breaker,
+// 		root_breakers: Rewrite.Breaker,
+// 		// INFO: these nodes created by user and not saved in db yet
+// 		unsaved_boards: Rewrite.Board,
+// 		unsaved_breakers: Rewrite.Breaker,
+// 		unsaved_root_breakers: Rewrite.Breaker,
+// 	},
+// 	tableLayout: {
+// 		electric_rooms: [{
+// 			id: "name",
+// 			header: "Name",
+// 			width: 200,
+// 			editor: "text",
+// 		}],
+// 		boards: defaultBoardDescription,
+// 		// INFO: these nodes created by user and not saved in db yet
+// 		unsaved_boards: [{
+// 			id: "name",
+// 			header: "Name",
+// 			width: 200,
+// 			editor: "text",
+// 		}],
+// 	},
+// 	edgeTypes: {
+// 		inbound: Edges.Inbound,
+// 		outbound: Edges.Outbound,
+// 	},
+// 	dimensions: {
+// 		electric_rooms: roomDimensions,
+// 		boards: boardDimensions,
+// 		breakers: breakerDimensions,
+// 		root_breakers: breakerDimensions,
+// 		unsaved_boards: boardDimensions,
+// 		unsaved_breakers: breakerDimensions,
+// 		unsaved_root_breakers: breakerDimensions,
+// 	},
+// 	flowOptions: {
+// 		electric_rooms: {
+// 			connectable: false,
+// 			deletable: false,
+// 			expandParent: true,
+// 			extent: "parent",
+// 			ariaLabel: "Room",
+// 			zIndex: 1,
+// 		},
+// 		boards: {
+// 			connectable: false,
+// 			draggable: true,
+// 			expandParent: true,
+// 			extent: "parent",
+// 			zIndex: 2,
+// 		},
+// 		breakers: {
+// 			connectable: true,
+// 			draggable: true,
+// 			expandParent: true,
+// 			extent: "parent",
+// 			zIndex: 9,
+// 		},
+// 		root_breakers: {
+// 			connectable: true,
+// 			draggable: false,
+// 			expandParent: true,
+// 			extent: "parent",
+// 			zIndex: 9,
+// 		},
+// 	},
+// 	layoutOptions: {
+// 		electric_rooms: {
+// 			"elk.algorithm": "rectpacking",
+// 			"elk.direction": "DOWN",
+// 			"hierarchyHandling": "INCLUDE_CHILDREN"
+// 		},
+// 		boards: {
+// 			"elk.algorithm": "layered",
+// 			"elk.direction": "RIGHT",
+// 			"hierarchyHandling": "INCLUDE_CHILDREN"
+// 		},
+// 		breakers: {
+// 			"elk.algorithm": "layered",
+// 			"hierarchyHandling": "INCLUDE_CHILDREN"
+// 		},
+// 		root_breakers: {
+// 			"elk.algorithm": "layered",
+// 			"elk.direction": "DOWN",
+// 			"hierarchyHandling": "INCLUDE_CHILDREN"
+// 		},
+// 	},
+// };
 
-export function toNode(item: ActionResult<{}>, parentId_filedName?: string): Node {
-	return {
-		id: item.id.toString(),
-		type: item.id.table,
-		data: item,
-		parentId: parentId_filedName ? item[parentId_filedName].toString() : undefined,
-		initialWidth: Flow.dimensions[item.id.table].width,
-		initialHeight: Flow.dimensions[item.id.table].height,
-		...Flow.dimensions[item.id.table],
-		...Flow.flowOptions[item.id.table],
-	}
-}
 
-export function toEdge(item: ActionResult<{}>): Edge {
-	return {
-		id: item.id.toString(),
-		type: item.id.table,
-		data: item,
-		source: item.in.toJSON(),
-		target: item.out.toJSON(),
-	}
-}
 
 export function splitByParent(nodes: Node[]): Record<string, Node[]> {
 	const out: Record<string, Node[]> = {};
@@ -194,63 +169,63 @@ export function splitByParent(nodes: Node[]): Record<string, Node[]> {
 	return out;
 }
 
-export function toElk(rooms: Node[], boards: Node[], breakers: Node[]) {
-	const root: ElkNode[] = rooms.map((r: Node) => {
-		const childs = boards.filter((b: Node) => b.parentId == r.id).map((board: Node) => {
-			const childs = breakers.filter((breaker: Node) => breaker.parentId == board.id).map(xy2elk);
-			const item = xy2elk(board);
-			item.layoutOptions = Flow.layoutOptions[board.type];
-			item.children = childs;
-			return item;
-		});
-		const item = xy2elk(r);
-		item.layoutOptions = Flow.layoutOptions[r.type];
-		item.children = childs;
-		return item;
-	});
-	return {
-		id: 'root',
-		children: root,
-	}
-}
+// export function toElk(rooms: Node[], boards: Node[], breakers: Node[]) {
+// 	const root: ElkNode[] = rooms.map((r: Node) => {
+// 		const childs = boards.filter((b: Node) => b.parentId == r.id).map((board: Node) => {
+// 			const childs = breakers.filter((breaker: Node) => breaker.parentId == board.id).map(xy2elk);
+// 			const item = xy2elk(board);
+// 			item.layoutOptions = Flow.layoutOptions[board.type];
+// 			item.children = childs;
+// 			return item;
+// 		});
+// 		const item = xy2elk(r);
+// 		item.layoutOptions = Flow.layoutOptions[r.type];
+// 		item.children = childs;
+// 		return item;
+// 	});
+// 	return {
+// 		id: 'root',
+// 		children: root,
+// 	}
+// }
 
-type ElkWithData = ElkNode & Partial<{ type: string, data: any }>
+// type ElkWithData = ElkNode & Partial<{ type: string, data: any }>
 
-export function elk2flow(elk: ElkWithData, parentId?: string): Node | Node[] {
-	if (!elk.type) {
-		elk.type = "default";
-	}
-	const dimensions = Flow.dimensions[elk.type]; // TODO: this could error
-	const position = {
-		x: elk.x || dimensions.position.x,
-		y: elk.y || dimensions.position.y,
-	};
-	let flow: Node = {
-		id: elk.id,
-		parentId,
-		extent: parentId ? "parent" : null,
-		width: elk.width || dimensions.width,
-		height: elk.height || dimensions.height,
-		position,
-		data: elk.data,
-		type: elk.type,
-		...Flow.flowOptions[elk.type], // TODO: fix type
-	};
-	if (elk.edges) {
-		// TODO: they pretty similar
-	}
-
-	let tree: Array<Node[]> | Node[] = [flow];
-	if (!elk.children || elk.children.length === 0) {
-		// nodes.push(flow);
-		return tree;
-	}
-
-	for (const node of elk.children) {
-		const item = elk2flow(node, elk.id)
-		tree.push(item);
-	}
-	return tree.flat();
-	// return { nodes, edges };
-	// return flow;
-}
+// export function elk2flow(elk: ElkWithData, parentId?: string): Node | Node[] {
+// 	if (!elk.type) {
+// 		elk.type = "default";
+// 	}
+// 	const dimensions = Flow.dimensions[elk.type]; // TODO: this could error
+// 	const position = {
+// 		x: elk.x || dimensions.position.x,
+// 		y: elk.y || dimensions.position.y,
+// 	};
+// 	let flow: Node = {
+// 		id: elk.id,
+// 		parentId,
+// 		extent: parentId ? "parent" : null,
+// 		width: elk.width || dimensions.width,
+// 		height: elk.height || dimensions.height,
+// 		position,
+// 		data: elk.data,
+// 		type: elk.type,
+// 		...Flow.flowOptions[elk.type], // TODO: fix type
+// 	};
+// 	if (elk.edges) {
+// 		// TODO: they pretty similar
+// 	}
+//
+// 	let tree: Array<Node[]> | Node[] = [flow];
+// 	if (!elk.children || elk.children.length === 0) {
+// 		// nodes.push(flow);
+// 		return tree;
+// 	}
+//
+// 	for (const node of elk.children) {
+// 		const item = elk2flow(node, elk.id)
+// 		tree.push(item);
+// 	}
+// 	return tree.flat();
+// 	// return { nodes, edges };
+// 	// return flow;
+// }
