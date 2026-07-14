@@ -1,14 +1,13 @@
 <script lang="ts">
     import { type Edge, type Node, type NodeProps, Handle, NodeResizer, Position, useOnSelectionChange, useSvelteFlow } from '@xyflow/svelte';
     import type { Breaker } from '$lib/server/schemas';
-    import { Flow } from '$lib/utils';
     import { resizer } from '$lib/components/Graph.svelte';
 
     type Props = {
-	data?: Breaker,
+	data?: { raw: Breaker, labelKey: keyof Breaker },
 	class?: string
     } & NodeProps<Node<Breaker>>
-    let { id, data, type, class: className, ...rest }: Props = $props();
+    let { id, data, type, class: className, width, height, ...rest }: Props = $props();
 
     let breaker: HTMLElement | undefined = $state();
 
@@ -25,10 +24,10 @@
 
     // svelte-ignore state_referenced_locally
     let resizeProps = $state({
-        minWidth: Flow.dimensions[type].width,
-        minHeight: Flow.dimensions[type].height,
-        maxWidth: Flow.dimensions[type].width*4,
-        maxHeight: Flow.dimensions[type].height*4,
+        minWidth: width,
+        minHeight: height,
+        maxWidth: width*4,
+        maxHeight: height*4,
     });
 
     const flow = useSvelteFlow();
@@ -40,8 +39,10 @@
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
 <Handle type="target" position={Position.Top} />
 <div class="size-full flex flex-col items-stretch">
-    <p class="size-full text-amber-300 text-[6px]">{data?.name}</p>
-    <p class="size-full text-amber-300 text-[3px]">{data?.value}A</p>
+    <p class="size-full text-blueprint/60 text-sm">{data.raw[data.labelKey]}</p>
+    {#if data.value}
+        <p class="size-full text-amber-300 text-xsm">{data?.value}A</p>
+    {/if}
 </div>
 <Handle type="source" position={Position.Bottom} />
 

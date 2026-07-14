@@ -36,7 +36,7 @@ function setSelection(node: Node) {
 			<button onclick={()=>setSelection(list[0])} class={twMerge(cb.italics[idx], "cursor-pointer")}>{cb.titles[idx]}</button>
 		    {:else}
 		    <Dropdown.Root>
-			<Dropdown.Trigger class="flex flex-row cursor-pointer">
+			<Dropdown.Trigger class="flex flex-row text-blueprint cursor-pointer">
 			    <p class={twMerge(cb.italics[idx])}>{cb.titles[idx]}</p>
 			    <span class="mt-auto icon-[solar--arrow-to-down-left-line-duotone] size-4"></span>
 			</Dropdown.Trigger>
@@ -44,12 +44,13 @@ function setSelection(node: Node) {
 			    {@const by_parent = Object.entries(Object.groupBy(list,(item: Node)=>item.parentId))}
 			    {#each by_parent as item, i}
 				<Dropdown.Group>
-				    {@const label = getNode(item[0])?.data?.name}
+				    {@const node = getNode(item[0])}
+				    {@const label = node?.data?.raw[node?.data.labelKey]}
 				    {#if label}
 					<Dropdown.Label>{label}</Dropdown.Label>
 				    {/if}
 				    {#each item[1] as val}
-					<Dropdown.Item onclick={()=>setSelection(val)} class="pl-4">{val.data.name}</Dropdown.Item>
+					<Dropdown.Item onclick={()=>setSelection(val)} class="pl-4">{val.data.raw[val.data.labelKey]}</Dropdown.Item>
 				    {/each}
 				    {#if i != by_parent.length-1}
 					<Dropdown.Separator />

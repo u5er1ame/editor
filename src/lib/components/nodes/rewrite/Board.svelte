@@ -3,7 +3,6 @@ import { fade } from 'svelte/transition';
 import { onMount } from 'svelte';
 import { toast } from 'svelte-sonner';
 import { ControlButton, NodeResizer, NodeToolbar, Position, useNodes, useOnSelectionChange, useSvelteFlow, type Edge, type Node, type NodeProps } from '@xyflow/svelte';
-import { Flow } from '$lib/utils';
 import type { Board } from '$lib/server/schemas';
 import { resizer } from '$lib/components/Graph.svelte';
 import Dialog, { type FormTypes } from '$lib/components/Dialog.svelte';
@@ -12,7 +11,7 @@ import { type Form } from '$lib/components/Dialog.svelte';
 
 
 type Props = {
-    data?: Board,
+    data?: { raw: Board, labelKey: keyof Board },
     class?: string
 } & NodeProps<Node<Board>>
 
@@ -46,10 +45,10 @@ let resizeable = $derived(selected && $resizer.get(id));
 
 // svelte-ignore state_referenced_locally
 let resizeProps = $state({
-    minWidth: Flow.dimensions[type].width,
-    minHeight: Flow.dimensions[type].height,
-    maxWidth: Flow.dimensions[type].width*4,
-    maxHeight: Flow.dimensions[type].height*4,
+    minWidth: width,
+    minHeight: height,
+    maxWidth: width*4 ?? width,
+    maxHeight: height*4 ?? height,
 });
 
 const flow = useSvelteFlow();
@@ -150,9 +149,9 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
 {/if}
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
 <div bind:this={item} class="size-full flex items-stretch">
-    {#if threshold}
-	<p class="size-full text-stone-300 content-center text-[1em]">{data?.name}</p>
-    {/if}
+    <!-- {#if threshold} -->
+	<p class="size-full text-stone-300/10 content-center text-[1em]">{data?.raw[data.labelKey]}</p>
+    <!-- {/if} -->
     {#if type == "unsaved_boards"}
         <button onclick={()=>toast.warning("Board not saved yet")} title="This item arnt saved to database"  class="absolute m-0.5 w-2 h-2 top-0 right-0 bg-amber-400/40 icon-[solar--danger-triangle-bold-duotone]"></button>
     {/if}
@@ -191,11 +190,11 @@ border: var(--xy-node-border, var(--xy-node-border-default));
 }
 
 :global(.svelte-flow__node-boards.selected) {
-    border: 1px solid var(--color-emerald-500);
+    border: 1px solid var(--color-blueprint);
 }
 
 :global(.svelte-flow__node-boards.selected:hover) {
-    border: 1px solid var(--color-emerald-300);
+    border: 1px solid var(--color-accent);
 }
 
 :global(.svelte-flow__node-boards.selectable:hover) {

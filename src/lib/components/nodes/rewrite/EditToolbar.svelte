@@ -123,6 +123,4 @@ async function onsubmit(e: SubmitEvent) {
         </Field.Field >
         </form>
     </Dialog.Content>
-    <Dialog.Footer>
-    </Dialog.Footer>
 </Dialog.Root>

@@ -9,7 +9,7 @@
 	import Graph from '$lib/components/Graph.svelte';
 
 	let { data } = $props();
-
+	$inspect("data", data);
 	// INFO: svelte files run both on server and client
 	let elk: Elk | null = $state(null);
 	if (browser) {
@@ -30,5 +30,5 @@
 </script>
 
 <SvelteFlowProvider>
-	<Graph {elk} nodes={data.nodes} edges={data.edges} bind:colorMode />
+	<Graph {elk} nodes={data.nodes} nodeTypes={data.nodeTypes} edges={data.edges} edgeTypes={data.edgeTypes} bind:colorMode />
 </SvelteFlowProvider>

@@ -1,23 +1,19 @@
-import { jsonify } from 'surrealdb';
-import type { Node } from '@xyflow/svelte';
-import { fakeElectricRooms, fakeBoards, fakeBreakers } from '$lib/fake_data';
-import { toNode } from '$lib/utils';
 import type { PageServerData, PageServerLoad } from './$types';
+import { getData, getDatabaseInfo } from '$lib/db.remote';
+import { error } from '@sveltejs/kit';
+import { schemaStore, type ModelRegistry, type ServerData } from '$lib/model/schemas';
+import { baseConfigStore } from '$lib/controller/config_store.svelte';
 
 export const load: PageServerLoad = async ({ params, request }): Promise<PageServerData> => {
-	const table = new URL(request.url).searchParams.get('table');
-
-	const rooms = fakeElectricRooms.map((r) => {
-		return toNode(r);
-	});
-	const boards = fakeBoards.map((r) => {
-		return toNode(r, 'room');
-	});
-	const breakers = fakeBreakers.map((r) => {
-		return toNode(r, 'board');
-	});
-	const test_data: Node[] = new Array().concat(rooms, boards, breakers);
-	// TODO: validate
-	//
-	return { selected_tab: table, nodes: jsonify(test_data), edges: [] };
+	const info = await getDatabaseInfo().catch((e)=>{ error(400,e.message) });
+	if (!info) return error(500,"Cant get database info. Are you connected to DB?");
+	if (info.tables == undefined) { return error(500,"Cant get tables. Something went wrong!"); }
+	// for (const table of info.tables) {
+	// 	if (!schemaStore.store.has(table.name)) {
+	// 		error(404, "Cant find schema for table: " + table.name);
+	// 	}
+	// 	else {
+	// 	}
+	// }
+	return { tables: { info } };
 };

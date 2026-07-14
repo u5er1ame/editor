@@ -26,7 +26,8 @@
 		type Node,
 		type Edge,
 		type IsValidConnection,
-		type OnBeforeConnect} from '@xyflow/svelte';
+		type OnBeforeConnect,
+		useNodes} from '@xyflow/svelte';
 	import { toast } from 'svelte-sonner';
 	import Button from '$lib/components/Button.svelte';
 
@@ -35,13 +36,14 @@
 	// where "type" is key from this table
 	// make sure keys in utls match styles in respective node component
 
-	import { Flow } from '$lib/utils';
 	import Toolbar from './Toolbar.svelte';
 	import { tick } from 'svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
 
 	let {
 		nodes = $bindable([]),
+		nodeTypes = {},
+		edgeTypes = {},
 		edges = $bindable([]),
 		colorMode = $bindable('system')
 	}: SvelteFlowProps & { elk: ELK | null } = $props();
@@ -83,9 +85,10 @@
 		}
 	}
 
-	let once = true;
+	let once = $state(true);
 	$effect.pre(() => {
 		if (useNodesInitialized().current && once) {
+
 			// onLayout();
 			once = false;
 		}
@@ -187,6 +190,11 @@
 		console.error(e);
 		toast.error('Flow error: ' + e);
 	}
+$effect(()=>{
+	if(useNodesInitialized().current) {
+		// useNodes().current.forEach(n=>console.log(n.measured));
+	}
+})
 </script>
 
 <SvelteFlow
@@ -206,10 +214,10 @@
 	selectionOnDrag
 	panOnDrag={[1]}
 	nodes={dbNodes}
+	nodeTypes={nodeTypes}
 	edges={dbEdges}
+	edgeTypes={edgeTypes}
 	{colorMode}
-	nodeTypes={Flow.nodeTypes}
-	edgeTypes={Flow.edgeTypes}
 	minZoom={0.1}
 	maxZoom={99}
 	snapGrid={[5, 5]}
@@ -236,7 +244,7 @@
 	>
 		<Button
 			title="Update db"
-			--color="var(--color-rose-400)"
+			--color="var(--blueprint)"
 			class="hover:bg-rose-200 hover:text-rose-500"
 			onclick={() => console.log(dbNodes)}
 		>
@@ -258,5 +266,5 @@
 			<!-- <NodeDataTable /> -->
 		<!-- </ScrollArea> -->
 	</Panel>
-	<Background size={1} variant={BackgroundVariant.Dots} />
+	<Background bgColor="var(--background)" patternColor="var(--color-sky-300)" size={1} variant={BackgroundVariant.Dots} />
 </SvelteFlow>

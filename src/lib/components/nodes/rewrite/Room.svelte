@@ -1,9 +1,10 @@
 <script module lang="ts">
-export type Props = NodeProps<Node<ElectricRoom>> & HTMLAttributes<HTMLDivElement>
+export type Props = NodeProps<Node<{raw: ElectricRoom, labelKey: keyof ElectricRoom}>> & HTMLAttributes<HTMLDivElement>
 </script>
 
 <script lang="ts">
 import { onMount, untrack } from "svelte";
+import { browser } from "$app/env";
 import type { HTMLAttributes } from "svelte/elements";
 import { fade } from "svelte/transition";
 import { useResizeObserver } from "runed";
@@ -11,18 +12,18 @@ import { NodeResizer, NodeToolbar, Position, useOnSelectionChange, useSvelteFlow
 import type { NodeProps } from "@xyflow/system";
 
 import { resizer } from "$lib/components/Graph.svelte";
-import { Flow } from "$lib/utils";
 import type { ElectricRoom } from "$lib/server/schemas";
 import EditToolbar from "./EditToolbar.svelte";
 
 
-let { id, data, type, class: className, children, width, height, ...rest }: Props = $props();
+let { id, data, type, class: className, children, width, height, measured, ...rest }: Props = $props();
 
 let content: HTMLElement | null = $state(null);
 
+const labelKey = data?.labelKey ?? "name";
 let editName = $state(false);
 // svelte-ignore state_referenced_locally
-let name = $state(data?.name);
+let name = $state(data?.raw[labelKey]);
 
 onMount(()=>{
     return () => {
@@ -32,20 +33,25 @@ onMount(()=>{
 
 let selectedNodes = $state<string[]>([]);
 useOnSelectionChange(({nodes})=>{
+    if (nodes.length == 0) { selectedNodes = []; return; }
     const selection = nodes.filter(n=>n.selected);
     selectedNodes = selection.map(n=>n.id);
+    selection.forEach(n=>{
+        if (n.id != id) return;
+        console.log($state.snapshot({w: width, h: height}),$state.snapshot(n.measured))
+    });
 });
 let selected = $derived.by(()=>selectedNodes.length > 0 && selectedNodes.every(item=>item == id));
 let resizeable = $derived(selected && $resizer.get(id));
-
+$inspect(selected, selectedNodes);
 // svelte-ignore state_referenced_locally
 let resizeProps = $state({
-    minWidth: Flow.dimensions[type].width,
-    minHeight: Flow.dimensions[type].height,
-    maxWidth: Flow.dimensions[type].width*4,
-    maxHeight: Flow.dimensions[type].height*4,
+    minWidth: width,
+    minHeight: height,
+    maxWidth: width*4,
+    maxHeight: height*4,
 });
-
+$inspect(measured);
 useResizeObserver(()=>content, ([info])=>{
     // if (!content || !info) return;
     // resizeProps.minWidth = clamp(info.contentRect.width, content.scrollWidth , resizeProps.maxWidth)+8;
@@ -92,15 +98,15 @@ function onblur(e: FocusEvent) {
 }
 
 </script>
-
+{#if browser}
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
-<div bind:this={content} transition:fade {ondblclick} class="size-full" role="list">
-    <div style:font-size={(s/4).toFixed()+"px"} class="text-stone-600 flex items-center justify-center size-full " {...rest}>
-        {#if !zoom}
-            <p>{name}</p>
-        {/if}
-    </div>
-</div>
+<!-- <div bind:this={content} transition:fade {ondblclick} class="w-full h-full" role="list"> -->
+    <!-- <div style:font-size={(s/4).toFixed()+"px"} class="text-stone-600" > -->
+        <!-- {#if !zoom} -->
+            <p class="p-2 flex-1 text-blueprint/70 content-center opacity-30">{name}</p>
+        <!-- {/if} -->
+    <!-- </div> -->
+<!-- </div> -->
 <EditToolbar isVisible={selected && zoom} bind:editable={editName} {id} size={s.toString()+"px"} />
 {#if zoom}
     <NodeToolbar isVisible={zoom}  class="text-slate-500" offset={-3}  position={Position.Top} align="center" nodeId={id}>
@@ -113,9 +119,9 @@ function onblur(e: FocusEvent) {
     </NodeToolbar>
 {/if}
 <NodeToolbar class="text-slate-500" offset={-4}  position={Position.Bottom} align="start" nodeId={id}>
-    <p class="font-extralight italic size-auto">{data?.id}</p>
+    <p class="font-extralight italic size-auto">{data?.raw?.id}</p>
 </NodeToolbar>
-
+{/if}
 <style>
 .room {
 font-size: 10px;
@@ -123,14 +129,14 @@ color: var(--xy-node-group-background-color-default, var(--xy-node-group-backgro
 text-align: left;
 }
 :global(.svelte-flow__node-electric_rooms) {
-font-size: 10px;
+font-size: 18px;
 background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
 text-align: center;
-border: 1px dashed --alpha(var(--color-stone-500)/30%);
+border: 1px dashed --alpha(var(--color-blueprint)/10%);
 backdrop-filter: blur(2px);
 }
 :global(.svelte-flow__node-electric_rooms.selectable.selected) {
-border: 1px solid var(--color-emerald-500);
+border: 1px solid var(--color-blueprint);
 box-shadow: var(--shadow-2xl);
 }
 :global(.svelte-flow__node-electric_rooms.selectable.selected:not(.draggable)) {
@@ -139,7 +145,7 @@ box-shadow: var(--shadow-2xl);
 }
 :global(.svelte-flow__node-electric_rooms:not(.draggable)) {
 padding: 10px;
-font-size: 10px;
+/* font-size: 10px; */
 background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
 text-align: center;
 border: 1px dashed --alpha(var(--color-yellow-400)/30%);
