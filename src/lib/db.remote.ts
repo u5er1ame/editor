@@ -6,6 +6,7 @@ import { db, root_access, type DatabaseInfo, type NamespaceInfo, type SystemInfo
 import { goto } from "$app/navigation";
 import z from "zod/v4";
 import { schemaStore, type ClientData, type ServerData } from "./model/schemas";
+import type { Tables } from "./model/types";
 
 export const connect_system = query(async () => {
 	const isConnected = await root_access.connect(env.SURREAL_URL, {
@@ -48,7 +49,7 @@ export const getDatabaseInfo = query(async () => {
 	return res ?? {}
 });
 
-export const getDataClient = query<string, ClientData[]>(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
+export const getDataClient = query<Tables, ClientData[]>(z.string().refine((v)=>schemaStore.store.has(v as Tables), { message: "Schema not found for table" } ),
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
@@ -60,7 +61,7 @@ export const getDataClient = query<string, ClientData[]>(z.string().refine((v)=>
 		return jsonify(res ?? [])
 });
 
-export const getData = query<string, ServerData[]>(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
+export const getData = query<Tables, ServerData[]>(z.string().refine((v)=>schemaStore.store.has(v as Tables), { message: "Schema not found for table" } ),
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
@@ -70,7 +71,7 @@ export const getData = query<string, ServerData[]>(z.string().refine((v)=>schema
 		return jsonify(res ?? [])
 });
 
-export const getTableStructure = query(z.string().refine((v)=>schemaStore.store.has(v), { message: "Schema not found for table" } ),
+export const getTableStructure = query(z.string().refine((v)=>schemaStore.store.has(v as Tables), { message: "Schema not found for table" } ),
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });

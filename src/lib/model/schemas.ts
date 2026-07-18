@@ -5,7 +5,7 @@
 
 import z from 'zod/v4';
 import { BoundQuery, RecordId } from 'surrealdb';
-import type { BaseConfig } from './types';
+import type { BaseConfig, Tables } from './types';
 
 export type AllKeys<T> = T extends any ? keyof T : never;
 
@@ -112,17 +112,26 @@ export type ModelRegistry = {
 	client: ClientSchemas,
 	query: BoundQuery,
 }
+export const TABLES = [
+	'levels',
+	'electric_rooms',
+	'boards',
+	'breakers',
+	'connects',
+	'area_name',
+	'shops',
+] as const;
 
 export class SchemaRegistry {
-	store = new Map<string, ModelRegistry>();
+	store = new Map<Tables, ModelRegistry>();
 	constructor() {
 	}
 
-	addSchemas(table_name: string, data: ModelRegistry) {
+	addSchemas(table_name: Tables, data: ModelRegistry) {
 		this.store.set(table_name, data);
 	}
 
-	defaultConfig(name: string): BaseConfig {
+	defaultConfig(name: Tables): BaseConfig {
 		if(!this.store.has(name)) throw new Error('Schema not found in registry');
 		return {
 			id: name,
@@ -132,6 +141,7 @@ export class SchemaRegistry {
 }
 // WARN: 1. db schemas (mark fetched fields later)
 // 2. dont add additional info here use ConfigStore instead
+// 3. query field for fetching nested data like in client schemas
 export const schemaStore = new SchemaRegistry();
 // INFO: ADD/REM SCHEMAS HERE
 schemaStore.addSchemas('breakers', { server: BreakerSchema, client: ClientBreakerSchema, query: BreakerQuery });

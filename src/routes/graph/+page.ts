@@ -30,14 +30,13 @@ export const load: PageLoad = async ({data, parent, params,  url,  fetch }): Pro
 			}
 			let meta = addTableMetadata(table.name);
 			if (meta.graph) {
-				console.log("meta", meta);
 				const val = await getData(table.name).catch(()=>{});
 				if (val && val.length > 0) {
 					records = records.concat(val);
 					if (meta.graph.type == "node") {
 						nodeTypes[table.name] = meta.graph.component;
 						val.forEach((item)=>{
-							const node = GraphViewController.toNode(item, meta.graph.parentIdKey, meta.graph.flowConfig)
+							const node = GraphViewController.toNode(item, meta.graph);
 							nodes.push(node);
 						});
 					}
@@ -45,7 +44,7 @@ export const load: PageLoad = async ({data, parent, params,  url,  fetch }): Pro
 						edgeTypes[table.name] = meta.graph.component;
 						val.forEach((item)=>{
 							item = item as EdgeData;
-							const edge = GraphViewController.toEdge(item, meta.graph.flowConfig)
+							const edge = GraphViewController.toEdge(item, meta.graph)
 							edges.push(edge);
 						});
 					}
@@ -58,7 +57,6 @@ export const load: PageLoad = async ({data, parent, params,  url,  fetch }): Pro
 			config.push(baseConfigStore.base.get(schemas.client)!)
 		}
 	}
-		console.log("n", nodeTypes, edgeTypes);
 	nodes = GraphViewController.sortNodesForSvelteFlow(nodes);
 	return { tables: { config, ...data.tables }, raw: records, nodes: nodes, nodeTypes: nodeTypes, edges: edges, edgeTypes: edgeTypes, ...data };
 };

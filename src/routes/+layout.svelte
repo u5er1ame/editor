@@ -43,6 +43,7 @@ export class DBContext {
 	import { icons } from '$lib/client/color_mode.svelte';
 	import DbStatus from '$lib/components/DbStatus.svelte';
 	import Views from '$lib/components/Views.svelte';
+	import { toast } from 'svelte-sonner';
 
 	let { children, data, params }: LayoutProps = $props();
 	const current_mode = $derived(mode.current ?? 'system');

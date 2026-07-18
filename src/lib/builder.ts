@@ -3,8 +3,9 @@ import { Rewrite } from "$lib/components/nodes/index";
 import { ColumnBuilder } from "$lib/builders/column.svelte";
 import { GraphConfigBuilder } from "$lib/builders/graph.config";
 import type { IColumn } from "@svar-ui/svelte-grid";
-import type { Views } from "./model/types";
+import type { Tables, Views } from "./model/types";
 import type { LayoutOptions } from "elkjs/lib/elk-api";
+
 
 export function getLayoutOptions(table: string): LayoutOptions | undefined {
 	switch (table) {
@@ -12,23 +13,39 @@ export function getLayoutOptions(table: string): LayoutOptions | undefined {
 			return {
 				'elk.algorithm': 'layered',
 				'elk.direction': 'DOWN',
-				'elk.padding': '[top=50,left=30,bottom=30,right=30]',
-				'elk.spacing.componentComponent': '40'
+				'elk.padding.top': '50',
+				'elk.padding.left': '30',
+				'elk.padding.bottom': '30',
+				'elk.padding.right': '30',
+				'elk.spacing.nodeNode': '40'
 			};
+
 		case "board":
 			return {
 				'elk.algorithm': 'layered',
 				'elk.direction': 'RIGHT',
-				'elk.padding': '[top=40,left=20,bottom=20,right=20]',
+				'elk.padding.top': '40',
+				'elk.padding.left': '20',
+				'elk.padding.bottom': '20',
+				'elk.padding.right': '20',
 				'elk.spacing.nodeNode': '30'
 			};
+
 		case "breakers":
 		default:
-			return undefined;
+			return {
+				'elk.algorithm': 'layered',
+				'elk.direction': 'RIGHT',
+				'elk.padding.top': '10',
+				'elk.padding.left': '10',
+				'elk.padding.bottom': '10',
+				'elk.padding.right': '10',
+				'elk.spacing.nodeNode': '20'
+			};
 	}
 }
 
-export function addTableMetadata(name: string) {
+export function addTableMetadata(name: Tables) {
 	const schema = schemaStore.store.get(name)!;
 	if (!schema) throw new Error("Schema not found");
 	const meta: {[key in Views]?: any} = {
