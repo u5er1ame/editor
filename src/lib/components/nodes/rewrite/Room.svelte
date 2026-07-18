@@ -16,7 +16,7 @@ import type { ElectricRoom } from "$lib/server/schemas";
 import EditToolbar from "./EditToolbar.svelte";
 
 
-let { id, data, type, class: className, children, width, height, measured, ...rest }: Props = $props();
+let { id, data, type, class: className, children, width, height, ...rest }: Props = $props();
 
 let content: HTMLElement | null = $state(null);
 
@@ -38,12 +38,10 @@ useOnSelectionChange(({nodes})=>{
     selectedNodes = selection.map(n=>n.id);
     selection.forEach(n=>{
         if (n.id != id) return;
-        console.log($state.snapshot({w: width, h: height}),$state.snapshot(n.measured))
     });
 });
 let selected = $derived.by(()=>selectedNodes.length > 0 && selectedNodes.every(item=>item == id));
 let resizeable = $derived(selected && $resizer.get(id));
-$inspect(selected, selectedNodes);
 // svelte-ignore state_referenced_locally
 let resizeProps = $state({
     minWidth: width,
@@ -51,7 +49,6 @@ let resizeProps = $state({
     maxWidth: width*4,
     maxHeight: height*4,
 });
-$inspect(measured);
 useResizeObserver(()=>content, ([info])=>{
     // if (!content || !info) return;
     // resizeProps.minWidth = clamp(info.contentRect.width, content.scrollWidth , resizeProps.maxWidth)+8;
@@ -100,39 +97,28 @@ function onblur(e: FocusEvent) {
 </script>
 {#if browser}
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
-<!-- <div bind:this={content} transition:fade {ondblclick} class="w-full h-full" role="list"> -->
-    <!-- <div style:font-size={(s/4).toFixed()+"px"} class="text-stone-600" > -->
-        <!-- {#if !zoom} -->
-            <p class="p-2 flex-1 text-blueprint/70 content-center opacity-30">{name}</p>
-        <!-- {/if} -->
-    <!-- </div> -->
-<!-- </div> -->
+<p class="p-2 flex-1 text-blueprint/50 content-center opacity-30">{name}</p>
 <EditToolbar isVisible={selected && zoom} bind:editable={editName} {id} size={s.toString()+"px"} />
 {#if zoom}
-    <NodeToolbar isVisible={zoom}  class="text-slate-500" offset={-3}  position={Position.Top} align="center" nodeId={id}>
+    <NodeToolbar isVisible={zoom}  class="text-blueprint-text" offset={-3}  position={Position.Top} align="center" nodeId={id}>
         {#if editName}
             <!-- svelte-ignore a11y_autofocus -->
-            <input bind:this={roomNameInput} {onfocus} class="w-full text-lg focus:bg-yellow-50 text-slate-500 bg-transparent" bind:value={name} {onblur}>
+            <input bind:this={roomNameInput} {onfocus} class="w-full text-lg focus:bg-yellow-50 text-blueprint-text bg-transparent" bind:value={name} {onblur}>
         {:else}
-            <p ondblclick={()=>{editName=true}} class="font-bold text-lg text-slate-500">{name}</p>
+            <p ondblclick={()=>{editName=true}} class="font-bold text-lg text-blueprint-background-hover">{name}</p>
         {/if}
     </NodeToolbar>
 {/if}
-<NodeToolbar class="text-slate-500" offset={-4}  position={Position.Bottom} align="start" nodeId={id}>
+<NodeToolbar class="text-blueprint/10" offset={-4}  position={Position.Bottom} align="start" nodeId={id}>
     <p class="font-extralight italic size-auto">{data?.raw?.id}</p>
 </NodeToolbar>
 {/if}
 <style>
-.room {
-font-size: 10px;
-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
-text-align: left;
-}
 :global(.svelte-flow__node-electric_rooms) {
-font-size: 18px;
+font-size: 24px;
 background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
 text-align: center;
-border: 1px dashed --alpha(var(--color-blueprint)/10%);
+border: 1px dashed var(--color-blueprint-background-hover);
 backdrop-filter: blur(2px);
 }
 :global(.svelte-flow__node-electric_rooms.selectable.selected) {
@@ -145,7 +131,6 @@ box-shadow: var(--shadow-2xl);
 }
 :global(.svelte-flow__node-electric_rooms:not(.draggable)) {
 padding: 10px;
-/* font-size: 10px; */
 background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
 text-align: center;
 border: 1px dashed --alpha(var(--color-yellow-400)/30%);

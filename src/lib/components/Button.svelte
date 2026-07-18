@@ -21,14 +21,14 @@
 </button>
 
 <style>
-    button {
-        cursor: pointer;
-	background-color: var(--xy-controls-button-background-color, var(--xy-controls-button-background-color-default));
-	box-shadow: var(--shadow-sm);
-	color: var(--color, var(--xy-controls-button-color-default));
-    }
-    button:hover {
-        cursor: pointer;
-	background-color: var(--xy-controls-button-background-color-hover, var(--xy-controls-button-background-color-hover-default));
-    }
+	/*    button { */
+	/*        cursor: pointer; */
+	/* background-color: var(--xy-controls-button-background-color, var(--xy-controls-button-background-color-default)); */
+	/* box-shadow: var(--shadow-sm); */
+	/* color: var(--color, var(--xy-controls-button-color-default)); */
+	/*    } */
+	/*    button:hover { */
+	/*        cursor: pointer; */
+	/* background-color: var(--xy-controls-button-background-color-hover, var(--xy-controls-button-background-color-hover-default)); */
+	/*    } */
 </style>

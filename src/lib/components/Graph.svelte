@@ -3,12 +3,10 @@
 	import { writable } from 'svelte/store';
 
 	export const resizer = writable(new SvelteMap<string, boolean>());
-	export const client_nodes = writable<Node[]>([]);
-	export const client_edges = writable<Edge[]>([]);
 </script>
 
 <script lang="ts">
-	import type { ELK } from 'elkjs/lib/elk-api';
+	import type { ELK, ElkNode } from 'elkjs/lib/elk-api';
 
 	import { watch } from 'runed';
 	import {
@@ -37,10 +35,14 @@
 	// make sure keys in utls match styles in respective node component
 
 	import Toolbar from './Toolbar.svelte';
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
+	import { GraphViewController } from '$lib/view/graph.svelte';
+	import type { ServerData } from '$lib/model/schemas';
+	import { flowReady } from '../../routes/graph/+page.svelte';
 
 	let {
+		elk,
 		nodes = $bindable([]),
 		nodeTypes = {},
 		edgeTypes = {},
@@ -70,7 +72,7 @@
 		}
 	});
 
-	const allNodes = $derived.by(getNodes);
+	const allNodes: Node<{raw: ServerData, labelKey: string, prio: number}>[] = $derived.by(getNodes);
 	const allEdges = $derived.by(getEdges);
 
 	async function onLayout() {
@@ -78,8 +80,9 @@
 			// const withLayout = await layout(dbNodes, edges, options);
 			// dbNodes = withLayout.nodes
 			// edges = withLayout.edges
-
-			fitView();
+			await oninitlayout();
+			$flowReady = true;
+			await fitView();
 		} catch (e: any) {
 			toast.error(e.message);
 		}
@@ -88,8 +91,7 @@
 	let once = $state(true);
 	$effect.pre(() => {
 		if (useNodesInitialized().current && once) {
-
-			// onLayout();
+			onLayout();
 			once = false;
 		}
 	});
@@ -104,10 +106,11 @@
 
 	let selectionReady = $state(true);
 	async function oninit() {
+		allNodes.forEach((n) => console.log(n.measured));
 		dbNodes.forEach((n) => $resizer.set(n.id, false));
-		// onLayout();
 	}
 	const onbeforeconnect: OnBeforeConnect = (c) => {
+		console.log('onbeforeconnect', c);
 		if (getNode(c.source)?.parentId == getNode(c.target)?.parentId) {
 			return { ...c, type: 'inbound', animated: true };
 		} else {
@@ -190,13 +193,78 @@
 		console.error(e);
 		toast.error('Flow error: ' + e);
 	}
-$effect(()=>{
-	if(useNodesInitialized().current) {
-		// useNodes().current.forEach(n=>console.log(n.measured));
-	}
-})
-</script>
+	const ready = $derived(useNodesInitialized().current);
+	let layouted: ElkNode | null = $state(null);
+	watch(()=>layouted, (cur,pre)=>{
+			if (cur == null) return;
+			const updated = GraphViewController.elk2xy(cur);
+			useNodes().update((nodes)=>{
+				return nodes.map((node)=>{
+					if (updated.has(node.id)) {
+						return {...node, ...updated.get(node.id)!};
+					}
+					else {
+						return node;
+					}
+				});
+			});
+	});
 
+	async function oninitlayout(){
+			if(ready) {
+				console.log('nodes initialized...layouting');
+				const root = {
+					id: "root",
+					layoutOptions: {
+						'elk.algorithm': 'box',
+						'elk.direction': 'DOWN',
+						'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+						'elk.edgeRouting': 'POLYLINE',
+						"elk.separateConnectedComponents": "true",
+						'elk.componentPacking.strategy': 'RECTPACKING',
+						'elk.aspectRatio': '1.0',
+						'elk.spacing.nodeNode': '20'
+					},
+				};
+				const elkGraph: ElkNode = untrack(()=>{
+					return GraphViewController.buildElkGraph(allNodes, allEdges, root);
+				});
+				console.log('elkGraph', elkGraph);
+				if (elk) {
+					layouted = await elk.layout(elkGraph, {measureExecutionTime: true });
+				}
+			}
+	}
+
+$effect(()=>{
+		if(ready) {
+			console.log('nodes initialized...layouting');
+			const root = {
+				id: "root",
+				layoutOptions: {
+					'elk.algorithm': 'layered',
+					'elk.direction': 'DOWN',
+					'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+					'elk.timeout': '1000',
+					'elk.edgeRouting': 'POLYLINE',
+					'elk.spacing.nodeNode': '20'
+				},
+			};
+			const elkGraph: ElkNode = untrack(()=>{
+				return GraphViewController.buildElkGraph(allNodes, allEdges, root);
+			});
+			console.log('elkGraph', elkGraph);
+			if (elk) {
+				elk.layout(elkGraph).then((layouted)=>{
+					layouted = layouted;
+				});
+			}
+		}
+		return () => {
+			$flowReady = false;
+		}
+});
+</script>
 <SvelteFlow
 	class="size-full"
 	proOptions={{ hideAttribution: true }}
@@ -224,12 +292,12 @@ $effect(()=>{
 	nodeDragThreshold={20}
 >
 	<Toolbar ready={selectionReady} />
-	<Controls position="top-right" />
+	<Controls class="bg-transparent "  position="top-right" />
 	<Panel
-		class="flex h-fit w-auto flex-row items-center justify-center gap-2 bg-transparent p-1"
+		class="flex h-fit w-auto flex-row items-center justify-center gap-2 p-1"
 		position="bottom-center"
 	>
-		<Button onclick={() => onLayout()}>
+		<Button class="bg-blueprint-background-hover hover:bg-blueprint" onclick={() => onLayout()}>
 			{#snippet children()}
 				<span
 					class="icon-[material-symbols--responsive-layout-outline-rounded] size-6 text-amber-600"
@@ -245,7 +313,7 @@ $effect(()=>{
 		<Button
 			title="Update db"
 			--color="var(--blueprint)"
-			class="hover:bg-rose-200 hover:text-rose-500"
+			class="bg-blueprint-background-hover hover:bg-blueprint hover:text-rose-500 cursor-pointer"
 			onclick={() => console.log(dbNodes)}
 		>
 			{#snippet children()}
@@ -262,9 +330,6 @@ $effect(()=>{
 	<Panel
 		position="bottom-left"
 	>
-		<!-- <ScrollArea class="w-fit max-w-xl h-fit max-h-1/3 bg-rose-200"> -->
-			<!-- <NodeDataTable /> -->
-		<!-- </ScrollArea> -->
 	</Panel>
-	<Background bgColor="var(--background)" patternColor="var(--color-sky-300)" size={1} variant={BackgroundVariant.Dots} />
+	<Background bgColor="var(--blueprint-background)" patternColor="var(--blueprint-background-hover)" size={1} variant={BackgroundVariant.Dots} />
 </SvelteFlow>

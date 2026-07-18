@@ -1,4 +1,3 @@
-@import '@xyflow/svelte/dist/style.css';
 @import 'tailwindcss';
 @import "tw-animate-css";
 
@@ -12,7 +11,14 @@
     --selected-border-locked: var(--color-rose-300);
     --radius: 0.625rem;
     --background: oklch(1 0 0);
-    --blueprint: var(--color-sky-300);
+    --blueprint: #2d545a;
+    --blueprint-background: #050c0e;
+    --blueprint-background-hover: #0f2124;
+    --blueprint-border: #0f2124;
+    --blueprint-text: #2d545a;
+    --blueprint-active: #0df5d4;
+    --blueprint-accent: #ff9f1c;
+    --blueprint-accent-hover: #ffb703;
     --foreground: oklch(0.147 0.004 49.25);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.147 0.004 49.25);
@@ -90,6 +96,13 @@
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-blueprint: var(--blueprint);
+  --color-blueprint-background: var(--blueprint-background);
+  --color-blueprint-background-hover: var(--blueprint-background-hover);
+  --color-blueprint-border: var(--blueprint-border);
+  --color-blueprint-text: var(--blueprint-text);
+  --color-blueprint-active: var(--blueprint-active);
+  --color-blueprint-accent: var(--blueprint-accent);
+  --color-blueprint-accent-hover: var(--blueprint-accent-hover);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -123,39 +136,49 @@
 }
 
 @layer base {
+    @import '@xyflow/svelte/dist/base.css';
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
   }
+    .svelte-flow__controls-button {
+        background-color: var(--blueprint-background-hover);
+        &:hover {
+            background-color: var(--color-blueprint-text);
+        }
+    }
+    .svelte-flow__panel {
+        background-color: var(--color-transparent);
+    }
 }
 
 .svelte-flow {
-    --xy-background-color-default: var(--color-stone-100);
-    --xy-node-color-default: var(--color-stone-300);
-    --xy-node-border-radius-default: 0px;
-    --xy-node-border-default: 1px solid var(--color-slate-300);
+/*     --xy-background-color-default: var(--color-stone-100); */
+/*     --xy-node-color-default: var(--color-stone-300); */
+/*     --xy-node-border-radius-default: 0px; */
+/*     --xy-node-border-default: 1px solid var(--color-slate-300); */
 /*    --xy-node-background-color-default: var(--color-slate-200);*/
-    --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%);
-    --xy-controls-button-background-color-default: var(--color-stone-50);
-    --xy-controls-button-background-color-hover: var(--color-blueprint);
-    --xy-resize-background-color-default: var(--color-orange-200);
-    --xy-edge-stroke: var(--color-orange-300);
+/*     --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%); */
+/*     --xy-controls-button-background-color-default: var(--color-stone-50); */
+/*     --xy-controls-button-background-color-hover: var(--color-blueprint); */
+/*     --xy-resize-background-color-default: var(--color-orange-200); */
+/*     --xy-edge-stroke: var(--color-orange-300); */
 /*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
 }
 /**/
 .svelte-flow.dark {
-    --xy-background-color-default: var(--color-neutral-800);
-    --xy-node-color-default: var(--color-stone-800);
-    --xy-node-border-radius-default: 0px;
-    --xy-node-border-default: 1px solid var(--color-stone-800);
+    /* --xy-background-color-default: var(--color-blueprint-background-hover); */
+    /* --xy-node-color-default: var(--color-stone-800); */
+    /* --xy-node-border-radius-default: 0px; */
+    /* --xy-node-border-default: 1px solid var(--color-stone-800); */
 /*    --xy-node-background-color-default: var(--color-slate-600);*/
 /*    --xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);*/
-    --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%);
-    --xy-controls-button-background-color-default: var(--color-stone-700);
-    --xy-controls-button-background-color-hover: var(--color-stone-500);
-    --xy-resize-background-color-default: var(--color-orange-500);
+    /* --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%); */
+    /* --xy-controls-button-background-color-default: var(--color-stone-700); */
+    /* --xy-controls-button-background-color-hover: var(--color-stone-500); */
+    /* --xy-resize-background-color-default: var(--color-orange-500); */
     /* --xy-edge-stroke: var(--color-yellow-400); */
 /*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
 }
@@ -173,7 +196,7 @@
     width: fit-content;
     display: flex;
     /* align-items: center; */
-    border: 1px solid var(--color-stone-400);
+    /* border: 1px solid var(--color-stone-400); */
 }
 .svelte-flow__node.selectable {
     box-shadow: var(--shadow-sm);

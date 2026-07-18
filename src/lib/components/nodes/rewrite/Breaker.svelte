@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { type Edge, type Node, type NodeProps, Handle, NodeResizer, Position, useOnSelectionChange, useSvelteFlow } from '@xyflow/svelte';
+    import { type Edge, type Node, type NodeProps, getOutgoers, Handle, NodeResizer, Position, useNodesInitialized, useOnSelectionChange, useSvelteFlow } from '@xyflow/svelte';
     import type { Breaker } from '$lib/server/schemas';
     import { resizer } from '$lib/components/Graph.svelte';
+	import { twMerge } from 'tailwind-merge';
 
     type Props = {
 	data?: { raw: Breaker, labelKey: keyof Breaker },
@@ -10,7 +11,6 @@
     let { id, data, type, class: className, width, height, ...rest }: Props = $props();
 
     let breaker: HTMLElement | undefined = $state();
-
     const { getZoom } = useSvelteFlow();
     const zoom = $derived.by(getZoom);
 
@@ -33,15 +33,20 @@
     const flow = useSvelteFlow();
     // svelte-ignore state_referenced_locally
     const node = flow.getNode(id)
-
+    let out = $state(false);
+    $effect(()=>{
+        if (useNodesInitialized().current && node) {
+            out = getOutgoers(node, flow.getNodes(), flow.getEdges()).length > 0;
+        }
+    });
 </script>
 
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
 <Handle type="target" position={Position.Top} />
 <div class="size-full flex flex-col items-stretch">
-    <p class="size-full text-blueprint/60 text-sm">{data.raw[data.labelKey]}</p>
-    {#if data.value}
-        <p class="size-full text-amber-300 text-xsm">{data?.value}A</p>
+    <p class={twMerge("size-full text-sm", out?"text-blueprint":"text-blueprint/40 " )}>{data.raw[data.labelKey]}</p>
+    {#if data.raw.value}
+        <p class="size-full text-blueprint text-xsm">{data?.value}A</p>
     {/if}
 </div>
 <Handle type="source" position={Position.Bottom} />
