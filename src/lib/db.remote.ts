@@ -22,7 +22,7 @@ export const getSystemInfo = query(async () => {
 	if (!root_access.isConnected) return
 	await root_access.ready.catch(()=>{});
 	const [res] = await root_access.query<[{ system: SystemInfo, defaults: { namespace: string, database: string } }]>("info for root structure").catch(()=>{return []});
-	return res
+	return jsonify(res);
 });
 
 export const connect = query(async () => {
