@@ -60,7 +60,7 @@ export class DBContext {
 <div class="flex size-full flex-col">
 	<Nav.Root
 		orientation="horizontal"
-		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-sidebar-border bg-sidebar py-1 sticky top-0"
+		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-sidebar-border bg-blueprint-4 py-1 sticky top-0"
 	>
 		<Nav.List>
 			<DbStatus />
@@ -70,7 +70,7 @@ export class DBContext {
 			<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->
 			{#key mode.current}
 				<div in:scale>
-					<Nav.Item>
+					<Nav.Item class="px-1 cursor-pointer  text-sidebar-primary-foreground hover:text-sidebar-primary">
 						<Nav.Link onclick={toggleMode}>
 							<!-- <Button variant="ghost" class="cursor-pointer" onclick={toggleMode}> -->
 							<span class={twMerge(mode_icon, 'content-center align-middle')}></span>

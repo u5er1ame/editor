@@ -42,12 +42,14 @@ useOnSelectionChange(({nodes})=>{
 });
 let selected = $derived.by(()=>selectedNodes.length > 0 && selectedNodes.every(item=>item == id));
 let resizeable = $derived(selected && $resizer.get(id));
+const flow = useSvelteFlow();
+const measured = $derived(flow.getNode(id)?.measured);
 // svelte-ignore state_referenced_locally
 let resizeProps = $state({
-    minWidth: width,
-    minHeight: height,
-    maxWidth: width*4,
-    maxHeight: height*4,
+    minWidth: width ?? measured?.width,
+    minHeight: height ?? measured?.height,
+    // maxWidth: width*4,
+    // maxHeight: height*4,
 });
 useResizeObserver(()=>content, ([info])=>{
     // if (!content || !info) return;
@@ -63,7 +65,6 @@ useResizeObserver(()=>content, ([info])=>{
     // }
 });
 
-const flow = useSvelteFlow();
 
 let zoom = $derived(flow.getZoom() > 1);
 
@@ -96,16 +97,16 @@ function onblur(e: FocusEvent) {
 
 </script>
 {#if browser}
-<NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
-<p class="p-2 flex-1 text-blueprint/50 content-center opacity-30">{name}</p>
+<NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="" nodeId={id} />
+<p {ondblclick} class="p-2 flex-1 text-foreground content-center opacity-30">{name}</p>
 <EditToolbar isVisible={selected && zoom} bind:editable={editName} {id} size={s.toString()+"px"} />
 {#if zoom}
-    <NodeToolbar isVisible={zoom}  class="text-blueprint-text" offset={-3}  position={Position.Top} align="center" nodeId={id}>
+    <NodeToolbar isVisible={zoom}  class="text-blueprint-light" offset={-3}  position={Position.Top} align="center" nodeId={id}>
         {#if editName}
             <!-- svelte-ignore a11y_autofocus -->
             <input bind:this={roomNameInput} {onfocus} class="w-full text-lg focus:bg-yellow-50 text-blueprint-text bg-transparent" bind:value={name} {onblur}>
         {:else}
-            <p ondblclick={()=>{editName=true}} class="font-bold text-lg text-blueprint-background-hover">{name}</p>
+            <p ondblclick={()=>{editName=true}} class="font-bold text-lg text-blueprint-light">{name}</p>
         {/if}
     </NodeToolbar>
 {/if}
@@ -115,25 +116,32 @@ function onblur(e: FocusEvent) {
 {/if}
 <style>
 :global(.svelte-flow__node-electric_rooms) {
-font-size: 24px;
-background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
-text-align: center;
-border: 1px dashed var(--color-blueprint-background-hover);
-backdrop-filter: blur(2px);
+    font-size: 24px;
+    background-color: var(--color-blueprint-2, var(--xy-node-group-background-color-default));
+    text-align: center;
+    border: 1px dashed var(--foreground);
+    backdrop-filter: blur(2px);
+    &:hover {
+        border: 1px solid var(--blueprint-yellow);
+    }
+}
+:global(.svelte-flow__node-electric_rooms.selectable) {
+    &:hover {
+        border: 1px solid var(--blueprint-yellow);
+    }
 }
 :global(.svelte-flow__node-electric_rooms.selectable.selected) {
-border: 1px solid var(--color-blueprint);
+border: 1px solid var(--color-blueprint-green);
 box-shadow: var(--shadow-2xl);
 }
 :global(.svelte-flow__node-electric_rooms.selectable.selected:not(.draggable)) {
-border: 1px solid var(--color-yellow-500);
+border: 1px solid var(--blueprint-orange);
 box-shadow: var(--shadow-2xl);
 }
 :global(.svelte-flow__node-electric_rooms:not(.draggable)) {
-padding: 10px;
-background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default));
-text-align: center;
-border: 1px dashed --alpha(var(--color-yellow-400)/30%);
+/* background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default)); */
+/* text-align: center; */
+border: 1px dashed --alpha(var(--color-blueprint-yellow)/30%);
 backdrop-filter: blur(2px);
 }
 

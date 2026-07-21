@@ -5,13 +5,49 @@
 @plugin "@iconify/tailwind4";
 
 @custom-variant dark (&:is(.dark *));
-
+/* b/w
+*  bg
+*   bg-1
+*   bg-2
+*   bg-3
+*  fg
+*   fg-1
+*   fg-2
+*   fg-3
+* y/o/r/b/g
+* */
+/* main/sidebar/popover
+*  text/disabled
+*  border
+*  hover
+*  selected
+*  accent
+*  destructive
+* */
 :root {
-    --selected-border: var(--color-emerald-500);
-    --selected-border-locked: var(--color-rose-300);
-    --radius: 0.625rem;
-    --background: oklch(1 0 0);
-    --blueprint: #2d545a;
+    --hover-border: var(--color-blueprint-yellow);
+    --selected-border: var(--color-blueprint-green);
+    --radius: 0.0rem;
+    --background: var(--light-1);
+    --black: #050c0e;
+    --white: #f8f8ff;
+    --light: #f1f1e6;
+    --light-1: #f1f1e6;
+    --light-2: #fff7d6;
+    --light-3: #dbecea;
+    --light-4: #ccd3ff;
+    --light-5: #a9aabc;
+    --dark-5: #a9aabc;
+    --dark-4: #2d545a;
+    --dark-3: #324b4a;
+    --dark-2: #0f2124;
+    --dark-1: #050c0e;
+    --blueprint-dark: #354276;
+    --blueprint-light: #ccd3ff;
+    --blueprint-red: #fd8674;
+    --blueprint-orange: #ffbc63;
+    --blueprint-yellow: #f9f871;
+    --blueprint-green: #00b38a;
     --blueprint-background: #050c0e;
     --blueprint-background-hover: #0f2124;
     --blueprint-border: #0f2124;
@@ -19,71 +55,81 @@
     --blueprint-active: #0df5d4;
     --blueprint-accent: #ff9f1c;
     --blueprint-accent-hover: #ffb703;
-    --foreground: oklch(0.147 0.004 49.25);
+    --foreground: var(--blueprint-light);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.147 0.004 49.25);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.147 0.004 49.25);
-    --primary: oklch(0.216 0.006 56.043);
+    --popover: var(--light-1);
+    --popover-foreground: var(--color-blueprint-1);
+    --primary: var(--color-blueprint-2);
     --primary-foreground: oklch(0.985 0.001 106.423);
     --secondary: oklch(0.97 0.001 106.424);
     --secondary-foreground: oklch(0.216 0.006 56.043);
-    --muted: oklch(0.97 0.001 106.424);
+    --muted: var(--light-4);
     --muted-foreground: oklch(0.553 0.013 58.071);
-    --accent: oklch(0.97 0.001 106.424);
-    --accent-foreground: oklch(0.216 0.006 56.043);
+    --accent: var(--color-blueprint-1);
+    --accent-foreground: var(--white);
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.923 0.003 48.717);
-    --input: oklch(0.923 0.003 48.717);
+    --input: var(--color-blueprint-2);
     --ring: oklch(0.709 0.01 56.259);
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
-    --sidebar: oklch(0.985 0.001 106.423);
-    --sidebar-foreground: oklch(0.147 0.004 49.25);
-    --sidebar-primary: oklch(0.216 0.006 56.043);
-    --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-    --sidebar-accent: oklch(0.97 0.001 106.424);
+    --sidebar: var(--light-1);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--color-blueprint-2);
+    --sidebar-primary-foreground: var(--dark-3);
+    --sidebar-accent: var(--blueprint-yellow);
     --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
-    --sidebar-border: oklch(0.923 0.003 48.717);
+    --sidebar-border: var(--black);
     --sidebar-ring: oklch(0.709 0.01 56.259);
 }
 
 
 .dark {
-    --background: var(--color-stone-900);
-    --foreground: oklch(0.985 0.001 106.423);
+    --background: var(--blueprint-dark);
+    --foreground: var(--blueprint-light);
+
     --card: oklch(0.216 0.006 56.043);
     --card-foreground: oklch(0.985 0.001 106.423);
-    --popover: oklch(0.216 0.006 56.043);
-    --popover-foreground: oklch(0.985 0.001 106.423);
-    --primary: oklch(0.923 0.003 48.717);
-    --primary-foreground: oklch(0.216 0.006 56.043);
+
+    --popover: var(--light-4);
+    --popover-foreground: var(--dark-4);
+
+    --primary: var(--color-blueprint-2);
+    --primary-foreground: var(--blueprint-light);
+
     --secondary: oklch(0.268 0.007 34.298);
     --secondary-foreground: oklch(0.985 0.001 106.423);
+
     --muted: oklch(0.268 0.007 34.298);
     --muted-foreground: oklch(0.709 0.01 56.259);
-    --accent: oklch(0.268 0.007 34.298);
+
+    --accent: var(--color-blueprint-4);
     --accent-foreground: oklch(0.985 0.001 106.423);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
+
+    --destructive: var(--blueprint-red);
+
+    --border: var(--light-2);
+    --input: var(--color-blueprint-3);
     --ring: oklch(0.553 0.013 58.071);
+
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.216 0.006 56.043);
-    --sidebar-foreground: oklch(0.985 0.001 106.423);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-    --sidebar-accent: oklch(0.268 0.007 34.298);
-    --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.553 0.013 58.071);
+
+    --sidebar: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--dark-3);
+    --sidebar-accent: var(--color-blueprint-yellow);
+    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-border: var(--color-blueprint-2);
+    --sidebar-ring: var(--color-foreground);
 };
 
 
@@ -95,7 +141,17 @@
   --text-xsm: var(--text-[10px]);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
-  --color-blueprint: var(--blueprint);
+  --color-blueprint: var(--blueprint-dark);
+  --color-blueprint-1: var(--blueprint-dark);
+  --color-blueprint-2: #59639b;
+  --color-blueprint-3: #7e87c1;
+  --color-blueprint-4: #a4ace9;
+  --color-blueprint-5: var(--blueprint-light);
+  --color-blueprint-red: var(--blueprint-red);
+  --color-blueprint-orange: var(--blueprint-orange);
+    --color-blueprint-yellow: var(--blueprint-yellow);
+    --color-blueprint-green: var(--blueprint-green);
+    --color-blueprint-blue: var(--blueprint-blue);
   --color-blueprint-background: var(--blueprint-background);
   --color-blueprint-background-hover: var(--blueprint-background-hover);
   --color-blueprint-border: var(--blueprint-border);
@@ -107,6 +163,7 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
+  --color-popover-accent: var(--light-2);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -144,9 +201,10 @@
     @apply bg-background text-foreground;
   }
     .svelte-flow__controls-button {
-        background-color: var(--blueprint-background-hover);
+        background-color: var(--color-blueprint-5);
+        color: var(--color-blueprint-1);
         &:hover {
-            background-color: var(--color-blueprint-text);
+            background-color: var(--blueprint-yellow);
         }
     }
     .svelte-flow__panel {
@@ -155,7 +213,7 @@
 }
 
 .svelte-flow {
-/*     --xy-background-color-default: var(--color-stone-100); */
+    --xy-background-color-default: var(--background);
 /*     --xy-node-color-default: var(--color-stone-300); */
 /*     --xy-node-border-radius-default: 0px; */
 /*     --xy-node-border-default: 1px solid var(--color-slate-300); */
@@ -169,7 +227,7 @@
 }
 /**/
 .svelte-flow.dark {
-    /* --xy-background-color-default: var(--color-blueprint-background-hover); */
+    --xy-background-color-default: var(--color-blueprint-background-hover);
     /* --xy-node-color-default: var(--color-stone-800); */
     /* --xy-node-border-radius-default: 0px; */
     /* --xy-node-border-default: 1px solid var(--color-stone-800); */
@@ -185,7 +243,7 @@
 
 .svelte-flow__resize-control.line {
     border-width: 1px;
-    width: 4em;
+    /* width: 4em; */
 }
 .svelte-flow__resize-control.handle {
     border-width: 0px;
@@ -204,9 +262,9 @@
 
 .svelte-flow__node.selectable:hover {
     box-shadow: var(--shadow-lg);
-    border: 1px solid --alpha(var(--color-blueprint)/50%);
+    /* border: 1px solid --alpha(var(--color-blueprint)/50%); */
 }
 
 .svelte-flow__node.selected {
-    border: 1px solid var(--color-blueprint);
+    /* border: 1px solid var(--color-blueprint); */
 }

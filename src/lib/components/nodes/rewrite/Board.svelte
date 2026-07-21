@@ -174,30 +174,29 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
 :global(.svelte-flow__node-unsaved_boards) {
 border-radius: 2px;
 width: "auto";
-color: var(--color-amber-200, var(--xy-node-color-default));
-background-color: --alpha(var(--color-amber-700, var(--xy-node-background-color-default))/7%);
+color: var(--color-blueprint-orange, var(--xy-node-color-default));
+background-color: --alpha(var(--color-blueprint-orange, var(--xy-node-background-color-default))/7%);
 text-align: center;
-border: 1px dotted --alpha(var(--color-amber-500)/30%);
+border: 1px dotted --alpha(var(--color-blueprint-orange)/30%);
 }
 :global(.svelte-flow__node-unsaved_boards.selected) {
-    border: 1px solid --alpha(var(--color-amber-500)/30%);
+    border: 1px solid --alpha(var(--color-blueprint-orange)/30%);
 }
 
 :global(.svelte-flow__node-boards.selectable) {
-color: var(--color-stone-200, var(--xy-node-color-default));
-background-color: --alpha(var(--color-stone-700, var(--xy-node-background-color-default))/40%);
+color: var(--color-blueprint-2, var(--xy-node-color-default));
+background-color: --alpha(var(--color-blueprint-2, var(--xy-node-background-color-default))/70%);
 border: var(--xy-node-border, var(--xy-node-border-default));
 }
 
 :global(.svelte-flow__node-boards.selected) {
-    border: 1px solid var(--color-blueprint);
-}
-
-:global(.svelte-flow__node-boards.selected:hover) {
-    border: 1px solid var(--color-accent);
+    border: 1px solid var(--color-blueprint-green);
+    &:hover {
+        border: 1px solid var(--color-blueprint-yellow);
+    }
 }
 
 :global(.svelte-flow__node-boards.selectable:hover) {
-box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-lg);
 }
 </style>

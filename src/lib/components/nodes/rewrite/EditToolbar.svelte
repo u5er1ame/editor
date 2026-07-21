@@ -8,6 +8,7 @@ import * as Field from "$lib/components/ui/field";
 
 import { resizer } from "$lib/components/Graph.svelte";
 import type { Board } from "$lib/server/schemas";
+	import { twMerge } from "tailwind-merge";
 
 let { id, size, isVisible, editable=$bindable(), ...rest } =  $props();
 
@@ -71,12 +72,12 @@ async function onsubmit(e: SubmitEvent) {
 </script>
 
 <NodeToolbar {isVisible} offset={1} class="h-auto" position={Position.Right} align="start" nodeId={id}>
-    <div class="border-l border-l-amber-500 flex flex-col gap-1 *:rounded-r-md items-start justify-baseline" in:slide={{ axis: "x" }} >
+    <div class={twMerge("border-l flex flex-col gap-1 *:rounded-r-md items-start justify-baseline",open?"border-l-blueprint-green":"border-l-blueprint-red" )} in:slide={{ axis: "x" }} >
     <ControlButton title="Edit" onclick={()=>open=!open}>
         {#if !open}
-            <span class="bg-rose-300 icon-[solar--lock-password-bold-duotone]"></span>
+            <span class="bg-blueprint-red icon-[solar--lock-password-bold-duotone]"></span>
         {:else}
-            <span class="text-sky-300 icon-[solar--lock-password-unlocked-bold-duotone]"></span>
+            <span class="text-blueprint-green icon-[solar--lock-password-unlocked-bold-duotone]"></span>
         {/if}
     </ControlButton>
     {#if open}
@@ -92,9 +93,9 @@ async function onsubmit(e: SubmitEvent) {
     </div>
 </NodeToolbar>
 <NodeToolbar {isVisible} offset={1} class="h-auto" position={Position.Right} align="end" nodeId={id}>
-    <div class="border-l border-l-amber-500 flex flex-col gap-1 *:rounded-r-md items-start justify-baseline" in:slide={{ axis: "x" }} >
+    <div class="border-l border-l-blueprint-green flex flex-col gap-1 *:rounded-r-md items-start justify-baseline" in:slide={{ axis: "x" }} >
         <ControlButton class="mt-auto " title="Layout">
-            <span class="bg-gray-300 icon-[solar--widget-add-bold-duotone]"></span>
+            <span class="bg-blueprint icon-[solar--widget-add-bold-duotone]"></span>
         </ControlButton>
     </div>
 </NodeToolbar>

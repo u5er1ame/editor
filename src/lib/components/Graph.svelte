@@ -297,7 +297,7 @@ $effect(()=>{
 		class="flex h-fit w-auto flex-row items-center justify-center gap-2 p-1"
 		position="bottom-center"
 	>
-		<Button class="bg-blueprint-background-hover hover:bg-blueprint" onclick={() => onLayout()}>
+		<Button class="bg-blueprint-light hover:bg-blueprint-yellow" onclick={() => onLayout()}>
 			{#snippet children()}
 				<span
 					class="icon-[material-symbols--responsive-layout-outline-rounded] size-6 text-amber-600"
@@ -313,7 +313,7 @@ $effect(()=>{
 		<Button
 			title="Update db"
 			--color="var(--blueprint)"
-			class="bg-blueprint-background-hover hover:bg-blueprint hover:text-rose-500 cursor-pointer"
+			class="bg-blueprint-light hover:bg-blueprint hover:text-rose-500 cursor-pointer"
 			onclick={() => console.log(dbNodes)}
 		>
 			{#snippet children()}
@@ -331,5 +331,5 @@ $effect(()=>{
 		position="bottom-left"
 	>
 	</Panel>
-	<Background bgColor="var(--blueprint-background)" patternColor="var(--blueprint-background-hover)" size={1} variant={BackgroundVariant.Dots} />
+	<Background bgColor="var(--background)" patternColor="var(--color-blueprint-5)" size={1} variant={BackgroundVariant.Lines} />
 </SvelteFlow>
