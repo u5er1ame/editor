@@ -13,7 +13,7 @@
 
 	function isWriteable(table: any) {
 		if (table.drop) {
-			return `<span class="icon-[material-symbols--lock] text-red-500"></span>`;
+			return `<span class="icon-[material-symbols--lock] text-destructive"></span>`;
 		} else {
 			return ``;
 		}
@@ -58,15 +58,15 @@
 {/snippet}
 
 {#if info}
-	<div class="h-fit w-full p-1">
-			<Tabs.Root bind:value={current_tab}>
-				<Tabs.List class="size-full">
+	<div class="size-auto p-1">
+			<Tabs.Root bind:value={current_tab} class="justify-center items-center">
+				<Tabs.List class="size-full bg-header">
 					{#each info.tables as table, i}
 						{@const label = tables.config.find((c)=>c.id == table.name)?.label ?? table.name}
 						<Tabs.Trigger
 							value={table.name}
 							title={label + (table.drop ? ' Writes disabled' : '')}
-							class="w-full"
+							class="w-full data-[state=active]:text-primary-foreground data-[state=active]:bg-accent/50 dark:data-[state=active]:bg-accent/50"
 						>
 							{@html isWriteable(table)}
 							<!-- {controller.store.getTableMeta(table.name)?.title} -->
@@ -83,7 +83,7 @@
 				</Tabs.List>
 					{#each info.tables as table, i}
 						{#if tables.selected_tab != undefined}
-							<Tabs.Content value={table.name} class="size-full">
+							<Tabs.Content value={table.name} class="size-full ">
 								{#key current_tab}
 									{#if table.name == current_tab}
 										{@const config = tables?.config.find((c)=>c.id == table.name)}

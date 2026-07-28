@@ -36,7 +36,7 @@ function setSelection(node: Node) {
 			<button onclick={()=>setSelection(list[0])} class={twMerge(cb.italics[idx], "cursor-pointer")}>{cb.titles[idx]}</button>
 		    {:else}
 		    <Dropdown.Root>
-			<Dropdown.Trigger class="flex flex-row text-blueprint cursor-pointer">
+			<Dropdown.Trigger class="flex flex-row text-secondary cursor-pointer">
 			    <p class={twMerge(cb.italics[idx])}>{cb.titles[idx]}</p>
 			    <span class="mt-auto icon-[solar--arrow-to-down-left-line-duotone] size-4"></span>
 			</Dropdown.Trigger>

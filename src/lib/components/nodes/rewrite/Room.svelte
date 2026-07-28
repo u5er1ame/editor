@@ -101,47 +101,42 @@ function onblur(e: FocusEvent) {
 <p {ondblclick} class="p-2 flex-1 text-foreground content-center opacity-30">{name}</p>
 <EditToolbar isVisible={selected && zoom} bind:editable={editName} {id} size={s.toString()+"px"} />
 {#if zoom}
-    <NodeToolbar isVisible={zoom}  class="text-blueprint-light" offset={-3}  position={Position.Top} align="center" nodeId={id}>
+    <NodeToolbar isVisible={zoom}  class="text-popover" offset={-3}  position={Position.Top} align="center" nodeId={id}>
         {#if editName}
             <!-- svelte-ignore a11y_autofocus -->
-            <input bind:this={roomNameInput} {onfocus} class="w-full text-lg focus:bg-yellow-50 text-blueprint-text bg-transparent" bind:value={name} {onblur}>
+            <input bind:this={roomNameInput} {onfocus} class="w-full text-lg focus:bg-hover text-foreground bg-transparent" bind:value={name} {onblur}>
         {:else}
-            <p ondblclick={()=>{editName=true}} class="font-bold text-lg text-blueprint-light">{name}</p>
+            <p ondblclick={()=>{editName=true}} class="font-bold text-lg text-foreground">{name}</p>
         {/if}
     </NodeToolbar>
 {/if}
-<NodeToolbar class="text-blueprint/10" offset={-4}  position={Position.Bottom} align="start" nodeId={id}>
+<NodeToolbar class="text-foreground/10" offset={-4}  position={Position.Bottom} align="start" nodeId={id}>
     <p class="font-extralight italic size-auto">{data?.raw?.id}</p>
 </NodeToolbar>
 {/if}
 <style>
 :global(.svelte-flow__node-electric_rooms) {
     font-size: 24px;
-    background-color: var(--color-blueprint-2, var(--xy-node-group-background-color-default));
+    background-color: var(--color-transparent, var(--xy-node-group-background-color-default));
     text-align: center;
-    border: 1px dashed var(--foreground);
+    border: 1px dashed var(--color-foreground);
+    border-radius: var(--radius);
     backdrop-filter: blur(2px);
-    &:hover {
-        border: 1px solid var(--blueprint-yellow);
-    }
 }
 :global(.svelte-flow__node-electric_rooms.selectable) {
-    &:hover {
-        border: 1px solid var(--blueprint-yellow);
-    }
 }
 :global(.svelte-flow__node-electric_rooms.selectable.selected) {
-border: 1px solid var(--color-blueprint-green);
+/* border: 1px solid var(--color-active); */
 box-shadow: var(--shadow-2xl);
 }
 :global(.svelte-flow__node-electric_rooms.selectable.selected:not(.draggable)) {
-border: 1px solid var(--blueprint-orange);
+border: 1px solid var(--color-border);
 box-shadow: var(--shadow-2xl);
 }
 :global(.svelte-flow__node-electric_rooms:not(.draggable)) {
 /* background-color: var(--xy-node-group-background-color-default, var(--xy-node-group-background-color-default)); */
 /* text-align: center; */
-border: 1px dashed --alpha(var(--color-blueprint-yellow)/30%);
+border: 1px dashed --alpha(var(--color-hover)/30%);
 backdrop-filter: blur(2px);
 }
 

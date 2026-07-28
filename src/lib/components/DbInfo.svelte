@@ -114,7 +114,7 @@ async function changeDb(val: string) {
 <MemInfo system={systeminfo?.system} />
 <div class="flex flex-col gap-1">
 	{#if nsInfo.error}
-		<p class="text-rose-500">{nsInfo.error.message}</p>
+		<p class="text-destructive">{nsInfo.error.message}</p>
 	{:else if nsInfo.loading}
 		<Skeleton class="w-full min-h-1/3" />
 	{/if}

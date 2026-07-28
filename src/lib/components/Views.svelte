@@ -9,11 +9,11 @@ const current_view_href = $derived(page.url.pathname);
 </script>
 
 {#each Object.values(views) as view}
-		<Nav.Item>
+		<Nav.Item >
 	{#if view.href == current_view_href}
-			<Nav.Link data-active={true} class="ring font-bold"  >{view.name}</Nav.Link>
+			<Nav.Link data-active={true} class="ring ring-accent font-bold select-none"  >{view.name}</Nav.Link>
 	{:else}
-			<Nav.Link href={view.href} onclick={()=>{console.log("CLICK", view.href); goto(view.href, { invalidate: [view.href] }) }}>{view.name}</Nav.Link>
+			<Nav.Link class="hover:text-hover" href={view.href} onclick={()=>{ goto(view.href, { invalidate: [view.href] }) }}>{view.name}</Nav.Link>
 	{/if}
 		</Nav.Item>
 {/each}

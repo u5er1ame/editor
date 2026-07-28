@@ -57,29 +57,31 @@ export class DBContext {
 
 <ModeWatcher />
 <Toaster richColors position="top-center" />
-<div class="flex size-full flex-col">
+<div class="flex size-full flex-col h-dvh ">
 	<Nav.Root
 		orientation="horizontal"
-		class="z-50 size-full max-h-16 max-w-full justify-between border-b border-b-sidebar-border bg-blueprint-4 py-1 sticky top-0"
+		class=" bg-header py-0.5 z-50 size-full max-h-16 max-w-full justify-between border-b sticky top-0"
 	>
-		<Nav.List>
-			<DbStatus />
-			<Views views={data.views} />
-		</Nav.List>
-		<Nav.List>
-			<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->
-			{#key mode.current}
-				<div in:scale>
-					<Nav.Item class="px-1 cursor-pointer  text-sidebar-primary-foreground hover:text-sidebar-primary">
-						<Nav.Link onclick={toggleMode}>
-							<!-- <Button variant="ghost" class="cursor-pointer" onclick={toggleMode}> -->
-							<span class={twMerge(mode_icon, 'content-center align-middle')}></span>
-							<!-- </Button> -->
-						</Nav.Link>
-					</Nav.Item>
-				</div>
-			{/key}
-		</Nav.List>
+			<Nav.List>
+				<DbStatus />
+				<Views views={data.views} />
+			</Nav.List>
+			<Nav.List>
+				<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->
+				{#key mode.current}
+					<div in:scale>
+						<Nav.Item class="px-1 cursor-pointer">
+							<Nav.Link onclick={toggleMode} class="hover:text-hover">
+								<!-- <Button variant="ghost" class="cursor-pointer" onclick={toggleMode}> -->
+								<span class={twMerge(mode_icon, 'content-center align-middle')}></span>
+								<!-- </Button> -->
+							</Nav.Link>
+						</Nav.Item>
+					</div>
+				{/key}
+			</Nav.List>
 	</Nav.Root>
 	{@render children()}
 </div>
+<style>
+</style>

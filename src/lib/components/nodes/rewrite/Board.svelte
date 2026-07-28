@@ -148,15 +148,15 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
 <Dialog bind:open={openDialog} onsubmit={createBreaker} form={dialogData} />
 {/if}
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
-<div bind:this={item} class="size-full flex items-stretch">
+<div {ondblclick} bind:this={item} class="size-full flex items-stretch">
     <!-- {#if threshold} -->
-	<p class="size-full text-stone-300/10 content-center text-[1em]">{data?.raw[data.labelKey]}</p>
+	<p class="size-full text-foreground/10 content-center text-[1em]">{data?.raw[data.labelKey]}</p>
     <!-- {/if} -->
     {#if type == "unsaved_boards"}
         <button onclick={()=>toast.warning("Board not saved yet")} title="This item arnt saved to database"  class="absolute m-0.5 w-2 h-2 top-0 right-0 bg-amber-400/40 icon-[solar--danger-triangle-bold-duotone]"></button>
     {/if}
 </div>
-<NodeToolbar class="text-slate-500 h-full"  position={Position.Right} align="start" nodeId={id}>
+<NodeToolbar class="text-secondary-foreground h-full"  position={Position.Right} align="start" nodeId={id}>
     <div class="flex flex-col gap-1 *:rounded-lg" transition:fade>
         <ControlButton   title="Add breaker" onclick={()=>{openDialog=true}}>
             <span class="icon-[material-symbols--add-2-rounded]"></span>
@@ -166,37 +166,40 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
     </ControlButton>
     </div>
 </NodeToolbar>
-<NodeToolbar isVisible={!threshold} class="text-slate-500 text-md" offset={-4}  position={Position.Top} align="center" nodeId={id}>
+<NodeToolbar isVisible={!threshold} class="text-secondary text-md" offset={-4}  position={Position.Top} align="center" nodeId={id}>
     {data?.name}
 </NodeToolbar>
 
 <style>
 :global(.svelte-flow__node-unsaved_boards) {
-border-radius: 2px;
+border-radius: var(--radius);
 width: "auto";
-color: var(--color-blueprint-orange, var(--xy-node-color-default));
-background-color: --alpha(var(--color-blueprint-orange, var(--xy-node-background-color-default))/7%);
+color: var(--color-destructive, var(--xy-node-color-default));
+background-color: --alpha(var(--color-destructive, var(--xy-node-background-color-default))/7%);
 text-align: center;
-border: 1px dotted --alpha(var(--color-blueprint-orange)/30%);
+border: 1px dotted --alpha(var(--color-destructive)/30%);
 }
 :global(.svelte-flow__node-unsaved_boards.selected) {
-    border: 1px solid --alpha(var(--color-blueprint-orange)/30%);
+    border: 1px solid --alpha(var(--color-destructive)/30%);
 }
 
-:global(.svelte-flow__node-boards.selectable) {
-color: var(--color-blueprint-2, var(--xy-node-color-default));
-background-color: --alpha(var(--color-blueprint-2, var(--xy-node-background-color-default))/70%);
-border: var(--xy-node-border, var(--xy-node-border-default));
-}
 
-:global(.svelte-flow__node-boards.selected) {
-    border: 1px solid var(--color-blueprint-green);
-    &:hover {
-        border: 1px solid var(--color-blueprint-yellow);
+:global(.svelte-flow__node-boards) {
+    border-radius: var(--radius);
+    color: var(--color-secondary, var(--xy-node-color-default));
+    &:global(.selectable) {
+        border: 1px solid var(--color-border);
+        background-color: --alpha(var(--color-primary, var(--xy-node-background-color-default))/50%);
+        color: var(--color-primary, var(--xy-node-color-default));
+    }
+    &:not(.selectable) {
+        border: 1px solid --alpha(var(--color-border)/30%);
+        background-color: --alpha(var(--color-primary, var(--xy-node-background-color-default))/70%);
     }
 }
 
-:global(.svelte-flow__node-boards.selectable:hover) {
-    box-shadow: var(--shadow-lg);
+:global(.svelte-flow__node-boards.selected) {
+    border: 1px solid var(--color-active);
 }
+
 </style>

@@ -44,18 +44,19 @@
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
 <Handle type="target" position={Position.Top} />
 <div class="size-full flex flex-col items-stretch">
-    <p class={twMerge("size-full text-sm", out?"text-blueprint":"text-blueprint/40 " )}>{data.raw[data.labelKey]}</p>
+    <p class={twMerge("size-full text-sm", out?"text-primary-foreground":"text-muted-foreground " )}>{data.raw[data.labelKey]}</p>
     {#if data.raw.value}
-        <p class="size-full text-blueprint text-xsm">{data?.value}A</p>
+        <p class="size-full text-foreground text-xsm">{data?.value}A</p>
     {/if}
 </div>
 <Handle type="source" position={Position.Bottom} />
 
 <style>
 :global(.svelte-flow__node-breakers) {
-border-radius: 0px;
+border-radius: var(--radius);
 width: "auto";
-color: var(--color-stone-200, var(--xy-node-color-default));
+background-color: var(--color-secondary, var(--xy-node-group-background-color-default));
+color: var(--color-primary, var(--xy-node-color-default));
 text-align: center;
 border: var(--xy-node-border, var(--xy-node-border-default));
 }

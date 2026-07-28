@@ -288,7 +288,7 @@ $effect(()=>{
 	{colorMode}
 	minZoom={0.1}
 	maxZoom={99}
-	snapGrid={[5, 5]}
+	snapGrid={[16, 16]}
 	nodeDragThreshold={20}
 >
 	<Toolbar ready={selectionReady} />
@@ -297,12 +297,12 @@ $effect(()=>{
 		class="flex h-fit w-auto flex-row items-center justify-center gap-2 p-1"
 		position="bottom-center"
 	>
-		<Button class="bg-blueprint-light hover:bg-blueprint-yellow" onclick={() => onLayout()}>
+		<Button class="bg-secondary hover:bg-hover" onclick={() => onLayout()}>
 			{#snippet children()}
 				<span
 					class="icon-[material-symbols--responsive-layout-outline-rounded] size-6 text-amber-600"
 				></span>
-				<div class="size-auto">layout?</div>
+				<div class="size-auto">layout</div>
 			{/snippet}
 		</Button>
 	</Panel>
@@ -312,8 +312,8 @@ $effect(()=>{
 	>
 		<Button
 			title="Update db"
-			--color="var(--blueprint)"
-			class="bg-blueprint-light hover:bg-blueprint hover:text-rose-500 cursor-pointer"
+			--color="var(--color-secondary)"
+			class="bg-header hover:bg-hover hover:text-rose-500 cursor-pointer"
 			onclick={() => console.log(dbNodes)}
 		>
 			{#snippet children()}
@@ -331,5 +331,5 @@ $effect(()=>{
 		position="bottom-left"
 	>
 	</Panel>
-	<Background bgColor="var(--background)" patternColor="var(--color-blueprint-5)" size={1} variant={BackgroundVariant.Lines} />
+	<Background bgColor="var(--color-background)" patternColor="var(--color-secondary)" size={4} gap={36} variant={BackgroundVariant.Cross} />
 </SvelteFlow>

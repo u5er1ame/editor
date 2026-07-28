@@ -14,10 +14,10 @@
 	{#snippet failed(e: unknown)}
 		<div class="size-full text-center flex flex-row gap-2 justify-center">
 			<div class="text-xl">{e.body?.message}</div>
-			<div class="text-xl text-rose-400">{e.status}</div>
+			<div class="text-xl text-destructive">{e.status}</div>
 		</div>
 	{/snippet}
-<div class="size-full">
+<div class="size-full max-w-screen">
 	{#await fetch("/api/v1/db/ready")}
 		<Skeleton class="w-full h-full animate-pulse m-1"/>
 	{:then}

@@ -34,12 +34,14 @@
 		}
 	});
 </script>
+<div class="flex grow size-full">
 <SvelteFlowProvider>
 	<Graph {elk} nodes={data.nodes} nodeTypes={data.nodeTypes} edges={data.edges} edgeTypes={data.edgeTypes} bind:colorMode />
 	{#if !$flowReady && data.nodes.length > 0}
-	<div out:fade class="absolute inset-0 bg-background flex flex-col items-center justify-center gap-4 bg-background text-muted-foreground">
-		<Spinner size="8" class="text-blueprint" />
-		<p>Loading...</p>
-	</div>
+		<div out:fade class="absolute inset-0 bg-background flex flex-col items-center justify-center gap-4 bg-background text-foreground">
+			<Spinner size="8" class="text-primary" />
+			<p>Loading...</p>
+		</div>
 	{/if}
 </SvelteFlowProvider>
+</div>
