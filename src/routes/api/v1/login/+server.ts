@@ -1,11 +1,14 @@
+import { getTokenMaxAge } from "$lib/utils";
 import { json, type RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ request, cookies, locals }) => {
     const data = await request.json()
+	const maxAge = getTokenMaxAge(data?.exp);
+
     const opts = {
         path: "/",
         httpOnly: true,
-        expires: new Date(data.exp*1000)
+        maxAge
     };
     cookies.set("sr_token", data.value, opts);
     cookies.set("sr_user", data.user, opts);

@@ -1,9 +1,9 @@
 import { env } from "$env/dynamic/private";
 import { db, root_access } from "$lib/server/root_db.svelte";
-import { decodeJWT } from "$lib/utils";
-import { error, json, redirect, type Handle, type HandleFetch, type HandleValidationError, type ServerInit } from "@sveltejs/kit";
+import { decodeJWT, getTokenMaxAge } from "$lib/utils";
+import { error,  redirect, type Handle, type HandleFetch, type HandleValidationError, type ServerInit } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
-import { jsonify, NotAllowedError } from "surrealdb";
+import { NotAllowedError } from "surrealdb";
 
 const colors = {
   red: '\x1b[31m',
@@ -92,10 +92,12 @@ const check_auth: Handle = async ({ event, resolve }) => {
 		if (event.locals.db.token == null) {
 			console.warn("Token not found login as default user");
 			const tokens = await db.signin(defaut_user).catch((e)=>{ return error(503, "Cant signin as default user") });
+			const decoded = decodeJWT(tokens.access);
+			const maxAge = getTokenMaxAge(decoded);
 			event.cookies.set("sr_token", tokens.access, {
 				path: "/",
+				maxAge
 			});
-			const decoded = decodeJWT(tokens.access);
 			event.locals.db = {
 				...event.locals.db,
 				token: tokens.access,
@@ -118,10 +120,12 @@ const check_auth: Handle = async ({ event, resolve }) => {
 				}
 				return error(400, e);
 			});
+			const decoded = decodeJWT(tokens.access);
+			const maxAge = getTokenMaxAge(decoded);
 			event.cookies.set("sr_token", tokens.access, {
 				path: "/",
+				maxAge
 			});
-			const decoded = decodeJWT(tokens.access);
 			event.locals.db = {
 				...event.locals?.db,
 				token: tokens.access,

@@ -1,18 +1,20 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 
 import { db } from "$lib/server/root_db.svelte";
-import { decodeJWT } from "$lib/utils";
+import { decodeJWT, getTokenMaxAge } from "$lib/utils";
 import { NotAllowedError } from "surrealdb";
 import { env } from "$env/dynamic/private";
 
 export const POST: RequestHandler = async ({ fetch, request, cookies, locals }) => {
     const data = await request.json()
     const tokens = await db.authenticate(data).then((tokens)=>{
+        const decoded = decodeJWT(tokens.access);
+		const maxAge = getTokenMaxAge(decoded);
         cookies.set("sr_token", tokens.access, {
             httpOnly: true,
             path: "/",
+			maxAge
         });
-        const decoded = decodeJWT(tokens.access);
         locals.db = {
             ...locals.db,
             isAuth: true,
