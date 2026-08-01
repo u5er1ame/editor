@@ -20,7 +20,7 @@ export class Toolbar {
 	selectionBounds: Rect = $derived(this.flowHook.getNodesBounds(this.selectedNodes));
 	isVisible: boolean = $derived(this.selectedNodes.length > 0);
 	nodeId: string[] = $derived(this.selectedNodes.map(n => n.id));
-	align: Align = $derived.by(() => this.selectedNodes.length > 1 ? "center" : "end");
+	align: Align = $derived.by(() => this.selectedNodes.length > 0 ? "center" : "end");
 	position: Position = $derived.by(() => this.selectedNodes.length > 1 ? Position.Bottom : Position.Bottom);
 
 	constructor() {

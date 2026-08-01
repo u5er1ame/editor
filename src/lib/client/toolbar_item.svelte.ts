@@ -3,9 +3,9 @@ import { get } from "svelte/store";
 import { watch } from "runed";
 import { type Node, useSvelteFlow, type ControlButtonProps, useNodes } from "@xyflow/svelte";
 import { type Controls } from "$lib/client/toolbar.svelte";
-import { resizer } from "$lib/components/Graph.svelte";
 import { DumbButton, Lock, Selectable, ResizeButton } from "$lib/client/snippets.svelte";
 import type { SvelteMap } from "svelte/reactivity";
+import { resizer } from "$lib/utils";
 
 
 export type MultiState = "all" | "partial" | "none"

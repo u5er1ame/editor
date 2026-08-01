@@ -13,21 +13,27 @@ export function getLayoutOptions(table: string): LayoutOptions | undefined {
 			return {
 				'elk.algorithm': 'layered',
 				'elk.direction': 'DOWN',
-				'elk.padding.top': '50',
-				'elk.padding.left': '30',
-				'elk.padding.bottom': '30',
-				'elk.padding.right': '30',
-				'elk.spacing.nodeNode': '40'
+				"hierarchyHandling": "INCLUDE_CHILDREN",
+				'elk.padding.top': '16',
+				'elk.padding.left': '16',
+				'elk.padding.bottom': '16',
+				'elk.padding.right': '16',
+				'elk.contentAlignment': 'V_CENTER H_CENTER',
+				'elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED',
+				'elk.spacing.nodeNode': '16'
 			};
 
 		case "board":
 			return {
 				'elk.algorithm': 'layered',
 				'elk.direction': 'RIGHT',
+				"hierarchyHandling": "INCLUDE_CHILDREN",
 				'elk.padding.top': '40',
 				'elk.padding.left': '20',
 				'elk.padding.bottom': '20',
 				'elk.padding.right': '20',
+				'elk.contentAlignment': 'V_CENTER H_CENTER',
+				'elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED',
 				'elk.spacing.nodeNode': '30'
 			};
 
@@ -35,11 +41,14 @@ export function getLayoutOptions(table: string): LayoutOptions | undefined {
 		default:
 			return {
 				'elk.algorithm': 'layered',
-				'elk.direction': 'RIGHT',
+				'elk.direction': 'DOWN',
+				'elk.edgeRouting': 'POLYLINE',
 				'elk.padding.top': '10',
 				'elk.padding.left': '10',
 				'elk.padding.bottom': '10',
 				'elk.padding.right': '10',
+				'elk.contentAlignment': 'V_CENTER H_CENTER',
+				'elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED',
 				'elk.spacing.nodeNode': '20'
 			};
 	}
@@ -70,7 +79,7 @@ export function addTableMetadata(name: Tables) {
 			meta.graph = builder.type("node").flowConfig({connectable: true}).parentIDKey("board").component(name, Rewrite.Breaker).build();
 		break;
 		case "connects":
-			meta.graph = builder.type("edge").build();
+			meta.graph = builder.type("edge").flowConfig({animated: true}).build();
 		break;
 		default:
 			throw new Error("Unknown table");

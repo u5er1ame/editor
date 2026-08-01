@@ -1,8 +1,8 @@
 <script lang="ts">
     import { type Edge, type Node, type NodeProps, getOutgoers, Handle, NodeResizer, Position, useNodesInitialized, useOnSelectionChange, useSvelteFlow } from '@xyflow/svelte';
     import type { Breaker } from '$lib/server/schemas';
-    import { resizer } from '$lib/components/Graph.svelte';
 	import { twMerge } from 'tailwind-merge';
+	import { resizer } from '$lib/utils';
 
     type Props = {
 	data?: { raw: Breaker, labelKey: keyof Breaker },
@@ -44,9 +44,9 @@
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
 <Handle type="target" position={Position.Top} />
 <div class="size-full flex flex-col items-stretch">
-    <p class={twMerge("size-full text-sm", out?"text-primary-foreground":"text-muted-foreground " )}>{data.raw[data.labelKey]}</p>
+    <!-- <p class={twMerge("size-full text-sm", out?"text-primary-foreground":"text-muted-foreground " )}>{data.raw[data.labelKey]}</p> -->
     {#if data.raw.value}
-        <p class="size-full text-foreground text-xsm">{data?.value}A</p>
+        <p class="size-full text-foreground text-xsm">{data?.raw.value}A</p>
     {/if}
 </div>
 <Handle type="source" position={Position.Bottom} />

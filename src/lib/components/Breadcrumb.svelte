@@ -33,10 +33,10 @@ function setSelection(node: Node) {
 	    {#if list.length != 0}
 		<Breadcrumb.Item>
 		    {#if list.length == 1}
-			<button onclick={()=>setSelection(list[0])} class={twMerge(cb.italics[idx], "cursor-pointer")}>{cb.titles[idx]}</button>
+			<button onclick={()=>setSelection(list[0])} class={twMerge(cb.italics[idx], "cursor-pointer text-active")}>{cb.titles[idx]}</button>
 		    {:else}
 		    <Dropdown.Root>
-			<Dropdown.Trigger class="flex flex-row text-secondary cursor-pointer">
+			<Dropdown.Trigger class="flex flex-row text-foreground cursor-pointer">
 			    <p class={twMerge(cb.italics[idx])}>{cb.titles[idx]}</p>
 			    <span class="mt-auto icon-[solar--arrow-to-down-left-line-duotone] size-4"></span>
 			</Dropdown.Trigger>
@@ -53,7 +53,7 @@ function setSelection(node: Node) {
 					<Dropdown.Item onclick={()=>setSelection(val)} class="pl-4">{val.data.raw[val.data.labelKey]}</Dropdown.Item>
 				    {/each}
 				    {#if i != by_parent.length-1}
-					<Dropdown.Separator />
+					<Dropdown.Separator class="text-accent" />
 				    {/if}
 				</Dropdown.Group>
 			    {/each}
@@ -62,7 +62,7 @@ function setSelection(node: Node) {
 		    {/if}
 		</Breadcrumb.Item>
 		{#if idx != cb.filter_grouped.length-1}
-		    <Breadcrumb.Separator />
+		    <Breadcrumb.Separator class="text-accent"/>
 		{/if}
 	    {/if}
 	{/each}

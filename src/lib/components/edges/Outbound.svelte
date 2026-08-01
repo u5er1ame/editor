@@ -13,4 +13,4 @@ let [path, labelX, labelY] = $derived(
   );
 </script>
 
-<BaseEdge {id} {path} {labelX} {labelY} {...rest} />
+<BaseEdge {id} {path} {labelX} {labelY} --xy-edge-stroke-width="3px" {...rest} />

@@ -35,47 +35,12 @@ export function getTokenMaxAge(token: string | SurrealToken) {
 	  : 900; // 15 min fallback
 }
 
-export type NodeDimensions = Dimensions & { position: XYPosition };
+import { SvelteMap } from 'svelte/reactivity';
+import { writable } from 'svelte/store';
 
-export default {
-	type: "group",
-	width: 128,
-	height: 128,
-	position: { x: 0, y: 0 },
-}
-// INFO: type infered from id.table (table name)
-export const roomDimensions = {
-	width: 128,
-	height: 128,
-	position: { x: 0, y: 0 },
-}
+export const resizer = writable(new SvelteMap<string, boolean>());
 
-export const boardDimensions = {
-	width: 64,
-	height: 64,
-	position: { x: 0, y: 0 },
-}
 
-export const breakerDimensions = {
-	width: 20,
-	height: 20,
-	position: { x: 0, y: 0 },
-}
-
-const defaultBoardDescription: IColumn[] = [
-	{ id: "name", header: "#", width: 64, editor: "text" },
-	{ id: "description", header: "Description", width: 256, editor: "text" },
-	{ id: "value", header: "Value", width: 64, editor: "text" },
-];
-
-export type FlowOptions = {
-	nodeTypes: NodeTypes,
-	tableLayout: { [key: string]: IColumn[] },
-	edgeTypes: EdgeTypes,
-	dimensions: { [key: string]: NodeDimensions },
-	flowOptions: { [key: string]: Omit<NodeBase, "id" | "data" | "type" | "position"> },
-	layoutOptions: { [key: string]: LayoutOptions },
-};
 // TODO: create builder for this
 // export const Flow: FlowOptions = {
 // 	nodeTypes: {

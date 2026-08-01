@@ -4,10 +4,10 @@ import { onMount } from 'svelte';
 import { toast } from 'svelte-sonner';
 import { ControlButton, NodeResizer, NodeToolbar, Position, useNodes, useOnSelectionChange, useSvelteFlow, type Edge, type Node, type NodeProps } from '@xyflow/svelte';
 import type { Board } from '$lib/server/schemas';
-import { resizer } from '$lib/components/Graph.svelte';
 import Dialog, { type FormTypes } from '$lib/components/Dialog.svelte';
 import { type Form } from '$lib/components/Dialog.svelte';
 	import { r, RecordId, StringRecordId } from 'surrealdb';
+	import { resizer } from '$lib/utils';
 
 
 type Props = {
@@ -136,7 +136,6 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
             return [...current, item];
         });
 }
-
 // function onblur(e: FocusEvent) {
 //     e.stopPropagation();
 //     editName=false
@@ -148,9 +147,9 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
 <Dialog bind:open={openDialog} onsubmit={createBreaker} form={dialogData} />
 {/if}
 <NodeResizer {...resizeProps} isVisible={selected && resizeable} color="var(--color-orange-400)" lineClass="h-8" nodeId={id} />
-<div {ondblclick} bind:this={item} class="size-full flex items-stretch">
+<div role="button" tabindex="0" {ondblclick} bind:this={item} class="size-full flex items-stretch">
     <!-- {#if threshold} -->
-	<p class="size-full text-foreground/10 content-center text-[1em]">{data?.raw[data.labelKey]}</p>
+	<p class="size-full text-foreground/40 content-center text-[1em]">{data?.raw[data.labelKey]}</p>
     <!-- {/if} -->
     {#if type == "unsaved_boards"}
         <button onclick={()=>toast.warning("Board not saved yet")} title="This item arnt saved to database"  class="absolute m-0.5 w-2 h-2 top-0 right-0 bg-amber-400/40 icon-[solar--danger-triangle-bold-duotone]"></button>
@@ -167,7 +166,7 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
     </div>
 </NodeToolbar>
 <NodeToolbar isVisible={!threshold} class="text-secondary text-md" offset={-4}  position={Position.Top} align="center" nodeId={id}>
-    {data?.name}
+    {data?.raw.name}
 </NodeToolbar>
 
 <style>

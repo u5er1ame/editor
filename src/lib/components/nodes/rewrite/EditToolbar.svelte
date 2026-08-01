@@ -6,9 +6,9 @@ import * as Dialog from "$lib/components/ui/dialog";
 import * as Input from "$lib/components/ui/input";
 import * as Field from "$lib/components/ui/field";
 
-import { resizer } from "$lib/components/Graph.svelte";
 import type { Board } from "$lib/server/schemas";
 	import { twMerge } from "tailwind-merge";
+	import { resizer } from "$lib/utils";
 
 let { id, size, isVisible, editable=$bindable(), ...rest } =  $props();
 

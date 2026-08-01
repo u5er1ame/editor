@@ -28,8 +28,8 @@ export class GraphConfigBuilder {
 	defaultElkConfig: Partial<LayoutOptions> = {
 		'elk.algorithm': 'layered',
 		'elk.direction': 'RIGHT',
-		'elk.padding': '[top=20,left=20,bottom=20,right=20]',
-		'elk.spacing.nodeNode': '30',
+		'elk.padding': '[top=10,left=20,bottom=10,right=20]',
+		'elk.spacing.nodeNode': '10',
 		'org.eclipse.elk.json.edgeCoords': 'PARENT'
 	};
 

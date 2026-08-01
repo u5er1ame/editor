@@ -11,6 +11,15 @@ let [path, labelX, labelY] = $derived(
       targetY,
     })
   );
+const centerY = $derived((targetY - sourceY) / 2 + sourceY);
+
+const edgePath = $derived(
+  `M ${sourceX} ${sourceY} L ${sourceX} ${centerY} L ${targetX} ${centerY} L ${targetX} ${targetY}`,
+);
 </script>
 
-<BaseEdge {id} {path} {labelX} {labelY} {...rest} />
+<!-- <BaseEdge {id} {path} {labelX} {labelY} {...rest} /> -->
+<BaseEdge {id} path={edgePath} {...rest} />
+
+<style>
+</style>

@@ -60,7 +60,7 @@ export class DBContext {
 <div class="flex size-full flex-col h-dvh ">
 	<Nav.Root
 		orientation="horizontal"
-		class=" bg-header py-0.5 z-50 size-full max-h-16 max-w-full justify-between border-b sticky top-0"
+		class=" bg-header py-0.5 z-50 size-full max-h-16 max-w-full justify-between border-b shadow shadow-border sticky top-0"
 	>
 			<Nav.List>
 				<DbStatus />

@@ -19,7 +19,8 @@ export const load: PageServerLoad = async ({ params, request, url, locals, fetch
 		if (!selected_tab) {
 			return error(500,"Cant find any table. Something went wrong!");
 		}
-		return redirect(302, `?table=${selected_tab}`);
+		// return redirect(302, `?table=${selected_tab}`);
+		return { tables: { info, selected_tab } };
 		// return { tables: { config } };
 	}
 

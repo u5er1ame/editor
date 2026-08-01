@@ -43,7 +43,8 @@
     --green-light: #9CD3A5;
     --green: #35753F;
     --green-dark: #132A16;
-    --red-light: #B3566C;
+    --red-light: #D92C26;
+    /* --red-light: #B3566C; */
     --red: #753543;
     --red-dark: #381920;
     --yellow: #F4D06F;
@@ -92,7 +93,7 @@
   --muted-foreground: var(--text-muted);
   --accent: var(--first);
   --accent-foreground: var(--white);
-  --destructive: var(--red);
+  --destructive: var(--red-light);
   --sidebar: var(--dark);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--first);
@@ -202,6 +203,8 @@
     @apply bg-background text-foreground;
   }
     .svelte-flow__controls-button {
+		height: auto;
+		width: auto;
         background-color: var(--color-secondary);
         color: var(--color-primary);
         &:hover {
@@ -216,14 +219,15 @@
 .svelte-flow {
     --xy-background-color-default: var(--color-background);
 /*     --xy-node-color-default: var(--color-stone-300); */
-/*     --xy-node-border-radius-default: 0px; */
+    --xy-node-border-radius-default: var(--radius);
 /*     --xy-node-border-default: 1px solid var(--color-slate-300); */
 /*    --xy-node-background-color-default: var(--color-slate-200);*/
 /*     --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%); */
 /*     --xy-controls-button-background-color-default: var(--color-stone-50); */
 /*     --xy-controls-button-background-color-hover: var(--color-blueprint); */
 /*     --xy-resize-background-color-default: var(--color-orange-200); */
-/*     --xy-edge-stroke: var(--color-orange-300); */
+    --xy-edge-stroke: --alpha(var(--color-foreground)/80%);
+    --xy-edge-stroke-selected: var(--color-active);
 /*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
 }
 /**/
@@ -238,7 +242,8 @@
     /* --xy-controls-button-background-color-default: var(--color-stone-700); */
     /* --xy-controls-button-background-color-hover: var(--color-stone-500); */
     /* --xy-resize-background-color-default: var(--color-orange-500); */
-    /* --xy-edge-stroke: var(--color-yellow-400); */
+    --xy-edge-stroke: --alpha(var(--color-foreground)/60%);
+    --xy-edge-stroke-selected: var(--color-active);
     /* --xy-node-default.selectable.selected: var(--color-emerald-500); */
 }
 
