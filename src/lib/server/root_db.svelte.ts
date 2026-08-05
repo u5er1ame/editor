@@ -8,7 +8,7 @@ export interface SystemInfo  {
 	memory_usage: number;
 	physical_cores: number;
 }
-
+export type Roles = "OWNER" | "EDITOR" | "VIEWER";
 export interface NamespaceInfo {
 	accesses: Array<any>
 	databases: Array<{
@@ -20,7 +20,7 @@ export interface NamespaceInfo {
 		duration: { session: Duration; token: Duration };
 		hash: string;
 		name: string;
-		roles: "OWNER" | "EDITOR" | "VIEWER"[];
+		roles: Roles[];
 	}>
 };
 

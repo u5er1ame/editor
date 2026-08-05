@@ -4,8 +4,7 @@
 
 <script lang="ts">
 	import { SvelteFlowProvider } from '@xyflow/svelte';
-	import type { ColorMode } from '@xyflow/system';
-	import { mode } from 'mode-watcher';
+	import { mode, type SystemModeValue } from 'mode-watcher';
 	import ELK, { type ELK as Elk } from 'elkjs/lib/elk-api';
 	import Worker from 'elkjs/lib/elk-worker?worker';
 	import { browser } from '$app/environment';
@@ -25,7 +24,7 @@
 		});
 	}
 
-	let colorMode: ColorMode = $derived(mode.current ?? 'system');
+	let colorMode: SystemModeValue | 'system' = $derived(mode.current ?? 'system');
 	$effect(() => {
 		return () => {
 			if (elk) {

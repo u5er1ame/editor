@@ -2,6 +2,7 @@
 export class DBContext {
 	isConnected: boolean = $state(false);
 	username?: string = $state();
+	userRoles?: Roles[] = $state();
 	namespace?: string = $state();
 	database?: string = $state();
 	constructor(data: LayoutProps["data"]) {
@@ -9,6 +10,14 @@ export class DBContext {
 		this.username = data.db.username;
 		this.namespace = data.db.namespace;
 		this.database = data.db.database;
+		watch(()=>this.username, (cur,pre)=>{
+			if (!cur) return;
+			if (cur == pre) return;
+			getNamespaceInfo().then((info)=>{
+				const roles = info?.users.find((u)=>u.name == cur)?.roles;
+				this.userRoles = roles;
+			});
+		});
 		watch(()=>[this.namespace, this.database], (cur,pre)=>{
 			const [ns, db] = cur;
 			const [pre_ns, pre_db] = pre ?? [];
@@ -44,6 +53,8 @@ export class DBContext {
 	import DbStatus from '$lib/components/DbStatus.svelte';
 	import Views from '$lib/components/Views.svelte';
 	import { toast } from 'svelte-sonner';
+	import { getNamespaceInfo } from '$lib/db.remote';
+	import type { Roles } from '$lib/server/root_db.svelte';
 
 	let { children, data, params }: LayoutProps = $props();
 	const current_mode = $derived(mode.current ?? 'system');

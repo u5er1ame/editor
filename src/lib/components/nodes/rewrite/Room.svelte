@@ -15,9 +15,9 @@
 		Position,
 		useOnSelectionChange,
 		useSvelteFlow,
-		type Node
+		type Node,
+		type NodeProps
 	} from '@xyflow/svelte';
-	import type { NodeProps } from '@xyflow/system';
 
 	import type { ElectricRoom } from '$lib/server/schemas';
 	import EditToolbar from './EditToolbar.svelte';

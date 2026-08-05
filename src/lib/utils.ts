@@ -1,10 +1,7 @@
 import type { Node, Dimensions, NodeTypes, XYPosition, EdgeTypes } from "@xyflow/svelte";
-import type { NodeBase } from "@xyflow/system";
-import type { LayoutOptions } from "elkjs/lib/elk-api";
 
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { IColumn } from "@svar-ui/svelte-grid";
 import type { Uuid } from "surrealdb";
 
 export function cn(...inputs: ClassValue[]) {

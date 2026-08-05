@@ -18,8 +18,8 @@ const edgePath = $derived(
 );
 </script>
 
-<!-- <BaseEdge {id} {path} {labelX} {labelY} {...rest} /> -->
-<BaseEdge {id} path={edgePath} {...rest} />
+<BaseEdge {id} {path} {labelX} {labelY} {...rest} />
+<!-- <BaseEdge {id} path={edgePath} {...rest} /> -->
 
 <style>
 </style>

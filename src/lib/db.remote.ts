@@ -35,7 +35,7 @@ export const getStatus = query(async () => {
 });
 
 export const getNamespaceInfo = query(async () => {
-	if (!db.isConnected) return
+	if (!db.isConnected) error(500,"DB not connected");
 	await db.ready;
 	const [res] = await db.query<[NamespaceInfo]>("info for ns structure").catch((e)=>{console.error(e); return []});
 	return res ?? {}

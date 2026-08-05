@@ -12,7 +12,7 @@ const db = getSurrealContext();
 
 function isWriteable(table: any) {
 	if (table.drop) {
-		return `<span class="icon-[material-symbols--lock] text-red-500"></span>`;
+		return `<span class="iconify material-symbols--lock] text-red-500"></span>`;
 	} else {
 		return ``;
 	}
@@ -20,10 +20,10 @@ function isWriteable(table: any) {
 function getKind(table: any) {
 	switch (table.kind.kind) {
 		case 'RELATION':
-			return `<span class="icon-[material-symbols--graph-8]"></span>`;
+			return `<span class="iconify material-symbols--graph-8"></span>`;
 		case 'NORMAL':
 			if (table.view) {
-				return `<span class="icon-[material-symbols--table-eye-outline]"></span>`;
+				return `<span class="iconify material-symbols--table-eye-outline"></span>`;
 			}
 		default:
 			return '';

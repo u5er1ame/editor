@@ -115,7 +115,7 @@
 	]
 </script>
 {#snippet PrintIcon()}
-	<span class="icon-[material-symbols--print-rounded] size-5 align-middle"></span>
+	<span class="iconify material-symbols--print-rounded size-5 align-middle"></span>
 {/snippet}
 
 {#if browser}

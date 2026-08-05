@@ -75,18 +75,18 @@ async function onsubmit(e: SubmitEvent) {
     <div class={twMerge("border-l flex flex-col gap-1 *:rounded-r-md items-start justify-baseline",open?"border-l-active":"border-l-destructive" )} in:slide={{ axis: "x" }} >
     <ControlButton title="Edit" onclick={()=>open=!open}>
         {#if !open}
-            <span class="bg-destructive icon-[solar--lock-password-bold-duotone]"></span>
+            <span class="bg-destructive iconify solar--lock-password-bold-duotone"></span>
         {:else}
-            <span class="text-active icon-[solar--lock-password-unlocked-bold-duotone]"></span>
+            <span class="text-active iconify solar--lock-password-unlocked-bold-duotone"></span>
         {/if}
     </ControlButton>
     {#if open}
         <div class="*:rounded-r-md flex flex-col gap-1" transition:slide={{ axis: "x" }}>
                 <ControlButton title="Rename" onclick={editName}>
-                    <span class="icon-[solar--clapperboard-edit-bold-duotone]"></span>
+                    <span class="iconify solar--clapperboard-edit-bold-duotone"></span>
                 </ControlButton>
                 <ControlButton title="Add Board" onclick={()=>openDiag=true}>
-                    <span class="icon-[solar--clipboard-add-bold-duotone]"></span>
+                    <span class="iconify solar--clipboard-add-bold-duotone"></span>
                 </ControlButton>
             </div>
     {/if}
@@ -95,7 +95,7 @@ async function onsubmit(e: SubmitEvent) {
 <NodeToolbar {isVisible} offset={1} class="h-auto" position={Position.Right} align="end" nodeId={id}>
     <div class="border-l border-l-active flex flex-col gap-1 *:rounded-r-md items-start justify-baseline" in:slide={{ axis: "x" }} >
         <ControlButton bgColor="var(--color-hover)" class="mt-auto " title="Layout">
-            <span class="bg-primary icon-[solar--widget-add-bold-duotone]"></span>
+            <span class="bg-primary iconify solar--widget-add-bold-duotone"></span>
         </ControlButton>
     </div>
 </NodeToolbar>

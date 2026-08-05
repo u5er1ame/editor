@@ -1,6 +1,6 @@
 import type { AllKeys, ServerData } from "$lib/model/schemas";
 import { error } from "@sveltejs/kit";
-import type { EdgeBase, NodeBase } from "@xyflow/system";
+import type { Edge as EdgeBase, Node as NodeBase } from "@xyflow/svelte";
 import type { LayoutOptions } from "elkjs/lib/elk-api";
 import type { Component } from "svelte";
 

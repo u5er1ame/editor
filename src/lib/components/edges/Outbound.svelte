@@ -1,5 +1,5 @@
 <script lang="ts">
-import { BaseEdge, getBezierPath, type EdgeProps } from "@xyflow/svelte";
+import { BaseEdge, getStraightPath, getBezierPath, type EdgeProps } from "@xyflow/svelte";
 
 let { id, data, sourceX, sourceY, targetX, targetY, ...rest }: EdgeProps = $props();
 
@@ -13,4 +13,7 @@ let [path, labelX, labelY] = $derived(
   );
 </script>
 
-<BaseEdge {id} {path} {labelX} {labelY} --xy-edge-stroke-width="3px" {...rest} />
+<BaseEdge style="--xy-edge-stroke-width:3px" {id} {path} {labelX} {labelY} {...rest} />
+
+<style>
+</style>

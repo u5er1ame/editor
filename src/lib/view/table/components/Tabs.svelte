@@ -13,7 +13,7 @@
 
 	function isWriteable(table: any) {
 		if (table.drop) {
-			return `<span class="icon-[material-symbols--lock] text-destructive"></span>`;
+			return `<span class="iconify material-symbols--lock text-destructive"></span>`;
 		} else {
 			return ``;
 		}
@@ -21,10 +21,10 @@
 	function getKind(table: any) {
 		switch (table.kind.kind) {
 			case 'RELATION':
-				return `<span class="icon-[material-symbols--graph-8]"></span>`;
+				return `<span class="iconify material-symbols--graph-8"></span>`;
 			case 'NORMAL':
 				if (table.view) {
-					return `<span class="icon-[material-symbols--table-eye-outline]"></span>`;
+					return `<span class="iconify material-symbols--table-eye-outline"></span>`;
 				}
 			default:
 				return '';
@@ -35,11 +35,30 @@
 	let current_tab: string = $derived(
 		page.state.table?.selected_tab ? page.state.table?.selected_tab : tables.selected_tab
 	);
+	class TableState {
+		name: string = $state('');
+		label: string = $derived(tables.config.find((c) => c.id == this.name)?.label ?? this.name);
+		kind: string = $derived(getKind(tables.info.tables.find((t)=>t.name == this.name)));
+		isWriteable: string = $derived(isWriteable(tables.info.tables.find((t)=>t.name == this.name)));
+		isSelected: boolean = $derived(current_tab == this.name);
+		selectedRow?: string = $state(undefined);
+		changes = $state({
+			updated: [],
+			deleted: [],
+			added: []
+		});
+		hasChanges: boolean = $derived(this.changes.added.length > 0 || this.changes.deleted.length > 0 || this.changes.updated.length > 0);
+		constructor(name: string) {
+			this.name = name;
+		}
+	}
 
 	const db = getContext<DBContext>('db');
 	// const info = await getDatabaseInfo().catch((e)=>{ error(400,e) });
 	const info = tables.info;
-
+	const tableChanges = info.tables.map((table)=>{
+		return new TableState(table.name);
+	});
 	$effect(() => {});
 	watch(
 		() => current_tab,
@@ -65,7 +84,7 @@
 </script>
 
 {#snippet PrintIcon()}
-	<span class="icon-[material-symbols--print-rounded] size-5 align-middle"></span>
+	<span class="iconify material-symbols--print-rounded size-5 align-middle"></span>
 {/snippet}
 
 {#if info}
@@ -73,16 +92,19 @@
 		<Tabs.Root bind:value={current_tab} class="items-center justify-center">
 			<Tabs.List class="size-full bg-header">
 				{#each info.tables as table, i}
-					{@const label = tables.config.find((c) => c.id == table.name)?.label ?? table.name}
+					{@const changes = tableChanges.find((t)=>t.name == table.name)}
 					<Tabs.Trigger
 						value={table.name}
-						title={label + (table.drop ? ' Writes disabled' : '')}
+						title={changes.label + (table.drop ? ' Writes disabled' : '')}
 						class="w-full data-[state=active]:bg-accent/50 data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-accent/50"
 					>
-						{@html isWriteable(table)}
+						{@html changes.isWriteable}
 						<!-- {controller.store.getTableMeta(table.name)?.title} -->
-						{label}
-						{@html getKind(table)}
+						{changes.label}
+						{@html changes.kind}
+						{#if changes.hasChanges}
+							<span title="Have unsaved changes" class="size-4 text-hover iconify solar--danger-circle-bold-duotone"></span>
+						{/if}
 					</Tabs.Trigger>
 				{:else}
 					<div class="size-full">
@@ -98,7 +120,8 @@
 						{#key current_tab}
 							{#if table.name == current_tab}
 								{@const config = tables?.config.find((c) => c.id == table.name)}
-								<NewTable table={table.name} readonly={table?.drop ?? false} {config} />
+								{@const changes = tableChanges.find((t)=>t.name == table.name)}
+								<NewTable table={table.name} readonly={table?.drop ?? false} {config} changes={changes} />
 							{/if}
 						{/key}
 					</Tabs.Content>

@@ -54,7 +54,7 @@ const hide = $derived(!zoom?"":"hidden");
 	<NodeToolbar class="text-slate-500 h-full"  position={Position.Right} align="start" nodeId={id}>
 	    <div class="flex flex-col gap-1 *:rounded-lg" transition:fade>
 		<ControlButton title="Add board" onclick={addBoard}>
-		    <span class="icon-[material-symbols--add-2-rounded]"></span>
+		    <span class="iconify material-symbols--add-2-rounded"></span>
 		</ControlButton>
 	    </div>
 	</NodeToolbar>

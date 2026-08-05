@@ -22,7 +22,7 @@ function setSelection(node: Node) {
     const desel = nodes.current.filter((n)=>n.id != node.id)
     desel.forEach((n)=>updateNode(n.id, {selected: false}));
     updateNode(node.id, {selected: true}); // INFO: just in case if selection is empty
-    fitView({nodes:[node], duration: 1000, padding: 1});
+    fitView({nodes:[node], duration: 2000, padding: 1});
 }
 
 </script>
@@ -38,7 +38,7 @@ function setSelection(node: Node) {
 		    <Dropdown.Root>
 			<Dropdown.Trigger class="flex flex-row text-foreground cursor-pointer">
 			    <p class={twMerge(cb.italics[idx])}>{cb.titles[idx]}</p>
-			    <span class="mt-auto icon-[solar--arrow-to-down-left-line-duotone] size-4"></span>
+			    <span class="mt-auto iconify solar--arrow-to-down-left-line-duotone size-4"></span>
 			</Dropdown.Trigger>
 			<Dropdown.Content>
 			    {@const by_parent = Object.entries(Object.groupBy(list,(item: Node)=>item.parentId))}
@@ -47,7 +47,7 @@ function setSelection(node: Node) {
 				    {@const node = getNode(item[0])}
 				    {@const label = node?.data?.raw[node?.data.labelKey]}
 				    {#if label}
-					<Dropdown.Label>{label}</Dropdown.Label>
+					<Dropdown.Label class="text-muted-foreground" >{label}</Dropdown.Label>
 				    {/if}
 				    {#each item[1] as val}
 					<Dropdown.Item onclick={()=>setSelection(val)} class="pl-4">{val.data.raw[val.data.labelKey]}</Dropdown.Item>

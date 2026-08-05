@@ -179,7 +179,7 @@
 		// INFO: this is very simple implementation of common ancestors
 		// not all cases covered
 		// always connect from root and it will be fine
-		const list = buildList(start, true);
+		const list = buildList(start, false);
 		const list_source = buildList(end, true);
 		intersection = list.intersection(list_source);
 		if (list.size > 0 && list_source.size > 0) {
@@ -306,7 +306,7 @@
 		<Button class="svelte-flow__controls-button" onclick={() => onLayout()}>
 			{#snippet children()}
 				<span
-					class="icon-[material-symbols--responsive-layout-outline-rounded] size-6 text-amber-600"
+					class="iconify material-symbols--responsive-layout-outline-rounded size-6 text-amber-600"
 				></span>
 				<div class="size-auto">layout</div>
 			{/snippet}
@@ -323,7 +323,7 @@
 			onclick={() => console.log(dbNodes)}
 		>
 			{#snippet children()}
-				<span class="icon-[material-symbols--database-upload-outline-rounded] size-6"></span>
+				<span class="iconify material-symbols--database-upload-outline-rounded size-6"></span>
 			{/snippet}
 		</Button>
 	</Panel>

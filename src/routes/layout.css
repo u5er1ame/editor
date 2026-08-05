@@ -2,7 +2,11 @@
 @import "tw-animate-css";
 
 @plugin '@tailwindcss/forms';
-@plugin "@iconify/tailwind4";
+@plugin "@iconify/tailwind4" {
+    prefixes: carbon, material-symbols, solar;
+    prefix: "iconify";
+    scale: 1.2;
+};
 
 @custom-variant dark (&:is(.dark *));
 /* b/w
@@ -226,7 +230,8 @@
 /*     --xy-controls-button-background-color-default: var(--color-stone-50); */
 /*     --xy-controls-button-background-color-hover: var(--color-blueprint); */
 /*     --xy-resize-background-color-default: var(--color-orange-200); */
-    --xy-edge-stroke: --alpha(var(--color-foreground)/80%);
+    --xy-edge-stroke: --alpha(var(--color-accent)/80%);
+    /* --xy-edge-stroke-width-default: 1px; */
     --xy-edge-stroke-selected: var(--color-active);
 /*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
 }

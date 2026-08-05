@@ -16,7 +16,10 @@
 	import { getDataClient } from '$lib/db.remote';
 	import Skeleton from './ui/skeleton/skeleton.svelte';
 	import Editor from './editor/Root.svelte';
-	import type { Component } from 'svelte';
+	import { getContext, type Component } from 'svelte';
+	import { page } from '$app/state';
+	import DbContext from './DbContext.svelte';
+	import type { DBContext } from '../../routes/+layout.svelte';
 
 	registerToolbarItem('print', Button);
 
@@ -101,10 +104,10 @@
 	// 	};
 	// });
 
-	let { table = $bindable(), readonly = $bindable(), config, ...rest } = $props();
-
+	let { table = $bindable(), readonly = $bindable(), config, changes, ...rest } = $props();
 	let id = $state();
 	let selection: IRow | null = $state(null);
+	const isEditor = $derived(getContext<DBContext>("db").userRoles?.includes("EDITOR") ?? false);
 	let column: string | null = $state(null);
 	let ref: HTMLElement | null = $state(null);
 	let showEditor = $state(false);
@@ -152,6 +155,7 @@
 	});
 	const init = (api: IApi) => {
 		api.on('select-row', (ev) => {
+			changes.selectedRow = ev.id;
 			if (selection) {
 				selection = ev.id ? api.getRow(ev.id) : null;
 			}
@@ -168,7 +172,7 @@
 			return false;
 		});
 		api.on('close-editor', (ev) => {
-			console.log('close-editor');
+			console.log('close-editor', ev);
 		});
 	};
 	$effect(() => {
@@ -186,7 +190,7 @@
 </script>
 
 {#snippet PrintIcon()}
-	<span class="icon-[material-symbols--print-rounded] size-5 align-middle"></span>
+	<span class="iconify material-symbols--print-rounded size-5 align-middle"></span>
 {/snippet}
 
 {#if browser}
@@ -214,6 +218,7 @@
 			</div>
 		{/await}
 	</div>
+	{#if isEditor}
 	<Editor
 		bind:show={showEditor}
 		onsave={(e) => {
@@ -225,6 +230,7 @@
 		bind:values={selection}
 		config={editorConfig}
 	/>
+	{/if}
 {/if}
 
 <style>

@@ -19,11 +19,11 @@ import type { DBContext } from '../../routes/+layout.svelte';
 let { ...rest } = $props();
 
 const db = getContext<DBContext>("db");
-
 const nsInfo = getNamespaceInfo();
 const systeminfo = await getSystemInfo();
 let showPassPrompt = $state(false);
 
+$inspect("nsInfo", nsInfo.ready);
 let selectedUser: string = $state(db.username);
 let passInputRef: HTMLInputElement | null = $state(null);
 let pass: string | undefined = $state();

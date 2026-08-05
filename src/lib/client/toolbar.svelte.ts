@@ -1,5 +1,5 @@
 import { type Node, useSvelteFlow, type ControlButtonProps, type Edge } from "@xyflow/svelte";
-import { Position, type Align, type Rect } from "@xyflow/system";
+import { Position, type Align, type Rect } from "@xyflow/svelte";
 import type { Snippet } from "svelte";
 
 import { DeleteButton, FitViewButton, } from "$lib/client/snippets.svelte";

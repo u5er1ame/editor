@@ -13,7 +13,7 @@
 
 	function isWriteable(table: any) {
 		if (table.drop) {
-			return `<span class="icon-[material-symbols--lock] text-red-500"></span>`;
+			return `<span class="iconify material-symbols--lock text-red-500"></span>`;
 		} else {
 			return ``;
 		}
@@ -21,10 +21,10 @@
 	function getKind(table: any) {
 		switch (table.kind.kind) {
 			case 'RELATION':
-				return `<span class="icon-[material-symbols--graph-8]"></span>`;
+				return `<span class="iconify material-symbols--graph-8"></span>`;
 			case 'NORMAL':
 				if (table.view) {
-					return `<span class="icon-[material-symbols--table-eye-outline]"></span>`;
+					return `<span class="iconify material-symbols--table-eye-outline"></span>`;
 				}
 			default:
 				return '';
@@ -50,7 +50,7 @@
 </script>
 
 {#snippet PrintIcon()}
-	<span class="icon-[material-symbols--print-rounded] size-5 align-middle"></span>
+	<span class="iconify material-symbols--print-rounded size-5 align-middle"></span>
 {/snippet}
 
 {#if controller.tablesInfo}

@@ -43,7 +43,7 @@ const text_color = $derived.by(() => {
     <Button onclick={()=>db?.reconnect()} variant="ghost" class="size-icon cursor-pointer" >
 	<div
 	    class={twMerge(
-		'icon-[solar--database-bold-duotone] size-4 content-center align-middle',
+		'iconify solar--database-bold-duotone size-4 content-center align-middle',
 		text_color
 	    )}
 	></div>

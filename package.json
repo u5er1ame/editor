@@ -16,6 +16,7 @@
 		"test": "npm run test:unit -- --run"
 	},
 	"devDependencies": {
+		"@iconify-json/carbon": "^1.2.25",
 		"@iconify-json/material-symbols": "^1.2.50",
 		"@iconify-json/solar": "^1.2.5",
 		"@iconify/tailwind4": "^1.2.0",
@@ -55,8 +56,8 @@
 		"@svar-ui/svelte-grid": "^2.5.0",
 		"@svar-ui/svelte-menu": "^2.5.0",
 		"@svar-ui/svelte-toolbar": "^2.5.0",
-		"@xyflow/svelte": "^1.5.0",
-		"@xyflow/system": "^0.0.74",
+		"@xyflow/svelte": "^1.6.2",
+		"@xyflow/system": "^0.0.79",
 		"elkjs": "^0.11.0",
 		"runed": "^0.37.1",
 		"surrealdb": "^2.0",

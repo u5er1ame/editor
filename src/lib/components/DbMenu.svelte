@@ -116,7 +116,7 @@ function setUsername(value: string) {
 				RAM {(rootInfo?.memory_usage / 1024 / 1024).toFixed(2)}MB
 			</p>
 			<div
-				class="icon-[solar--database-bold-duotone] size-4 content-center bg-emerald-600 align-bottom"
+				class="iconify solar--database-bold-duotone size-4 content-center bg-emerald-600 align-bottom"
 			></div>
 		</div>
 	</Popover.Header>

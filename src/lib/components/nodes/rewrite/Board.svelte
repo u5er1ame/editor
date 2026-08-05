@@ -152,16 +152,16 @@ async function createBreaker(data: {[key: keyof typeof dialogData]: any}) {
 	<p class="size-full text-foreground/40 content-center text-[1em]">{data?.raw[data.labelKey]}</p>
     <!-- {/if} -->
     {#if type == "unsaved_boards"}
-        <button onclick={()=>toast.warning("Board not saved yet")} title="This item arnt saved to database"  class="absolute m-0.5 w-2 h-2 top-0 right-0 bg-amber-400/40 icon-[solar--danger-triangle-bold-duotone]"></button>
+        <button onclick={()=>toast.warning("Board not saved yet")} title="This item arnt saved to database"  class="absolute m-0.5 w-2 h-2 top-0 right-0 bg-amber-400/40 iconify solar--danger-triangle-bold-duotone"></button>
     {/if}
 </div>
 <NodeToolbar class="text-secondary-foreground h-full"  position={Position.Right} align="start" nodeId={id}>
     <div class="flex flex-col gap-1 *:rounded-lg" transition:fade>
         <ControlButton   title="Add breaker" onclick={()=>{openDialog=true}}>
-            <span class="icon-[material-symbols--add-2-rounded]"></span>
+            <span class="iconify material-symbols--add-2-rounded"></span>
         </ControlButton>
     <ControlButton  title="Rename board" onclick={()=>console.log("click")}>
-        <span class="icon-[solar--clapperboard-edit-bold-duotone]"></span>
+        <span class="iconify solar--clapperboard-edit-bold-duotone"></span>
     </ControlButton>
     </div>
 </NodeToolbar>
