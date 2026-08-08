@@ -72,10 +72,10 @@ const reccon: Handle = async ({ event, resolve }) => {
 				}
 			}).catch((e)=>{ return error(500, e) });
 		// }
-		// if (db.isConnected == false) {
+		if (db.isConnected == false) {
 			const isConnected = await db.connect(env.SURREAL_URL,{ authentication: event.locals.db.token  }).catch((e)=>{ return error(500, e) });
 			event.locals.db.isConnected = isConnected;
-		// }
+		}
 		return await resolve(event);
 	} catch (e) {
 		console.error(colors.red, "[CHECK CONNECTION]", colors.reset, e.message);

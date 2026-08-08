@@ -70,7 +70,7 @@ function setUsername(value: string) {
 
 async function changeDb(val: string) {
 	// await fetch("/api/v1/db/use", { method: "POST", body: JSON.stringify({ database: val }) }).then((res)=>res.json());
-	await invalidateAll();
+	db.database = val
 }
 </script>
 

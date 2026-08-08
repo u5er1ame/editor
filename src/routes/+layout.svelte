@@ -1,54 +1,62 @@
 <script lang="ts" module>
-export class DBContext {
-	isConnected: boolean = $state(false);
-	username: string = $state("user");
-	userRoles?: Roles[] = $state();
-	namespace?: string = $state();
-	database?: string = $state();
-	constructor(data: LayoutProps["data"]) {
-		this.isConnected = data.db.isConnected;
-		if (data.db.username) this.username = data.db.username;
-		this.namespace = data.db.namespace;
-		this.database = data.db.database;
-		watch(()=>this.username, (cur,pre)=>{
-			if (!cur) return;
-			if (cur == pre) return;
-			getNamespaceInfo().then((info)=>{
-				const roles = info?.users.find((u)=>u.name == cur)?.roles;
-				this.userRoles = roles;
-			});
-		});
-		watch(()=>[this.namespace, this.database], (cur,pre)=>{
-			const [ns, db] = cur;
-			const [pre_ns, pre_db] = pre ?? [];
-			if (!cur) return;
-			if (cur == pre) return;
-			fetch("/api/v1/db/use", {
-				method: "POST",
-				body: JSON.stringify({
-					namespace: ns,
-					database: db,
-				}),
-			}).catch((e) => {
-				error(500, "Error setting namespace/database");
-			});
-		});
-	}
-	getRoleString(): string {
-		if (!this.userRoles) return ""
-		if (this.userRoles.includes("OWNER")) return "Owner";
-		if (this.userRoles.includes("EDITOR")) return "Editor"
-		return "Viewer"
-	}
-	isEditor(): boolean {
-		if (!this.userRoles) return false
-		if (this.userRoles.includes("EDITOR") || this.userRoles.includes("OWNER")){
-			return true
+	export class DBContext {
+		isConnected: boolean = $state(false);
+		username: string = $state('user');
+		userRoles?: Roles[] = $state();
+		namespace?: string = $state();
+		database?: string = $state();
+		constructor(pageData: () => LayoutProps['data']['db']) {
+			const data = pageData();
+			this.isConnected = data.isConnected;
+			if (data.username) this.username = data.username;
+			this.namespace = data.namespace;
+			this.database = data.database;
+			watch(
+				() => this.username,
+				(cur, pre) => {
+					if (!cur) return;
+					if (cur == pre) return;
+					getNamespaceInfo().then((info) => {
+						const roles = info?.users.find((u) => u.name == cur)?.roles;
+						this.userRoles = roles;
+					});
+				}
+			);
+			watch(
+				() => [this.namespace, this.database],
+				(cur, pre) => {
+					const [ns, db] = cur;
+					const [pre_ns, pre_db] = pre ?? [];
+					if (!cur) return;
+					if (cur == pre) return;
+					fetch('/api/v1/db/use', {
+						method: 'POST',
+						body: JSON.stringify({
+							namespace: ns,
+							database: db
+						})
+					}).then(()=>invalidateAll()).catch((e) => {
+						error(500, 'Error setting namespace/database');
+					});
+				}
+			);
 		}
-		return false
+		getRoleString(): string {
+			if (!this.userRoles) return '';
+			if (this.userRoles.includes('OWNER')) return 'Owner';
+			if (this.userRoles.includes('EDITOR')) return 'Editor';
+			return 'Viewer';
+		}
+		isEditor(): boolean {
+			if (!this.userRoles) return false;
+			if (this.userRoles.includes('EDITOR') || this.userRoles.includes('OWNER')) {
+				return true;
+			}
+			return false;
+		}
 	}
-}
 </script>
+
 <script lang="ts">
 	import { twMerge } from 'tailwind-merge';
 	import { watch } from 'runed';
@@ -67,11 +75,12 @@ export class DBContext {
 	import Views from '$lib/components/Views.svelte';
 	import { getNamespaceInfo } from '$lib/db.remote';
 	import type { Roles } from '$lib/server/root_db.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	let { children, data }: LayoutProps = $props();
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
-	const db = setContext("db", new DBContext(data));
+	const db = setContext('db', new DBContext(() => data.db));
 </script>
 
 <svelte:head>
@@ -80,34 +89,35 @@ export class DBContext {
 
 <ModeWatcher />
 <Toaster richColors position="top-center" />
-<div class="flex size-full flex-col h-dvh ">
+<div class="flex size-full h-dvh flex-col">
 	<Nav.Root
 		orientation="horizontal"
-		class=" bg-header py-0.5 z-50 size-full max-h-16 max-w-full justify-between border-b shadow shadow-border sticky top-0"
+		class=" sticky top-0 z-50 size-full max-h-16 max-w-full justify-between border-b bg-header py-0.5 shadow shadow-border"
 	>
-			<Nav.List>
-				<DbStatus />
-				<Views views={data.views} />
-			</Nav.List>
-			<Nav.List>
-						<div class={twMerge("px-1 ",db.isEditor()?"text-destructive":"")}>
-							{db.getRoleString()}
-						</div>
-				<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->
-				{#key mode.current}
-					<div in:scale>
-						<Nav.Item class="px-1 cursor-pointer">
-							<Nav.Link onclick={toggleMode} class="hover:text-hover">
-								<!-- <Button variant="ghost" class="cursor-pointer" onclick={toggleMode}> -->
-								<span class={twMerge(mode_icon, 'content-center align-middle')}></span>
-								<!-- </Button> -->
-							</Nav.Link>
-						</Nav.Item>
-					</div>
-				{/key}
-			</Nav.List>
+		<Nav.List>
+			<DbStatus />
+			<Views views={data.views} />
+		</Nav.List>
+		<Nav.List>
+			<div class={twMerge('px-1 ', db.isEditor() ? 'text-destructive' : '')}>
+				{db.getRoleString()}
+			</div>
+			<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->
+			{#key mode.current}
+				<div in:scale>
+					<Nav.Item class="cursor-pointer px-1">
+						<Nav.Link onclick={toggleMode} class="hover:text-hover">
+							<!-- <Button variant="ghost" class="cursor-pointer" onclick={toggleMode}> -->
+							<span class={twMerge(mode_icon, 'content-center align-middle')}></span>
+							<!-- </Button> -->
+						</Nav.Link>
+					</Nav.Item>
+				</div>
+			{/key}
+		</Nav.List>
 	</Nav.Root>
 	{@render children()}
 </div>
+
 <style>
 </style>
