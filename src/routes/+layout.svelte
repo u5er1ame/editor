@@ -1,13 +1,13 @@
 <script lang="ts" module>
 export class DBContext {
 	isConnected: boolean = $state(false);
-	username?: string = $state();
+	username: string = $state("user");
 	userRoles?: Roles[] = $state();
 	namespace?: string = $state();
 	database?: string = $state();
 	constructor(data: LayoutProps["data"]) {
 		this.isConnected = data.db.isConnected;
-		this.username = data.db.username;
+		if (data.db.username) this.username = data.db.username;
 		this.namespace = data.db.namespace;
 		this.database = data.db.database;
 		watch(()=>this.username, (cur,pre)=>{
@@ -59,17 +59,16 @@ export class DBContext {
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 
-	import type { LayoutProps, PageData } from './$types';
+	import type { LayoutProps } from './$types';
 	import { Toaster } from '$lib/components/ui/sonner/index';
 	import * as Nav from '$lib/components/ui/navigation-menu/index';
 	import { icons } from '$lib/client/color_mode.svelte';
 	import DbStatus from '$lib/components/DbStatus.svelte';
 	import Views from '$lib/components/Views.svelte';
-	import { toast } from 'svelte-sonner';
 	import { getNamespaceInfo } from '$lib/db.remote';
 	import type { Roles } from '$lib/server/root_db.svelte';
 
-	let { children, data, params }: LayoutProps = $props();
+	let { children, data }: LayoutProps = $props();
 	const current_mode = $derived(mode.current ?? 'system');
 	const mode_icon = $derived(icons.get(current_mode));
 	const db = setContext("db", new DBContext(data));

@@ -4,7 +4,6 @@ import { page } from '$app/state';
 import * as Field from '$lib/components/ui/field/index';
 import * as Select from '$lib/components/ui/select/index';
 import * as Dialog from './ui/dialog/index';
-import Skeleton from './ui/skeleton/skeleton.svelte';
 import { Button } from './ui/button';
 import Badge from './ui/badge/badge.svelte';
 import Input from './ui/input/input.svelte';
@@ -20,11 +19,9 @@ let { ...rest } = $props();
 
 const db = getContext<DBContext>("db");
 const nsInfo = getNamespaceInfo();
-const systeminfo = await getSystemInfo();
 let showPassPrompt = $state(false);
 
-$inspect("nsInfo", nsInfo.ready);
-let selectedUser: string = $state(db.username);
+let selectedUser: string | undefined = $state(db.username);
 let passInputRef: HTMLInputElement | null = $state(null);
 let pass: string | undefined = $state();
 let errorMsg: string | undefined = $state();
@@ -49,7 +46,7 @@ function badgeVariant(role: string) {
 
 async function onsubmit(e: Event) {
 	e.preventDefault();
-	const result = await fetch("/api/v1/db/signin", { method: "POST", body: JSON.stringify({ username: selectedUser, password: pass, namespace: systeminfo?.defaults?.namespace ?? "main" }) });
+	const result = await fetch("/api/v1/db/signin", { method: "POST", body: JSON.stringify({ username: selectedUser, password: pass }) });
 	if (result.status == 200) {
 		showPassPrompt = false;
 		pass = undefined;
@@ -111,13 +108,8 @@ async function changeDb(val: string) {
 	</Dialog.Portal>
 </Dialog.Root>
 
-<MemInfo system={systeminfo?.system} />
+<MemInfo />
 <div class="flex flex-col gap-1">
-	{#if nsInfo.error}
-		<p class="text-destructive">{nsInfo.error.message}</p>
-	{:else if nsInfo.loading}
-		<Skeleton class="w-full min-h-1/3" />
-	{/if}
 	{#if nsInfo.ready}
 		<Field.Field name="username">
 			<Field.Content class="flex flex-row justify-between gap-2">
