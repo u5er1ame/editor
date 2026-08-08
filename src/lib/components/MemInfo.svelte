@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getSystemInfo } from "$lib/db.remote";
     import { getDiagnostics } from "$lib/nodered.remote";
     import * as Popover from "./ui/popover";
 
@@ -7,8 +6,8 @@
 
     const noderedInfo = await getDiagnostics();
 
-    const dbRam = $derived((system?.memory_usage / 1024 / 1024).toFixed(2))
-    const noderedRam= $derived((noderedInfo?.nodejs.memoryUsage.rss!/ 1024 / 1024).toFixed(2))
+    const dbRam = $derived((system?.memory_usage / 1024 / 1024))
+    const noderedRam= $derived((noderedInfo?.nodejs.memoryUsage.rss!/ 1024 / 1024))
 </script>
 <Popover.Header class="flex size-full flex-col gap-1">
     <div class="flex flex-row justify-between">
@@ -17,7 +16,13 @@
 		class="icon-node-red"
 	    >
 	    </div>
-	    <p>{noderedRam}MB</p>
+	    <p>
+		{#if Number.isNaN(noderedRam)}
+		    Unavailable
+		{:else}
+		   {noderedRam.toFixed()}MB
+		{/if}
+	    </p>
 	</Popover.Title>
     </div>
     <div class="flex flex-row justify-between">
@@ -26,7 +31,13 @@
 		class="icon-surrealdb"
 	    >
 	    </div>
-	    <p>{dbRam}MB</p>
+	    <p>
+		{#if Number.isNaN(dbRam)}
+		    Unavailable
+		{:else}
+		   {dbRam.toFixed()}MB
+		{/if}
+	    </p>
 	</Popover.Title>
     </div>
 </Popover.Header>
