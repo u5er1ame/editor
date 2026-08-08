@@ -34,6 +34,19 @@ export class DBContext {
 			});
 		});
 	}
+	getRoleString(): string {
+		if (!this.userRoles) return ""
+		if (this.userRoles.includes("OWNER")) return "Owner";
+		if (this.userRoles.includes("EDITOR")) return "Editor"
+		return "Viewer"
+	}
+	isEditor(): boolean {
+		if (!this.userRoles) return false
+		if (this.userRoles.includes("EDITOR") || this.userRoles.includes("OWNER")){
+			return true
+		}
+		return false
+	}
 }
 </script>
 <script lang="ts">
@@ -78,6 +91,9 @@ export class DBContext {
 				<Views views={data.views} />
 			</Nav.List>
 			<Nav.List>
+						<div class={twMerge("px-1 ",db.isEditor()?"text-destructive":"")}>
+							{db.getRoleString()}
+						</div>
 				<!-- INFO: because both icons packed in one span element rerender needed to apply animation -->
 				{#key mode.current}
 					<div in:scale>
