@@ -1,7 +1,8 @@
 <script lang="ts">
     import { getDiagnostics } from "$lib/nodered.remote";
     import * as Popover from "./ui/popover";
-
+    import nodered from "$lib/assets/nodered.svg"
+    import surrealdb from "$lib/assets/db.svg"
     let { system, ...rest } = $props();
 
     const noderedInfo = await getDiagnostics();
@@ -12,10 +13,11 @@
 <Popover.Header class="flex size-full flex-col gap-1">
     <div class="flex flex-row justify-between">
 	<Popover.Title class="flex flex-row gap-2">
-	    <div
+	    <img
 		class="icon-node-red"
-	    >
-	    </div>
+		src={nodered}
+		alt="Node-red icon"
+	    />
 	    <p>
 		{#if Number.isNaN(noderedRam)}
 		    Unavailable
@@ -27,10 +29,11 @@
     </div>
     <div class="flex flex-row justify-between">
 	<Popover.Title class="flex flex-row gap-2">
-	    <div
+	    <img
 		class="icon-surrealdb"
-	    >
-	    </div>
+		src={surrealdb}
+		alt="Db icon"
+	    />
 	    <p>
 		{#if Number.isNaN(dbRam)}
 		    Unavailable
@@ -43,14 +46,12 @@
 </Popover.Header>
 <style>
 .icon-surrealdb {
-  background-image: url('https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/surrealdb/default.svg');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   width: 20px;
   height: 20px;
 }
 .icon-node-red {
-  background-image: url('https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/node-red/default.svg');
   background-size: contain;
   background-repeat: no-repeat;
   width: 20px;
