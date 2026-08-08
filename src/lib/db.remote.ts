@@ -49,7 +49,7 @@ export const getDatabaseInfo = query(async () => {
 	return res ?? {}
 });
 
-export const getDataClient = query<Tables, ClientData[]>(z.string().refine((v)=>schemaStore.store.has(v as Tables), { message: "Schema not found for table" } ),
+export const getDataClient = query<Tables, ClientData[]>(z.string().refine((v)=>schemaStore.store.has(v as Tables), { error: (iss)=>`Schema not found for table ${iss.input}` } ),
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
@@ -61,7 +61,7 @@ export const getDataClient = query<Tables, ClientData[]>(z.string().refine((v)=>
 		return jsonify(res ?? [])
 });
 
-export const getData = query<Tables, ServerData[]>(z.string().refine((v)=>schemaStore.store.has(v as Tables), { message: "Schema not found for table" } ),
+export const getData = query<Tables, ServerData[]>(z.string().refine((v)=>schemaStore.store.has(v as Tables), { error: (iss)=>`Schema not found for table ${iss.input}` } ),
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
@@ -71,7 +71,7 @@ export const getData = query<Tables, ServerData[]>(z.string().refine((v)=>schema
 		return jsonify(res ?? [])
 });
 
-export const getTableStructure = query(z.string().refine((v)=>schemaStore.store.has(v as Tables), { message: "Schema not found for table" } ),
+export const getTableStructure = query(z.string().refine((v)=>schemaStore.store.has(v as Tables), { error: (iss)=>`Schema not found for table ${iss.input}` } ),
 	async (table) => {
 		if (!db.isConnected) return
 		await db.ready.catch(()=>{ return error(500,"DB not ready") });

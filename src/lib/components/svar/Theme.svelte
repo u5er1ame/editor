@@ -88,7 +88,7 @@
 		--wx-input-background-disabled: var(--wx-color-disabled);
 		--wx-input-placeholder-color: var(--wx-color-font-alt);
 		--wx-input-border: var(--wx-border);
-		--wx-input-border-focus: 0px solid var(--color-hover);
+		--wx-input-border-focus: 0px solid var(--color-active);
 		--wx-input-border-disabled: var(--wx-border);
 		--wx-input-border-radius: var(--wx-border-radius);
 		--wx-input-height: 32px;

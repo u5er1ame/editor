@@ -63,9 +63,9 @@
     --text-dark: var(--black);
     --text-light: var(--white);
     --text-muted: var(--second-light-2);
-    --input: --alpha(var(--first)/50%);
+    --input: --alpha(var(--first)/20%);
     --input-foreground: var(--second-light-2);
-    --ring: var(--first-dark);
+    --ring: var(--color-active);
     --ring-destructive: var(--red-light);
 
     --radius: 0.0rem;
@@ -113,30 +113,29 @@
     --background: var(--dark);
     --foreground: var(--white);
 
-    --ring: var(--white);
     --header: var(--second-dark-2);
-
-      --card: var(--background);
-      --card-foreground: var(--foreground);
-      --popover: var(--first-light);
-      --popover-foreground: var(--foreground);
-      --primary: var(--first);
-      --primary-foreground: var(--text-light);
-      --secondary: var(--second);
-      --secondary-foreground: var(--text-dark);
-      --muted: var(--second-light);
-      --muted-foreground: var(--text-muted);
-      --accent: var(--first);
-      --accent-foreground: var(--white);
-      --destructive: var(--red-light);
-      --sidebar: var(--dark);
-      --sidebar-foreground: var(--foreground);
-      --sidebar-primary: var(--first);
-      --sidebar-primary-foreground: var(--first-light);
-      --sidebar-accent: var(--first-dark);
-      --sidebar-accent-foreground: var(--first-light-2);
-      --sidebar-border: var(--border);
-      --sidebar-ring: var(--ring);
+    --card: var(--background);
+    --card-foreground: var(--foreground);
+    --popover: var(--first-light);
+    --popover-foreground: var(--foreground);
+    --primary: var(--first);
+    --primary-foreground: var(--text-light);
+    --secondary: var(--second);
+    --secondary-foreground: var(--text-dark);
+    --muted: var(--second-light);
+    --muted-foreground: var(--text-muted);
+    --accent: var(--first);
+    --accent-foreground: var(--white);
+    --destructive: var(--red-light);
+    --ring: var(--color-active);
+    --sidebar: var(--dark);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--first);
+    --sidebar-primary-foreground: var(--first-light);
+    --sidebar-accent: var(--first-dark);
+    --sidebar-accent-foreground: var(--first-light-2);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
 };
 
 

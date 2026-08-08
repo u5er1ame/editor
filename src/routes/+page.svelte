@@ -19,7 +19,7 @@
 	{/snippet}
 <div class="size-full max-w-screen">
 	{#await fetch("/api/v1/db/ready")}
-		<Skeleton class="w-full h-full animate-pulse m-1"/>
+		<Skeleton class="w-full h-full m-1 bg-background"/>
 	{:then}
 		<Tabs tables={data.tables} />
 	{/await}

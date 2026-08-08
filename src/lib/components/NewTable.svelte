@@ -21,6 +21,7 @@
 	import DbContext from './DbContext.svelte';
 	import type { DBContext } from '../../routes/+layout.svelte';
 	import Theme from './svar/Theme.svelte';
+	import Spinner from './ui/spinner/spinner.svelte';
 
 	registerToolbarItem('print', Button);
 
@@ -198,7 +199,10 @@
 	<!-- <div class="wx-theme size-full max-w-svw"> -->
 	<Theme>
 		{#await getDataClient(table)}
-			<Skeleton class="m-1 h-full w-svw animate-pulse bg-header" />
+			<div class="flex flex-row size-full justify-center">
+				Loading...
+				<Spinner size="200" />
+			</div>
 		{:then data}
 			{#if data && data.length == 0}
 				<div class="size-full text-start">
@@ -215,8 +219,8 @@
 				<!-- </Style> -->
 			{/if}
 		{:catch e}
-			<div class="size-full text-start">
-				<div class="text-xl text-destructive">{e.error.message}</div>
+			<div class="flex flex-row size-full justify-center">
+				<div class="text-xl text-destructive">{JSON.parse(e).message}</div>
 			</div>
 		{/await}
 	</Theme>

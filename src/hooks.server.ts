@@ -32,7 +32,7 @@ export const handleError = (e: ErrorEvent) => {
 export const handleValidationError: HandleValidationError = async ({ event, issues }) => {
 	console.log(colors.red, "[VALIDATION ERROR]", colors.reset, issues);
 	const message = issues.map((issue) => issue.message).join(", ");
-	error(404, {
+	error(400, {
 		message,
 	})
 };

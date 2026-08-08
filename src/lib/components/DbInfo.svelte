@@ -8,10 +8,10 @@ import { Button } from './ui/button';
 import Badge from './ui/badge/badge.svelte';
 import Input from './ui/input/input.svelte';
 
-import { getNamespaceInfo, expire, getSystemInfo } from '$lib/db.remote';
+import { getNamespaceInfo, expire } from '$lib/db.remote';
 import MemInfo from './MemInfo.svelte';
 import { toast } from 'svelte-sonner';
-import { goto, invalidate, invalidateAll } from '$app/navigation';
+import { goto, invalidateAll } from '$app/navigation';
 
 import type { DBContext } from '../../routes/+layout.svelte';
 
