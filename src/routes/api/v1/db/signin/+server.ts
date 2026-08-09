@@ -1,6 +1,5 @@
 import { type RequestHandler } from "@sveltejs/kit";
 
-import { db } from "$lib/server/root_db.svelte";
 import { decodeJWT, getTokenMaxAge } from "$lib/utils";
 import { getSystemInfo } from "$lib/db.remote";
 
@@ -13,9 +12,9 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
     }
     let body = { message: "OK" };
     let code = 200;
-    await db.signin(data).then((tokens)=>{
+    await locals.db.instance.signin(data).then((tokens)=>{
         const decoded = decodeJWT(tokens.access);
-		const maxAge = getTokenMaxAge(decoded);
+        const maxAge = getTokenMaxAge(decoded);
         cookies.set("sr_token", tokens.access, {
             httpOnly: true,
             path: "/",
