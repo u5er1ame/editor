@@ -68,8 +68,8 @@ export const getDatabaseInfo = query(async () => {
 	return res ?? {};
 });
 
-export const getDataClient = query<Tables, ClientData[]>(
-	z.string().refine((v) => schemaStore.store.has(v as Tables), {
+export const getDataClient = query(
+	z.custom<Tables>((v) => typeof v === "string" && schemaStore.store.has(v as Tables), {
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
@@ -86,8 +86,8 @@ export const getDataClient = query<Tables, ClientData[]>(
 	}
 );
 
-export const getData = query<Tables, ServerData[]>(
-	z.string().refine((v) => schemaStore.store.has(v as Tables), {
+export const getData = query(
+	z.custom<Tables>((v) => typeof v === "string" && schemaStore.store.has(v as Tables), {
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
@@ -97,8 +97,8 @@ export const getData = query<Tables, ServerData[]>(
 		});
 		const { locals } = getRequestEvent();
 		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
-		const res = await db.select<ServerData>(new Table(table)).catch((e) => {
-			return error(500, e);
+		const res = await db.select<ServerData>(new Table(table)).catch((e: any) => {
+			return error(500, { message: e.toString() }); // FIXME: THIS EXPOSES DB ERRORS
 		});
 		return jsonify(res ?? []);
 	}
