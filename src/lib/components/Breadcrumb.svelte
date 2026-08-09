@@ -1,10 +1,11 @@
 <script lang="ts">
 import { twMerge } from 'tailwind-merge';
-import { type Node, useOnSelectionChange, useNodes, useSvelteFlow } from '@xyflow/svelte';
+import { type Node, useOnSelectionChange, useNodes, useSvelteFlow, getNodesBounds, getViewportForBounds } from '@xyflow/svelte';
 import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 import * as Dropdown from '$lib/components/ui/dropdown-menu';
 import { CrumbBuilder } from '$lib/client/bredcrumb.svelte';
 	import { tick } from 'svelte';
+	import { fitViewport, getInternalNodesBounds, getNodePositionWithOrigin } from '@xyflow/system';
 
 
 let {} = $props();
@@ -20,9 +21,16 @@ useOnSelectionChange(({ nodes }) => {
 
 function setSelection(node: Node) {
     const desel = nodes.current.filter((n)=>n.id != node.id)
-    desel.forEach((n)=>updateNode(n.id, {selected: false}));
-    updateNode(node.id, {selected: true}); // INFO: just in case if selection is empty
-    fitView({nodes:[node], duration: 2000, padding: 1});
+    const selectableMap = new Map<string, boolean | undefined>(desel.map((n)=>[n.id, n.selectable]));
+    desel.forEach((n)=>updateNode(n.id, {selected: false, selectable: false}));
+    fitView({nodes:[node], duration: 2000, padding: 1}).then(()=>{
+	desel.forEach((n)=>{
+	    if (selectableMap.has(n.id)) {
+		updateNode(n.id, {selectable: selectableMap.get(n.id)});
+	    }
+	});
+    });
+    updateNode(node.id, {selected: true, hidden: false}); // INFO: just in case if selection is empty
 }
 
 </script>
