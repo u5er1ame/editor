@@ -14,10 +14,9 @@ declare global {
 		interface Locals {
 			db: {
 				instance: Surreal;
+				root_instance: Surreal;
 				token: Token | null;
-				isConnected: boolean;
 				username?: string;
-				namespace?: string;
 				database?: string;
 			}
 		}

@@ -1,5 +1,4 @@
 import type { LayoutServerLoad } from "./$types";
-import { db } from "$lib/server/root_db.svelte";
 
 export interface View {
     name: string;
@@ -24,10 +23,10 @@ const views: View[] = [
 export const load: LayoutServerLoad = async ({ locals, fetch }) => {
 		return {
 			db: {
-				isConnected: db.isConnected,
+				isConnected: locals.db.instance.isConnected,
 				username: locals.db.username,
-				namespace: locals.db.namespace,
-				database: locals.db.database,
+				namespace: locals.db.instance.namespace,
+				database: locals.db.instance.database,
 			},
 			views,
 		}

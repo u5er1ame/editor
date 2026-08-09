@@ -5,7 +5,7 @@ import { getDatabaseInfo } from '$lib/db.remote';
 
 export const load: PageServerLoad = async ({ depends, params, request, url, locals, fetch }): Promise<PageServerData> => {
 	depends(url.pathname);
-	if(!locals.db.isConnected) return error(500,"DB not connected");
+	if(!locals.db.instance.isConnected) return error(500,"DB not connected");
 	const info = await getDatabaseInfo().catch((e)=>{ error(400,e.message) });
 	if (!info) return error(500,"Cant get database info. Are you connected to DB?");
 	if (info.tables == undefined) { return error(500,"Cant get tables. Something went wrong!"); }

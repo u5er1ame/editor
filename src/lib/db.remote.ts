@@ -3,8 +3,6 @@ import { error } from '@sveltejs/kit';
 import { getRequestEvent, query } from '$app/server';
 import { env } from '$env/dynamic/private';
 import {
-	db,
-	root_access,
 	type DatabaseInfo,
 	type NamespaceInfo,
 	type SystemInfo
@@ -15,6 +13,8 @@ import { schemaStore, type ClientData, type ServerData } from './model/schemas';
 import type { Tables } from './model/types';
 
 export const connect_system = query(async () => {
+	const { locals } = getRequestEvent();
+	const root_access = locals.db.root_instance;
 	const isConnected = await root_access
 		.connect(env.SURREAL_URL, {
 			authentication: {
@@ -27,6 +27,8 @@ export const connect_system = query(async () => {
 });
 
 export const getSystemInfo = query(async () => {
+	const { locals } = getRequestEvent();
+	const root_access = locals.db.root_instance;
 	if (!root_access.isConnected) return;
 	await root_access.ready.catch(() => {});
 	const [res] = await root_access
@@ -40,15 +42,21 @@ export const getSystemInfo = query(async () => {
 });
 
 export const connect = query(async () => {
+	const { locals } = getRequestEvent();
+	const db = locals.db.instance;
 	const isConnected = await db.connect(env.SURREAL_URL).catch(() => false);
 	return isConnected;
 });
 
 export const getStatus = query(async () => {
+	const { locals } = getRequestEvent();
+	const db = locals.db.instance;
 	return db.status;
 });
 
 export const getNamespaceInfo = query(async () => {
+	const { locals } = getRequestEvent();
+	const db = locals.db.instance;
 	if (!db.isConnected) error(500, 'Cant get NS info DB not connected');
 	await db.ready;
 	const [res] = await db.query<[NamespaceInfo]>('info for ns structure').catch((e) => {
@@ -59,10 +67,11 @@ export const getNamespaceInfo = query(async () => {
 });
 
 export const getDatabaseInfo = query(async () => {
+	const { locals } = getRequestEvent();
+	const db = locals.db.instance;
 	await db.ready.catch(() => {
 		return error(500, 'DB not ready');
 	});
-	const { locals } = getRequestEvent();
 	db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
 	const [res] = await db.query<[DatabaseInfo]>('info for db structure');
 	return res ?? {};
@@ -73,15 +82,16 @@ export const getDataClient = query(
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
+		const { locals } = getRequestEvent();
+		const db = locals.db.instance;
 		if (!db.isConnected) return;
 		await db.ready.catch(() => {
 			return error(500, 'DB not ready');
 		});
-		const { locals } = getRequestEvent();
 		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
 		const query = schemaStore.store.get(table)!.query;
 		// const res = await db.select<Data>(new Table(table)).catch((e)=>{ return error(500,e) });
-		const [res] = await db.query(query);
+		const [res] = await db.query<[ClientData[]]>(query);
 		return jsonify(res ?? []);
 	}
 );
@@ -91,11 +101,12 @@ export const getData = query(
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
+		const { locals } = getRequestEvent();
+		const db = locals.db.instance;
 		if (!db.isConnected) return;
 		await db.ready.catch(() => {
 			return error(500, 'DB not ready');
 		});
-		const { locals } = getRequestEvent();
 		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
 		const res = await db.select<ServerData>(new Table(table)).catch((e: any) => {
 			return error(500, { message: e.toString() }); // FIXME: THIS EXPOSES DB ERRORS
@@ -109,11 +120,12 @@ export const getTableStructure = query(
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
+		const { locals } = getRequestEvent();
+		const db = locals.db.instance;
 		if (!db.isConnected) return;
 		await db.ready.catch(() => {
 			return error(500, 'DB not ready');
 		});
-		const { locals } = getRequestEvent();
 		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
 		const [res] = await db.query(surql`info for table ${table} structure`);
 		return res ?? [];
@@ -139,6 +151,8 @@ export const getTableStructure = query(
 // });
 
 export const generateId = query(z.string(), async (table: string) => {
+	const { locals } = getRequestEvent();
+	const db = locals.db.instance;
 	if (!db.isConnected) return;
 	await db.ready.catch(() => {
 		return error(500, 'DB not ready');
@@ -151,6 +165,8 @@ export const generateId = query(z.string(), async (table: string) => {
 });
 
 export const expire = query(async () => {
+	const { locals } = getRequestEvent();
+	const db = locals.db.instance;
 	if (!db.isConnected) return;
 	await db.invalidate();
 	goto('/', { invalidateAll: true });

@@ -1,9 +1,8 @@
 import { env } from "$env/dynamic/private";
-import { db, root_access } from "$lib/server/root_db.svelte";
 import { decodeJWT, getTokenMaxAge } from "$lib/utils";
-import { error,  redirect, type Handle, type HandleFetch, type HandleValidationError, type ServerInit } from "@sveltejs/kit";
+import { error,  type Handle, type HandleFetch, type HandleValidationError, type ServerInit } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
-import { NotAllowedError } from "surrealdb";
+import { NotAllowedError, Surreal } from "surrealdb";
 
 const colors = {
   red: '\x1b[31m',
@@ -15,13 +14,13 @@ const colors = {
 
 
 export const init: ServerInit = ()=>{
-	root_access.connect(env.SURREAL_URL, {
-		authentication: {
-			username: env.SURREAL_ROOT_VIEWER_USER,
-			password: env.SURREAL_ROOT_VIEWER_PASS,
-		}
-	}).catch((e) =>{ return false  });
-	db.connect(env.SURREAL_URL).catch((e)=>{ return false });
+	// root_access.connect(env.SURREAL_URL, {
+	// 	authentication: {
+	// 		username: env.SURREAL_ROOT_VIEWER_USER,
+	// 		password: env.SURREAL_ROOT_VIEWER_PASS,
+	// 	}
+	// }).catch((e) =>{ return false  });
+	// db.connect(env.SURREAL_URL).catch((e)=>{ return false });
 }
 
 export const handleError = (e: ErrorEvent) => {
@@ -55,43 +54,41 @@ const get_cookies: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get("sr_token") ?? null;
 	const database = event.cookies.get("sr_db") ?? "main";
 	event.locals.db = {
-		isConnected: db.isConnected,
-		token: token,
+		...event.locals.db,
+		token,
 		database,
 	};
 	return await resolve(event);
 };
 
-const reccon: Handle = async ({ event, resolve }) => {
+const db_init: Handle = async ({ event, resolve }) => {
 	try {
-		// if (root_access.isConnected == false) {
-			await root_access.connect(env.SURREAL_URL, {
-				authentication: {
-					username: env.SURREAL_ROOT_VIEWER_USER,
-					password: env.SURREAL_ROOT_VIEWER_PASS,
-				}
-			}).catch((e)=>{ return error(500, e) });
-		// }
-		if (db.isConnected == false) {
-			const isConnected = await db.connect(env.SURREAL_URL,{ authentication: event.locals.db.token  }).catch((e)=>{ return error(500, e) });
-			event.locals.db.isConnected = isConnected;
-		}
+		event.locals.db.instance = new Surreal();
+		await event.locals.db.instance.connect(env.SURREAL_URL);
+
+		event.locals.db.root_instance = new Surreal();
+		await event.locals.db.root_instance.connect(env.SURREAL_URL, {
+			authentication: {
+				username: env.SURREAL_ROOT_VIEWER_USER,
+				password: env.SURREAL_ROOT_VIEWER_PASS,
+			}
+		});
+
 		return await resolve(event);
 	} catch (e) {
-		console.error(colors.red, "[CHECK CONNECTION]", colors.reset, e.message);
-		event.locals.db.isConnected = false;
+		console.error(colors.red, "[DB INIT]", colors.reset, e.message);
 		return await resolve(event);
 	}
 };
 
 const check_auth: Handle = async ({ event, resolve }) => {
 	try {
-		if (event.locals.db.isConnected == false) {
+		if (event.locals.db.instance.isConnected == false) {
 			return error(400, "Cant check auth because connection is not established");
 		}
 		if (event.locals.db.token == null) {
 			console.warn("Token not found login as default user");
-			const tokens = await db.signin(defaut_user).catch((e)=>{ return error(503, "Cant signin as default user") });
+			const tokens = await event.locals.db.instance.signin(defaut_user).catch((e)=>{ return error(503, "Cant signin as default user") });
 			const decoded = decodeJWT(tokens.access);
 			const maxAge = getTokenMaxAge(decoded);
 			event.cookies.set("sr_token", tokens.access, {
@@ -102,20 +99,22 @@ const check_auth: Handle = async ({ event, resolve }) => {
 				...event.locals.db,
 				token: tokens.access,
 				username: decoded.ID ?? defaut_user.username,
-				namespace: decoded.NS ?? defaut_user.namespace,
+				// namespace: decoded.NS ?? defaut_user.namespace,
 				database: decoded.DB ?? event.locals.db.database,
 			};
 			return await resolve(event);
 		}
 		else {
-			const tokens = await db.authenticate(event.locals.db.token).catch((e)=>{
+			if (!event.route.id || event.url.pathname.startsWith("/api/v1/db/signin")) {
+					return await resolve(event);
+			}
+			const tokens = await event.locals.db.instance.authenticate(event.locals.db.token).catch(async (e)=>{
 				if (e instanceof NotAllowedError ) {
 					if (e.isTokenExpired) {
 						console.warn("Token expired deleting it and redirecting to login");
 						event.cookies.delete("sr_token", { path: "/" });
-						event.locals.db.isConnected = true;
 						event.locals.db.token = null
-						return redirect(303, "/api/v1/db/signin");
+						return await event.locals.db.instance.signin(defaut_user).catch((e)=>{ return error(503, "Cant signin as default user") });
 					}
 				}
 				return error(400, e);
@@ -130,7 +129,7 @@ const check_auth: Handle = async ({ event, resolve }) => {
 				...event.locals?.db,
 				token: tokens.access,
 				username: decoded.ID,
-				namespace: decoded.NS ?? defaut_user.namespace,
+				// namespace: decoded.NS ?? defaut_user.namespace,
 				database: event.locals.db.database ?? decoded.DB,
 			};
 		}
@@ -141,7 +140,7 @@ const check_auth: Handle = async ({ event, resolve }) => {
 	}
 }
 
-export const handle: Handle = sequence(log_request, get_cookies, reccon, check_auth);
+export const handle: Handle = sequence(log_request, get_cookies, db_init, check_auth);
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	console.log("FETCH", event.request.method, event.url.pathname);

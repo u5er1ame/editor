@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
             ...locals.db,
             token: tokens.access,
             username: decoded.ID,
-            namespace: decoded.NS,
+            // namespace: decoded.NS,
             database: decoded.DB,
         };
     }).catch((e)=>{ body.message = e.message; code = 400; });
