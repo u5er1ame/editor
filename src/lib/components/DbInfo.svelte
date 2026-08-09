@@ -52,7 +52,7 @@ async function onsubmit(e: Event) {
 		pass = undefined;
 		db.username = selectedUser;
 		toast.success('Login successful');
-	    await goto(page.url, { invalidateAll: true });
+	    await goto(page.url, { invalidate: [page.url.pathname] });
 	}
 	else {
 		const res = await result.json();

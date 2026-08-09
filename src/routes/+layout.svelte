@@ -11,7 +11,7 @@
 			if (data.username) this.username = data.username;
 			this.namespace = data.namespace;
 			this.database = data.database;
-			watch(
+			watch.pre(
 				() => this.username,
 				(cur, pre) => {
 					if (!cur) return;
@@ -22,24 +22,29 @@
 					});
 				}
 			);
-			watch(
+			watch.pre(
 				() => [this.namespace, this.database],
 				(cur, pre) => {
 					const [ns, db] = cur;
 					const [pre_ns, pre_db] = pre ?? [];
 					if (!cur) return;
 					if (cur == pre) return;
-					fetch('/api/v1/db/use', {
-						method: 'POST',
-						body: JSON.stringify({
-							namespace: ns,
-							database: db
-						})
-					}).then(()=>invalidateAll()).catch((e) => {
-						error(500, 'Error setting namespace/database');
-					});
-				}
-			);
+					if (ns == pre_ns && db == pre_db) return;
+					this.use(ns, db);
+			});
+		}
+		async use(ns?: string, db?: string) {
+			try {
+				await fetch('/api/v1/db/use', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ namespace: ns, database: db })
+				});
+
+				await invalidate(page.url.pathname);
+			} catch (e) {
+				console.error('Failed to update DB state:', e);
+			}
 		}
 		getRoleString(): string {
 			if (!this.userRoles) return '';
@@ -63,7 +68,6 @@
 	import { mode, ModeWatcher, toggleMode } from 'mode-watcher';
 	import { setContext } from 'svelte';
 	import { scale } from 'svelte/transition';
-	import { error } from '@sveltejs/kit';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 
@@ -75,7 +79,8 @@
 	import Views from '$lib/components/Views.svelte';
 	import { getNamespaceInfo } from '$lib/db.remote';
 	import type { Roles } from '$lib/server/root_db.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidate } from '$app/navigation';
+	import { page } from '$app/state';
 
 	let { children, data }: LayoutProps = $props();
 	const current_mode = $derived(mode.current ?? 'system');

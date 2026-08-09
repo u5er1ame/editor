@@ -81,9 +81,8 @@
 	watch(
 		() => db.database,
 		(cur, pre) => {
-			console.log('CHANGES', cur);
 			if (cur == pre) return;
-			getDatabaseInfo().refresh().then(()=>invalidateAll());
+			getDatabaseInfo().refresh();
 		}
 	);
 </script>
