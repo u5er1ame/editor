@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/db';
+import { db } from '$lib/server/root_db.svelte';
 import { getTables } from '$lib/server/queries';
 
 export const GET: RequestHandler = async () => {

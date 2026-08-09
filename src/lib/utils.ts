@@ -1,4 +1,4 @@
-import type { Node, Dimensions, NodeTypes, XYPosition, EdgeTypes } from "@xyflow/svelte";
+import type { Node } from "@xyflow/svelte";
 
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -149,64 +149,3 @@ export function splitByParent(nodes: Node[]): Record<string, Node[]> {
 	}
 	return out;
 }
-
-// export function toElk(rooms: Node[], boards: Node[], breakers: Node[]) {
-// 	const root: ElkNode[] = rooms.map((r: Node) => {
-// 		const childs = boards.filter((b: Node) => b.parentId == r.id).map((board: Node) => {
-// 			const childs = breakers.filter((breaker: Node) => breaker.parentId == board.id).map(xy2elk);
-// 			const item = xy2elk(board);
-// 			item.layoutOptions = Flow.layoutOptions[board.type];
-// 			item.children = childs;
-// 			return item;
-// 		});
-// 		const item = xy2elk(r);
-// 		item.layoutOptions = Flow.layoutOptions[r.type];
-// 		item.children = childs;
-// 		return item;
-// 	});
-// 	return {
-// 		id: 'root',
-// 		children: root,
-// 	}
-// }
-
-// type ElkWithData = ElkNode & Partial<{ type: string, data: any }>
-
-// export function elk2flow(elk: ElkWithData, parentId?: string): Node | Node[] {
-// 	if (!elk.type) {
-// 		elk.type = "default";
-// 	}
-// 	const dimensions = Flow.dimensions[elk.type]; // TODO: this could error
-// 	const position = {
-// 		x: elk.x || dimensions.position.x,
-// 		y: elk.y || dimensions.position.y,
-// 	};
-// 	let flow: Node = {
-// 		id: elk.id,
-// 		parentId,
-// 		extent: parentId ? "parent" : null,
-// 		width: elk.width || dimensions.width,
-// 		height: elk.height || dimensions.height,
-// 		position,
-// 		data: elk.data,
-// 		type: elk.type,
-// 		...Flow.flowOptions[elk.type], // TODO: fix type
-// 	};
-// 	if (elk.edges) {
-// 		// TODO: they pretty similar
-// 	}
-//
-// 	let tree: Array<Node[]> | Node[] = [flow];
-// 	if (!elk.children || elk.children.length === 0) {
-// 		// nodes.push(flow);
-// 		return tree;
-// 	}
-//
-// 	for (const node of elk.children) {
-// 		const item = elk2flow(node, elk.id)
-// 		tree.push(item);
-// 	}
-// 	return tree.flat();
-// 	// return { nodes, edges };
-// 	// return flow;
-// }

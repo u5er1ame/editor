@@ -32,56 +32,6 @@
 	// second save new row id to state
 	// third if update-cell is from new row use PUT request
 
-	// $effect(() => {
-	// 	if (tbl == undefined) return;
-	// 	tbl.on("print", async (ev) => {
-	// 		console.log("printing", ev);
-	// 	});
-	//
-	//
-	// 	tbl.on('add-row', async (ev) => {
-	// 		if (isWriteable == false) return;
-	// 		if (ev.id == undefined) return;
-	// 		new_row_id.push(ev.id.toString());
-	// 	});
-	//
-	// 	// tbl.on('update-cell', (ev) => {
-	// 	// 	if (isWriteable == false) return;
-	// 	// 	const row = tbl?.getRow(ev.id);
-	// 	// 	if (row == null) return;
-	// 	// 	const parsed = table_state?.schema!.safeParse(row);
-	// 	// 	const out = parsed.data;
-	// 	// 	if (!parsed.success) {
-	// 	// 		toast.error(parsed.error.message);
-	// 	// 		return;
-	// 	// 	}
-	// 	// 	if (new_row_id.includes(ev.id.toString())) {
-	// 	// 		console.log('this is unsaved row!');
-	// 	// 		fetch(`/api/v1/db/tables?q=${table_state.table}`, {
-	// 	// 			method: 'PUT',
-	// 	// 			body: JSON.stringify(jsonify(out))
-	// 	// 		}).catch((e) => {
-	// 	// 			console.error('error', e);
-	// 	// 			toast.error(e.body.message);
-	// 	// 		});
-	// 	// 	} else {
-	// 	// 		fetch(`/api/v1/db/tables?q=${table_state.table}`, {
-	// 	// 			method: 'POST',
-	// 	// 			body: JSON.stringify(jsonify(out))
-	// 	// 		}).catch((e) => {
-	// 	// 			console.error('error', e);
-	// 	// 			toast.error(e.body.message);
-	// 	// 		});
-	// 	// 	}
-	// 	// 	console.log('update-cell', out);
-	// 	// 	new_row_id = [];
-	// 	// });
-	// 	return () => {
-	// 		new_row_id = [];
-	// 		tbl = undefined;
-	// 	};
-	// });
-
 	let { table = $bindable(), readonly = $bindable(), config, changes, ...rest } = $props();
 	let id = $state();
 	let selection: IRow | null = $state(null);
