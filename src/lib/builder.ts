@@ -119,7 +119,7 @@ export function addFieldsMetadata(schema: ClientSchemas) {
 			break;
 			case "room":
 				if (schema.shape[key].type == "object") {
-							col = ColumnBuilder.defaultWithKey(key, "name").build()
+							col = ColumnBuilder.defaultWithKey(key, "name").editor("select").addEditorProps({fetchTable: "electric_rooms", labelKey: "name", valueKey: "id"}).build()
 				}
 				else {
 							col = ColumnBuilder.default(key).build()
