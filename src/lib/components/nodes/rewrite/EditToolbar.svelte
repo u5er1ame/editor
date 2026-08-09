@@ -30,7 +30,7 @@ async function addBoard(type?: string) {
     console.log("adding board", child_id, "to", id);
     // $effect.root(()=>{
         nodes.update((current)=>{
-        const item: Node<Board> = {
+        const item: Node<{raw: Board}> = {
             id: child_id,
             type,
             parentId: id,
@@ -40,8 +40,10 @@ async function addBoard(type?: string) {
             width: 64,
             height: 64,
             data: {
-                name: prompt,
-                room: id
+                raw: {
+                    name: prompt,
+                    room: id
+                }
             }
         }
             return [...current, item];

@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { mode } from 'mode-watcher';
 	import {
 		Grid,
-		Willow,
-		WillowDark,
+		Toolbar,
 		type IApi,
 		type IColumn,
 		type IHeaderCell,
@@ -13,27 +11,20 @@
 
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/svar/Button.svelte';
-	import { getDataClient } from '$lib/db.remote';
+	import { getDataClient, generateId } from '$lib/db.remote';
 	import Skeleton from './ui/skeleton/skeleton.svelte';
 	import Editor from './editor/Root.svelte';
-	import { getContext, type Component } from 'svelte';
-	import { page } from '$app/state';
-	import DbContext from './DbContext.svelte';
 	import type { DBContext } from '../../routes/+layout.svelte';
 	import Theme from './svar/Theme.svelte';
 	import Spinner from './ui/spinner/spinner.svelte';
+	import { toast } from 'svelte-sonner';
+	import { Trash2Icon, TrashIcon } from '@lucide/svelte';
+	import { getContext } from 'svelte';
 
 	registerToolbarItem('print', Button);
+	registerToolbarItem('icon', Button);
 
-	const Style = $derived.by(() => {
-		if (mode.current && mode.current == 'dark') {
-			return WillowDark;
-		} else {
-			return Willow;
-		}
-	});
-
-	let tbl: Component<IApi> | undefined = $state();
+	let tbl: IApi | undefined = $state();
 
 	let new_row_id: string[] = $state([]);
 
@@ -47,21 +38,6 @@
 	// 		console.log("printing", ev);
 	// 	});
 	//
-	// 	tbl.intercept(
-	// 		'add-row',
-	// 		async (ev) => {
-	// 			if (isWriteable == false) return;
-	// 			const res = await fetch('/api/v1/db/generate_id')
-	// 				.then((r) => r.json())
-	// 				.catch(() => toast.error('DB not available'));
-	// 			const [generated] = res.data;
-	// 			const id = new RecordId(table_state.table, generated).toString();
-	// 			ev.id = id;
-	// 			ev.row.id = id;
-	// 			return ev;
-	// 		},
-	// 		{ intercept: true }
-	// 	);
 	//
 	// 	tbl.on('add-row', async (ev) => {
 	// 		if (isWriteable == false) return;
@@ -109,7 +85,7 @@
 	let { table = $bindable(), readonly = $bindable(), config, changes, ...rest } = $props();
 	let id = $state();
 	let selection: IRow | null = $state(null);
-	const isEditor = $derived(getContext<DBContext>("db").userRoles?.includes("EDITOR") ?? false);
+	const isEditor = $derived(getContext<DBContext>('db').userRoles?.includes('EDITOR') ?? false);
 	let column: string | null = $state(null);
 	let ref: HTMLElement | null = $state(null);
 	let showEditor = $state(false);
@@ -137,7 +113,8 @@
 					out.label = col.header;
 				}
 				if (Array.isArray(col.header)) {
-					out.label = col.header?.reduce((acc: string, itm: IHeaderCell) => {
+					out.label = col.header?.reduce((acc: string, itm: IHeaderCell | string) => {
+						if (typeof itm == 'string') return acc.concat(itm);
 						if (itm.text) {
 							return acc.concat(itm.text);
 						}
@@ -156,6 +133,7 @@
 		// console.log("row", id ,data);
 	});
 	const init = (api: IApi) => {
+		tbl = api;
 		api.on('select-row', (ev) => {
 			changes.selectedRow = ev.id;
 			if (selection) {
@@ -168,14 +146,27 @@
 		});
 
 		api.intercept('open-editor', (ev) => {
-			selection = api.getRow(ev.id);
-			column = ev.column as string;
-			showEditor = true;
+			if (isEditor) {
+				selection = api.getRow(ev.id);
+				column = ev.column as string;
+				showEditor = true;
+			} else
+				toast.message('You are not editor dude', { duration: 2000, position: 'bottom-center' });
 			return false;
 		});
 		api.on('close-editor', (ev) => {
 			console.log('close-editor', ev);
 		});
+		api.intercept(
+			'add-row',
+			async (ev) => {
+				if (readonly == false) return;
+				// ID is already set by the button handler
+				if (!ev.id) return;
+				return ev;
+			},
+			{ intercept: true }
+		);
 	};
 	$effect(() => {
 		// if (tbl == undefined) return;
@@ -192,14 +183,17 @@
 </script>
 
 {#snippet PrintIcon()}
-	<span class="iconify material-symbols--print-rounded size-5 align-middle"></span>
+	<span class="iconify size-5 align-middle material-symbols--print-rounded"></span>
+{/snippet}
+{#snippet Icon()}
+	<Trash2Icon />
 {/snippet}
 
 {#if browser}
 	<!-- <div class="wx-theme size-full max-w-svw"> -->
 	<Theme>
 		{#await getDataClient(table)}
-			<div class="flex flex-row size-full justify-center">
+			<div class="flex size-full flex-row justify-center">
 				Loading...
 				<Spinner size="200" />
 			</div>
@@ -215,28 +209,71 @@
 						<div class="text-xl text-destructive">Table is read-only! Writes disabled</div>
 					</div>
 				{/if}
-				<Grid {init} bind:this={tbl} {data} columns={config.table} filterValues={[]} />
+				{#if isEditor}
+					<Toolbar
+						api={tbl}
+						items={[
+							{
+								id: 'add-row',
+								comp: 'icon',
+								text: 'Add Row',
+								onclick: async () => {
+									const res = (await generateId(table)) as { id: string } | undefined;
+									if (!res || !res.id) return;
+									const rowId = res.id;
+									console.log(typeof rowId);
+									await tbl?.exec('add-row', { id: rowId, row: { id: rowId } });
+									selection = tbl?.getRow(rowId) ?? { id: rowId };
+									showEditor = true;
+								},
+								variant: 'primary',
+								snippet: Icon
+							},
+							{
+								id: 'delete-row',
+								comp: 'icon',
+								text: 'Delete Row',
+								onclick: () => {
+									if (selection) {
+										tbl?.exec('delete-row', { id: selection.id });
+									}
+								},
+								variant: 'destructive',
+								snippet: Icon
+							},
+							{
+								id: 'refresh',
+								comp: 'icon',
+								text: 'Refresh',
+								onclick: async () => {
+									getDataClient(table).refresh();
+								},
+								variant: 'secondary',
+								snippet: Icon
+							}
+						]} />
+				{/if}
+				<Grid {init} {data} columns={config.table} filterValues={[]} />
 				<!-- </Style> -->
 			{/if}
 		{:catch e}
-			<div class="flex flex-row size-full justify-center">
-				<div class="text-xl text-destructive">{JSON.parse(e).message}</div>
+			<div class="flex size-full flex-row justify-center">
+				<div class="text-xl text-destructive">{JSON.parse(e)?.message ?? e.toString()}</div>
 			</div>
 		{/await}
 	</Theme>
 	<!-- </div> -->
 	{#if isEditor}
-	<Editor
-		bind:show={showEditor}
-		onsave={(e) => {
-			console.log(e);
-		}}
-		onclose={(e: any) => {
-			tbl?.exec('close-editor', e);
-		}}
-		bind:values={selection}
-		config={editorConfig}
-	/>
+		<Editor
+			bind:show={showEditor}
+			onsave={(e) => {
+				console.log(e);
+			}}
+			onclose={(e: any) => {
+				tbl?.exec('close-editor', e);
+			}}
+			bind:values={selection}
+			config={editorConfig} />
 	{/if}
 {/if}
 
