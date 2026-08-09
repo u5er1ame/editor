@@ -20,9 +20,7 @@ const editors = {
     checkbox: Checkbox,
     none: Text,
 }
-
 function validationState(element, formData, action, cancel, submitter) {
-    console.log("enhance", formData, action, cancel, submitter);
     return async ({result, update})=>{
 	console.log("result", result);
 	show = false;
@@ -33,17 +31,18 @@ function validationState(element, formData, action, cancel, submitter) {
 
 {#if values}
     <Dialog.Root bind:open={show}
-	onOpenChange={(e)=>{ if(!e) {
-	show = false;
-	onclose?.(values);
-	values = null;
+	onOpenChange={(e)=>{
+	if(!e) {
+	    show = false;
+	    onclose?.(values);
+	    values = null;
 	}
 	}}>
 	<Dialog.Portal>
 	    <Dialog.Overlay />
 	    <Dialog.Content class="size-fit "
 		onOpenAutoFocus={(e: Event) => {
-		e.preventDefault();
+		    e.preventDefault();
 		}}
 	    >
 		<Dialog.Header>
@@ -81,7 +80,7 @@ function validationState(element, formData, action, cancel, submitter) {
 				</Field.Content>
 			    </Field.Field>
 			{/each}
-			<Button type="submit" variant="default" class="hover:bg-emerald-300 cursor-pointer" title="Save">Save</Button>
+			<Button type="submit" variant="default" class="hover:bg-hover cursor-pointer" title="Save">Save</Button>
 		    </Field.Set>
 		</form>
 	    </Dialog.Content>

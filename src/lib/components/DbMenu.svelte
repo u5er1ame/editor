@@ -26,7 +26,6 @@ const rootInfo = $derived(page.data.db.systeminfo);
 
 function changeUser(e: string) {
 	showPassPrompt = true;
-	console.log('CHANGE USER', e);
 }
 
 function badgeVariant(role: string) {
@@ -53,8 +52,6 @@ $effect(() => {
 
 async function onsubmit(e: Event) {
 	e.preventDefault();
-	console.log(e);
-	console.log('submit', selectedUser, pass);
 	errorMsg = await db?.signin({ username: selectedUser, password: pass! });
 	if (errorMsg == undefined) {
 		showPassPrompt = false;

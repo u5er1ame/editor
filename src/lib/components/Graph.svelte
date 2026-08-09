@@ -108,7 +108,6 @@
 
 	let selectionReady = $state(true);
 	async function oninit() {
-		allNodes.forEach((n) => console.log(n.measured));
 		dbNodes.forEach((n) => $resizer.set(n.id, false));
 	}
 	const onbeforeconnect: OnBeforeConnect = (c) => {
@@ -234,7 +233,6 @@
 			const elkGraph: ElkNode = untrack(() => {
 				return GraphViewController.buildElkGraph(allNodes, allEdges, root);
 			});
-			console.log('elkGraph', elkGraph);
 			if (elk) {
 				layouted = await elk.layout(elkGraph);
 			}

@@ -36,11 +36,11 @@ function createValue(item: any) {
 
 <input type="hidden" value={value?.length == 0 ? undefined : value} name={name} />
 <Popover.Root bind:open >
-    <Popover.Trigger {name} bind:ref={triggerRef}>
+    <Popover.Trigger {name} bind:ref={triggerRef} class="w-full justify-between ring ring-secondary font-normal">
 	{#snippet child({ props })}
 	    <Button
-		variant="outline"
-		class="w-full justify-stretch"
+		variant="primary"
+		class="w-full "
 		{...props}
 		role="combobox"
 		aria-expanded={open}

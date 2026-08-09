@@ -26,7 +26,7 @@ let {
     id="editor-select",
     ...restProps
 }: SelectProps = $props();
-$inspect(value);
+
 function createLabel(item: any) {
         return item[props.labelKey]
 }
@@ -36,9 +36,9 @@ function createValue(item: any) {
 }
 
 // svelte-ignore state_referenced_locally
-let val = $state(value[props.valueKey]);
+let val = $derived(value?value[props.valueKey]:undefined);
 const label = $derived.by(()=>{
-    if (val == undefined) return placeholder ?? "Select";
+    if (val == undefined) { return placeholder ?? "Select"; }
     const hasValue: any = data.find((item: any)=>{ return item[props.valueKey] == val });
     if (hasValue == undefined) return "Cant find value";
     return hasValue[props.labelKey] ?? placeholder ?? "Select"
@@ -49,7 +49,7 @@ const label = $derived.by(()=>{
 </script>
 
     <Select.Root type="single" {open} bind:value={val} {...restProps} >
-	<Select.Trigger class="w-full" {id}>
+	<Select.Trigger class="w-full data-[state=open]:border-active data-[placeholder]:text-sidebar-accent-foreground" {id}>
 	    {label}
 	</Select.Trigger>
 	<Select.Content>

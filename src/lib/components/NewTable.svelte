@@ -18,7 +18,7 @@
 	import Theme from './svar/Theme.svelte';
 	import Spinner from './ui/spinner/spinner.svelte';
 	import { toast } from 'svelte-sonner';
-	import { Trash2Icon, TrashIcon } from '@lucide/svelte';
+	import { PlusIcon, RefreshCwIcon, Trash2Icon, TrashIcon } from '@lucide/svelte';
 	import { getContext } from 'svelte';
 
 	registerToolbarItem('print', Button);
@@ -185,19 +185,30 @@
 {#snippet PrintIcon()}
 	<span class="iconify size-5 align-middle material-symbols--print-rounded"></span>
 {/snippet}
-{#snippet Icon()}
+{#snippet Plus()}
+	<PlusIcon />
+{/snippet}
+{#snippet Trash()}
 	<Trash2Icon />
+{/snippet}
+{#snippet Refresh()}
+	<RefreshCwIcon />
 {/snippet}
 
 {#if browser}
 	<!-- <div class="wx-theme size-full max-w-svw"> -->
 	<Theme>
-		{#await getDataClient(table)}
+		{#if getDataClient(table).loading}
 			<div class="flex size-full flex-row justify-center">
 				Loading...
 				<Spinner size="200" />
 			</div>
-		{:then data}
+		{:else if getDataClient(table).error}
+			<div class="flex size-full flex-row justify-center">
+				<div class="text-xl text-destructive">{JSON.parse(getDataClient(table).error)?.message ?? getDataClient(table).error.toString() }</div>
+			</div>
+		{:else if getDataClient(table).ready}
+			{@const data = getDataClient(table).current}
 			{#if data && data.length == 0}
 				<div class="size-full text-start">
 					<div class="text-xl text-secondary">Table is empty</div>
@@ -221,13 +232,13 @@
 									const res = (await generateId(table)) as { id: string } | undefined;
 									if (!res || !res.id) return;
 									const rowId = res.id;
-									console.log(typeof rowId);
 									await tbl?.exec('add-row', { id: rowId, row: { id: rowId } });
 									selection = tbl?.getRow(rowId) ?? { id: rowId };
+									console.log(rowId, selection);
 									showEditor = true;
 								},
 								variant: 'primary',
-								snippet: Icon
+								snippet: Plus
 							},
 							{
 								id: 'delete-row',
@@ -239,7 +250,7 @@
 									}
 								},
 								variant: 'destructive',
-								snippet: Icon
+								snippet: Trash
 							},
 							{
 								id: 'refresh',
@@ -249,18 +260,14 @@
 									getDataClient(table).refresh();
 								},
 								variant: 'secondary',
-								snippet: Icon
+								snippet: Refresh
 							}
 						]} />
 				{/if}
 				<Grid {init} {data} columns={config.table} filterValues={[]} />
 				<!-- </Style> -->
 			{/if}
-		{:catch e}
-			<div class="flex size-full flex-row justify-center">
-				<div class="text-xl text-destructive">{JSON.parse(e)?.message ?? e.toString()}</div>
-			</div>
-		{/await}
+		{/if}
 	</Theme>
 	<!-- </div> -->
 	{#if isEditor}

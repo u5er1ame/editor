@@ -24,7 +24,7 @@ let {
     id,
     ...restProps
 }: SelectProps = $props();
-$inspect("select", value, data);
+
 const label = $derived.by(()=>{
     return (data.find((item: Item)=>item.value == val)?.label ?? placeholder ?? "Select")
 });

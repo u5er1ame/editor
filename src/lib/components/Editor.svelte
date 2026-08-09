@@ -14,7 +14,6 @@ import { getDataClient } from "$lib/db.remote";
 
 let { onsave, onclose, show=$bindable(false), values=$bindable(null), config, ...rest } = $props();
 
-$inspect("editor",values);
 registerEditorItem('text', TestEditorItem);
 registerToolbarItem('dialog-close', Dialog.Close);
 // registerToolbarItem('button', Button);
@@ -39,7 +38,7 @@ const editors = {
 	    <Dialog.Overlay />
 	    <Dialog.Content class="size-fit"
 		onOpenAutoFocus={(e: Event) => {
-		e.preventDefault();
+		    e.preventDefault();
 		}}
 	    >
 		<Dialog.Header>

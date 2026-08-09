@@ -147,7 +147,6 @@ export class SurrealStore {
 
 		watch(() => this.username, (cur, prev) => {
 			if (this._db.status != 'connected') return;
-			$inspect("new log", this.username);
 		});
 	}
 

@@ -51,7 +51,7 @@
 			</Popover.Root>
 		{:else}
 			<Button variant="primary" class="size-sm cursor-pointer" {onclick}>
-				<span class="icon-[solar--database-bold-duotone] size-4 content-center align-middle "></span>
+				<span class="iconify solar--database-bold-duotone size-4 content-center align-middle "></span>
 			</Button>
 		{/if}
 	</Nav.Item>

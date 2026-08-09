@@ -11,7 +11,7 @@
 	{#snippet pending()}
 		<Skeleton class="w-svw h-svh animate-pulse m-1"/>
 	{/snippet}
-	{#snippet failed(e: unknown)}
+	{#snippet failed(e: unknown, reset)}
 		<div class="size-full text-center flex flex-row gap-2 justify-center">
 			<div class="text-xl">{e.body?.message}</div>
 			<div class="text-xl text-destructive">{e.status}</div>
