@@ -29,7 +29,7 @@ export const load: PageLoad = async ({data, parent, params,  url,  fetch }): Pro
 
 	let nodes: Node[] = [];
 	let nodeTypes: {[key: string]: Component} = {};
-	const node_tables = data.tables.info.tables.filter(t=>t.kind.kind !="RELATION");
+	const node_tables = data.tables.info.tables.filter((t: any)=>t.kind.kind !="RELATION");
 
 	for (const table of node_tables) {
 		let meta = addTableMetadata(table.name);

@@ -1,10 +1,5 @@
-
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-// import { db } from '$lib/server/surreal.svelte';
-import { getTables } from '$lib/server/queries';
-import { r, RecordId, StringRecordId, Table } from 'surrealdb';
-import { schemas } from '$lib/client/schemas';
 
 export const GET: RequestHandler = async ({ url, params }) => {
     try {

@@ -1,7 +1,10 @@
 import type { LayoutServerLoad } from "./$types";
 import { db } from "$lib/server/root_db.svelte";
-import type { View } from "$lib/rewrite/views/base";
 
+export interface View {
+    name: string;
+    href: string;
+}
 
 const views: View[] = [
 	{

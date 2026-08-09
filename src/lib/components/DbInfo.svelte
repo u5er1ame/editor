@@ -11,7 +11,7 @@ import Input from './ui/input/input.svelte';
 import { getNamespaceInfo, expire } from '$lib/db.remote';
 import MemInfo from './MemInfo.svelte';
 import { toast } from 'svelte-sonner';
-import { goto, invalidateAll } from '$app/navigation';
+import { goto } from '$app/navigation';
 
 import type { DBContext } from '../../routes/+layout.svelte';
 
@@ -50,7 +50,7 @@ async function onsubmit(e: Event) {
 	if (result.status == 200) {
 		showPassPrompt = false;
 		pass = undefined;
-		db.username = selectedUser;
+		db.username = selectedUser!;
 		toast.success('Login successful');
 	    await goto(page.url, { invalidate: [page.url.pathname] });
 	}

@@ -1,9 +1,9 @@
-import RwRoom from './rewrite/Room.svelte';
-import RwBoard from './rewrite/Board.svelte';
-import RwBreaker from './rewrite/Breaker.svelte';
+import Room from './Room.svelte';
+import Board from './Board.svelte';
+import Breaker from './Breaker.svelte';
 
-export const Rewrite = {
-    Room: RwRoom,
-    Board: RwBoard,
-    Breaker: RwBreaker
+export {
+    Room,
+    Board,
+    Breaker,
 };

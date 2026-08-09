@@ -1,5 +1,5 @@
 import { schemaStore, type ClientSchemas } from "$lib/model/schemas";
-import { Rewrite } from "$lib/components/nodes/index";
+import { Room, Board, Breaker } from "$lib/components/nodes/index";
 import { ColumnBuilder } from "$lib/builders/column.svelte";
 import { GraphConfigBuilder } from "$lib/builders/graph.config";
 import type { IColumn } from "@svar-ui/svelte-grid";
@@ -70,13 +70,13 @@ export function addTableMetadata(name: Tables) {
 		case "shops":
 		break;
 		case "electric_rooms":
-			meta.graph = builder.type("node").component(name, Rewrite.Room).build();
+			meta.graph = builder.type("node").component(name, Room).build();
 		break;
 		case "boards":
-			meta.graph = builder.type("node").parentIDKey("room").component(name, Rewrite.Board).build();
+			meta.graph = builder.type("node").parentIDKey("room").component(name, Board).build();
 		break;
 		case "breakers":
-			meta.graph = builder.type("node").flowConfig({connectable: true}).parentIDKey("board").component(name, Rewrite.Breaker).build();
+			meta.graph = builder.type("node").flowConfig({connectable: true}).parentIDKey("board").component(name, Breaker).build();
 		break;
 		case "connects":
 			meta.graph = builder.type("edge").flowConfig({animated: true}).build();

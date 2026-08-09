@@ -73,17 +73,13 @@ const field: { [key in FormTypes]: Component<typeof Input | typeof Select | type
 </script>
 
 <Dialog.Root {open} onOpenChange={()=>open=!open}>
-    {#if withCloseButton}
-	<Dialog.Close />
-    {/if}
-    <Dialog.Content>
+    <Dialog.Content showCloseButton={withCloseButton}>
 	<Dialog.Header>
 	    {header}
         </Dialog.Header>
 	{#if form }
 	    <form onsubmit={submit}>
 		<Field.Group >
-		    <!-- {#each form as item, j} -->
 		    {#each Object.entries(form) as [key, data], i}
 			{@const Component = field[data.type]}
 			<Field.Field orientation="responsive">
@@ -106,7 +102,6 @@ const field: { [key in FormTypes]: Component<typeof Input | typeof Select | type
 			</Field.Field>
 			<Field.Separator />
 		    {/each}
-		    <!-- {/each} -->
 		    <Button type="submit">Submit</Button>
 		</Field.Group >
 	    </form>
