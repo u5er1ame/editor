@@ -1,4 +1,4 @@
-import type { Token } from "surrealdb";
+import type { Surreal, Token } from "surrealdb";
 
 import type { DatabaseInfo, SystemInfo } from '$lib/server/root_db.svelte';
 import type { NoderedDiagnostic } from '$lib/nodered.remote';
@@ -13,6 +13,7 @@ declare global {
 		}
 		interface Locals {
 			db: {
+				instance: Surreal;
 				token: Token | null;
 				isConnected: boolean;
 				username?: string;
