@@ -1,4 +1,4 @@
-import type { Surreal, Token } from "surrealdb";
+import type { Surreal, Token } from 'surrealdb';
 
 import type { DatabaseInfo, SystemInfo } from '$lib/server/root_db.svelte';
 import type { NoderedDiagnostic } from '$lib/nodered.remote';
@@ -9,7 +9,7 @@ declare global {
 		interface Error {
 			message: string;
 			code?: number | string;
-			path?: PropertyKey[]
+			path?: PropertyKey[];
 		}
 		interface Locals {
 			db: {
@@ -18,7 +18,7 @@ declare global {
 				token: Token | null;
 				username?: string;
 				database?: string;
-			}
+			};
 		}
 		interface PageData {
 			db: {
@@ -27,22 +27,24 @@ declare global {
 				username?: string;
 				namespace?: string;
 				database?: string;
-			},
+			};
 			tables: {
-				selected_tab: string,
-				info: DatabaseInfo["tables"],
-				data?: any,
-				config?: any,
-			},
+				selected_tab: string;
+				info: DatabaseInfo['tables'];
+				data?: any;
+				config?: any;
+			};
 		}
 		interface PageState {
 			db?: {
-				namespace?: string,
-				database?: string,
-			},
+				namespace?: string;
+				database?: string;
+			};
 			table?: {
-				selected_tab: string,
-			}
+				selected_tab: string;
+			};
+			selectedRow?: string;
+			selectedTable?: string;
 		}
 		// interface Platform {}
 	}

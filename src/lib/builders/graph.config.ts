@@ -1,29 +1,29 @@
-import type { AllKeys, ServerData } from "$lib/model/schemas";
-import { error } from "@sveltejs/kit";
-import type { Edge as EdgeBase, Node as NodeBase } from "@xyflow/svelte";
-import type { LayoutOptions } from "elkjs/lib/elk-api";
-import type { Component } from "svelte";
+import type { AllKeys, ServerData } from '$lib/model/schemas';
+import { error } from '@sveltejs/kit';
+import type { Edge as EdgeBase, Node as NodeBase } from '@xyflow/svelte';
+import type { LayoutOptions } from 'elkjs/lib/elk-api';
+import type { Component } from 'svelte';
 
 export interface GraphConfig {
-	type: "node" | "edge";
+	type: 'node' | 'edge';
 	component: Component;
-	parentIdKey: Omit<AllKeys<ServerData>, "id">;
+	parentIdKey: Omit<AllKeys<ServerData>, 'id'>;
 	labelKey: string;
 	// prio: number;
 	elkConfig: Partial<LayoutOptions>;
-	flowConfig: Omit<NodeBase, "id" | "data" | "position">;
-};
+	flowConfig: Omit<NodeBase, 'id' | 'data' | 'position'>;
+}
 
 export class GraphConfigBuilder {
 	private _config: Partial<GraphConfig>;
 
-	defaultFlowConfig: Partial<NodeBase> = {
+	defaultFlowConfig: Partial<EdgeBase> | Partial<NodeBase> = {
 		hidden: false,
 		connectable: false,
 		draggable: true,
-		extent: "parent",
-		expandParent: true,
-	}
+		extent: 'parent',
+		expandParent: true
+	};
 
 	defaultElkConfig: Partial<LayoutOptions> = {
 		'elk.algorithm': 'layered',
@@ -33,7 +33,7 @@ export class GraphConfigBuilder {
 		'org.eclipse.elk.json.edgeCoords': 'PARENT'
 	};
 
-	constructor(type?: "node" | "edge") {
+	constructor(type?: 'node' | 'edge') {
 		this._config = { type };
 	}
 
@@ -41,11 +41,11 @@ export class GraphConfigBuilder {
 		return this._config;
 	}
 
-	type(type: "node" | "edge") {
+	type(type: 'node' | 'edge') {
 		this._config.type = type;
 		return this;
 	}
-	component(type: string, comp: Component) {
+	component(type: string, comp: Component<any>) {
 		this._config.component = comp;
 		this.flowConfig({ type });
 		return this;
@@ -67,22 +67,27 @@ export class GraphConfigBuilder {
 		return this;
 	}
 	// WARN: hidden by default until layout calculated
-	flowConfig(config?: Omit<NodeBase | EdgeBase, "id" | "data" |  "position">) {
+	flowConfig(
+		config?:
+			| Omit<NodeBase, 'id' | 'data' | 'position'>
+			| Omit<EdgeBase, 'id' | 'data' | 'source' | 'target'>
+	) {
 		this._config.flowConfig = { ...this.defaultFlowConfig, ...this._config.flowConfig, ...config };
 		return this;
 	}
 
 	build() {
-		if (this._config.type == undefined) error(401,"Config error: Type not set");
+		if (this._config.type == undefined) error(401, 'Config error: Type not set');
 		// INFO: edge type/component sets in runtime (not ok for perf but for now....)
-		if (this._config.type == "node" && this._config.component == undefined) error(501,"Config error: Component not set for " + this._config.type);
+		if (this._config.type == 'node' && this._config.component == undefined)
+			error(501, 'Config error: Component not set for ' + this._config.type);
 		// if (this._config.type == "node" && this._config.prio == undefined) error(501,["Config error: Priority unknown for", this._config.type, this._config?.flowConfig?.type].join(" "))
 		return this.config;
 	}
 	static node() {
-		return new GraphConfigBuilder("node");
+		return new GraphConfigBuilder('node');
 	}
 	static edge() {
-		return new GraphConfigBuilder("edge");
+		return new GraphConfigBuilder('edge');
 	}
 }

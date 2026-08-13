@@ -2,11 +2,7 @@ import { jsonify, surql, Table, RecordId } from 'surrealdb';
 import { error } from '@sveltejs/kit';
 import { getRequestEvent, query } from '$app/server';
 import { env } from '$env/dynamic/private';
-import {
-	type DatabaseInfo,
-	type NamespaceInfo,
-	type SystemInfo
-} from '$lib/server/root_db.svelte';
+import { type DatabaseInfo, type NamespaceInfo, type SystemInfo } from '$lib/server/root_db.svelte';
 import { goto } from '$app/navigation';
 import z from 'zod/v4';
 import { schemaStore, type ClientData, type ServerData } from './model/schemas';
@@ -69,6 +65,7 @@ export const getNamespaceInfo = query(async () => {
 export const getDatabaseInfo = query(async () => {
 	const { locals } = getRequestEvent();
 	const db = locals.db.instance;
+	if (!db.isConnected) error(500, 'DB not connected');
 	await db.ready.catch(() => {
 		return error(500, 'DB not ready');
 	});
@@ -78,13 +75,13 @@ export const getDatabaseInfo = query(async () => {
 });
 
 export const getDataClient = query(
-	z.custom<Tables>((v) => typeof v === "string" && schemaStore.store.has(v as Tables), {
+	z.custom<Tables>((v) => typeof v === 'string' && schemaStore.store.has(v as Tables), {
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
 		const { locals } = getRequestEvent();
 		const db = locals.db.instance;
-		if (!db.isConnected) return;
+		if (!db.isConnected) error(500, 'DB not connected');
 		await db.ready.catch(() => {
 			return error(500, 'DB not ready');
 		});
@@ -97,13 +94,13 @@ export const getDataClient = query(
 );
 
 export const getData = query(
-	z.custom<Tables>((v) => typeof v === "string" && schemaStore.store.has(v as Tables), {
+	z.custom<Tables>((v) => typeof v === 'string' && schemaStore.store.has(v as Tables), {
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
 		const { locals } = getRequestEvent();
 		const db = locals.db.instance;
-		if (!db.isConnected) return;
+		if (!db.isConnected) error(500, 'DB not connected');
 		await db.ready.catch(() => {
 			return error(500, 'DB not ready');
 		});
@@ -122,7 +119,7 @@ export const getTableStructure = query(
 	async (table) => {
 		const { locals } = getRequestEvent();
 		const db = locals.db.instance;
-		if (!db.isConnected) return;
+		if (!db.isConnected) error(500, 'DB not connected');
 		await db.ready.catch(() => {
 			return error(500, 'DB not ready');
 		});
@@ -153,7 +150,7 @@ export const getTableStructure = query(
 export const generateId = query(z.string(), async (table: string) => {
 	const { locals } = getRequestEvent();
 	const db = locals.db.instance;
-	if (!db.isConnected) return;
+	if (!db.isConnected) error(500, 'DB not connected');
 	await db.ready.catch(() => {
 		return error(500, 'DB not ready');
 	});
@@ -167,7 +164,7 @@ export const generateId = query(z.string(), async (table: string) => {
 export const expire = query(async () => {
 	const { locals } = getRequestEvent();
 	const db = locals.db.instance;
-	if (!db.isConnected) return;
+	if (!db.isConnected) error(500, 'DB not connected');
 	await db.invalidate();
 	goto('/', { invalidateAll: true });
 });

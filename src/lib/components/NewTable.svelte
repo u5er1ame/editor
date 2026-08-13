@@ -18,27 +18,34 @@
 	import Theme from './svar/Theme.svelte';
 	import Spinner from './ui/spinner/spinner.svelte';
 	import { toast } from 'svelte-sonner';
-	import { PlusIcon, RefreshCwIcon, Trash2Icon, TrashIcon } from '@lucide/svelte';
+	import { PlusIcon, RefreshCwIcon, Trash2Icon, TrashIcon, PrinterIcon } from '@lucide/svelte';
 	import { getContext } from 'svelte';
+	import { registerInlineEditors } from './inline-editors/register';
+	import { replaceState } from '$app/navigation';
+	import { page } from '$app/state';
+	import { twMerge } from 'tailwind-merge';
 
 	registerToolbarItem('print', Button);
 	registerToolbarItem('icon', Button);
+	registerInlineEditors();
 
 	let tbl: IApi | undefined = $state();
 
-	let new_row_id: string[] = $state([]);
-
-	// INFO: first intercept add-row to generate id
-	// second save new row id to state
-	// third if update-cell is from new row use PUT request
-
 	let { table = $bindable(), readonly = $bindable(), config, changes, ...rest } = $props();
-	let id = $state();
 	let selection: IRow | null = $state(null);
 	const isEditor = $derived(getContext<DBContext>('db').userRoles?.includes('EDITOR') ?? false);
-	let column: string | null = $state(null);
-	let ref: HTMLElement | null = $state(null);
 	let showEditor = $state(false);
+
+	// Page state persistence for view transitions using SvelteKit
+	$effect(() => {
+		if (selection?.id) {
+			let prev: App.PageState = page.state;
+			prev.selectedRow = selection.id;
+			prev.selectedTable = table;
+			replaceState('', prev);
+		}
+	});
+
 	function createEditorConfig(columns: [IColumn & { props?: any }]) {
 		interface Config {
 			id?: string | number;
@@ -77,59 +84,47 @@
 		return out;
 	}
 	const editorConfig = createEditorConfig(config.table);
-	$effect(() => {
-		// if (tbl == undefined || id == undefined) return;
-		// const data = tbl.getRow(id);
-		// console.log("row", id ,data);
+
+	// Get columns that have header filters
+	const columnsWithFilters = $derived.by(() => {
+		if (!config?.table) return [];
+		return config.table.filter((col: any) => col.props?.headerFilterConfig);
 	});
+
 	const init = (api: IApi) => {
 		tbl = api;
 		api.on('select-row', (ev) => {
 			changes.selectedRow = ev.id;
-			if (selection) {
-				selection = ev.id ? api.getRow(ev.id) : null;
+			if (!selection) selection = ev.id ? api.getRow(ev.id) : null;
+			else {
+				if (selection.id != ev.id) {
+					selection = ev.id ? api.getRow(ev.id) : null;
+				}
 			}
-			// id = ev.id;
-			// const data = api.getRow(ev.id);
-			// console.log("selected", ev.id, data);
-			// return ev.id
 		});
 
-		api.intercept('open-editor', (ev) => {
-			if (isEditor) {
-				selection = api.getRow(ev.id);
-				column = ev.column as string;
-				showEditor = true;
-			} else
-				toast.message('You are not editor dude', { duration: 2000, position: 'bottom-center' });
-			return false;
-		});
-		api.on('close-editor', (ev) => {
-			console.log('close-editor', ev);
-		});
 		api.intercept(
 			'add-row',
 			async (ev) => {
 				if (readonly == false) return;
-				// ID is already set by the button handler
 				if (!ev.id) return;
 				return ev;
 			},
 			{ intercept: true }
 		);
 	};
-	$effect(() => {
-		// if (tbl == undefined) return;
-		// tbl.on("select-row", (ev) => {
-		// 	id = ev.id;
-		// 	const data = tbl.getRow(ev.id);
-		// 	console.log("select", ev.id, data);
-		// 	return ev.id
-		// });
-		// tbl.on("open-editor", (ev) => {
-		// 	console.log("edit", ev);
-		// });
-	});
+
+	let refresh = $state(true);
+	function customCellsStyle(row: any, col: IColumn) {
+		let out: string = ''; // this is added to cell class
+		if (col.id && typeof col.id == 'string' && col.id.includes('actions')) {
+			out = twMerge(out, 'bg-header!');
+			if (selection && selection.id == row.id) {
+				out = twMerge(out, 'bg-[var(--wx-table-select-background)]!');
+			}
+		}
+		return out;
+	}
 </script>
 
 {#snippet PrintIcon()}
@@ -144,9 +139,11 @@
 {#snippet Refresh()}
 	<RefreshCwIcon />
 {/snippet}
+{#snippet Print()}
+	<PrinterIcon />
+{/snippet}
 
 {#if browser}
-	<!-- <div class="wx-theme size-full max-w-svw"> -->
 	<Theme>
 		{#if getDataClient(table).loading}
 			<div class="flex size-full flex-row justify-center">
@@ -155,7 +152,9 @@
 			</div>
 		{:else if getDataClient(table).error}
 			<div class="flex size-full flex-row justify-center">
-				<div class="text-xl text-destructive">{JSON.parse(getDataClient(table).error)?.message ?? getDataClient(table).error.toString() }</div>
+				<div class="text-xl text-destructive">
+					{JSON.parse(getDataClient(table).error)?.message ?? getDataClient(table).error.toString()}
+				</div>
 			</div>
 		{:else if getDataClient(table).ready}
 			{@const data = getDataClient(table).current}
@@ -164,12 +163,24 @@
 					<div class="text-xl text-secondary">Table is empty</div>
 				</div>
 			{:else}
-				<!-- <Style> -->
 				{#if readonly == true}
 					<div class="size-full text-start">
 						<div class="text-xl text-destructive">Table is read-only! Writes disabled</div>
 					</div>
 				{/if}
+				<!-- Header filters row -->
+				{#if columnsWithFilters.length > 0}
+					<div class="mb-1 flex gap-1">
+						{#each columnsWithFilters as col (col.id)}
+							<div class="min-w-0 flex-1">
+								{#if col.props.headerFilterComponent}
+									{@render col.props.headerFilterComponent({ api: tbl, column: col })}
+								{/if}
+							</div>
+						{/each}
+					</div>
+				{/if}
+
 				{#if isEditor}
 					<Toolbar
 						api={tbl}
@@ -184,7 +195,6 @@
 									const rowId = res.id;
 									await tbl?.exec('add-row', { id: rowId, row: { id: rowId } });
 									selection = tbl?.getRow(rowId) ?? { id: rowId };
-									console.log(rowId, selection);
 									showEditor = true;
 								},
 								variant: 'primary',
@@ -208,22 +218,41 @@
 								text: 'Refresh',
 								onclick: async () => {
 									getDataClient(table).refresh();
+									refresh = !refresh;
 								},
 								variant: 'secondary',
 								snippet: Refresh
+							},
+							{
+								id: 'print',
+								comp: 'icon',
+								text: 'Print',
+								onclick: async () => {
+									if (!tbl) return;
+									// Theme.svelte has @media print styles
+									tbl.exec('print', { mode: 'portrait', paper: 'a4' });
+								},
+								variant: 'secondary',
+								snippet: Print
 							}
 						]} />
 				{/if}
-				<Grid {init} {data} columns={config.table} filterValues={[]} />
-				<!-- </Style> -->
+				{#key refresh}
+					<Grid
+						{init}
+						{data}
+						columns={config.table}
+						autoRowHeight
+						cellStyle={customCellsStyle}
+						filterValues={[]} />
+				{/key}
 			{/if}
 		{/if}
 	</Theme>
-	<!-- </div> -->
 	{#if isEditor}
 		<Editor
 			bind:show={showEditor}
-			onsave={(e) => {
+			onsave={(e: any) => {
 				console.log(e);
 			}}
 			onclose={(e: any) => {
@@ -236,8 +265,6 @@
 
 <style>
 	:global(.wx-theme) {
-		/*PLACE HERE*/
-
 		--wx-table-select-background: --alpha(var(--wx-color-primary-selected)/20%);
 		--wx-table-select-color: var(--wx-color-font);
 		--wx-table-border: var(--wx-border);
@@ -258,4 +285,10 @@
 	:global(.wx-table-box) {
 		border-radius: var(--wx-border-radius);
 	}
+	/*:global(.wx-body) {
+		--wx-padding: 0.2em;
+	}
+	:global(.wx-cell:data-[role='gridcell']) {
+		padding: var(--wx-padding);
+	}*/
 </style>

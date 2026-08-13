@@ -92,52 +92,51 @@
 {/snippet}
 
 {#key db.database}
-{#if info}
-	<div class="size-auto p-1">
-		<Tabs.Root bind:value={current_tab} class="items-center justify-center">
-			<Tabs.List class="size-full bg-header">
-				{#each info.tables as table, i}
-					{@const changes = tableChanges.find((t) => t.name == table.name)}
-					<Tabs.Trigger
-						value={table.name}
-						title={changes?.label + (table.drop ? ' Writes disabled' : '')}
-						class="w-full data-[state=active]:bg-accent/50 data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-accent/50"
-					>
-						{@html changes?.isWriteable ?? ""}
-						<!-- {controller.store.getTableMeta(table.name)?.title} -->
-						{changes?.label}
-						{@html changes?.kind ?? ""}
-						{#if changes?.hasChanges}
-							<span
-								title="Have unsaved changes"
-								class="iconify size-4 text-hover solar--danger-circle-bold-duotone"
-							></span>
-						{/if}
-					</Tabs.Trigger>
-				{:else}
-					<div class="size-full">
-						<div class="text-center">
-							<div class="text-xl">No tables found</div>
-						</div>
-					</div>
-				{/each}
-			</Tabs.List>
-			{#each info.tables as table, i}
-				{#if tables.selected_tab != undefined}
-					<Tabs.Content value={table.name} class="size-full ">
-						{#key current_tab}
-							{#if table.name == current_tab}
-								{@const config = tables?.config.find((c) => c.id == table.name)}
-								{@const changes = tableChanges.find((t) => t.name == table.name)}
-								<NewTable table={table.name} readonly={table?.drop ?? false} {config} {changes} />
+	{#if info}
+		<div class="size-auto p-1">
+			<Tabs.Root bind:value={current_tab} class="items-center justify-center">
+				<Tabs.List class="size-full bg-header">
+					{#each info.tables as table, i}
+						{@const changes = tableChanges.find((t) => t.name == table.name)}
+						<Tabs.Trigger
+							value={table.name}
+							title={changes?.label + (table.drop ? ' Writes disabled' : '')}
+							class="w-full data-[state=active]:bg-accent/50 data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-accent/50">
+							{@html changes?.isWriteable ?? ''}
+							<!-- {controller.store.getTableMeta(table.name)?.title} -->
+							{changes?.label}
+							{@html changes?.kind ?? ''}
+							{#if changes?.hasChanges}
+								<span
+									title="Have unsaved changes"
+									class="iconify size-4 text-hover solar--danger-circle-bold-duotone">
+								</span>
 							{/if}
-						{/key}
-					</Tabs.Content>
-				{/if}
-			{/each}
-		</Tabs.Root>
-	</div>
-{/if}
+						</Tabs.Trigger>
+					{:else}
+						<div class="size-full">
+							<div class="text-center">
+								<div class="text-xl">No tables found</div>
+							</div>
+						</div>
+					{/each}
+				</Tabs.List>
+				{#each info.tables as table, i}
+					{#if tables.selected_tab != undefined}
+						<Tabs.Content value={table.name} class="size-full ">
+							{#key current_tab}
+								{#if table.name == current_tab}
+									{@const config = tables?.config.find((c) => c.id == table.name)}
+									{@const changes = tableChanges.find((t) => t.name == table.name)}
+									<NewTable table={table.name} readonly={table?.drop ?? false} {config} {changes} />
+								{/if}
+							{/key}
+						</Tabs.Content>
+					{/if}
+				{/each}
+			</Tabs.Root>
+		</div>
+	{/if}
 {/key}
 
 <style>

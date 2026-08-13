@@ -1,14 +1,14 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @plugin '@tailwindcss/forms';
-@plugin "@iconify/tailwind4" {
-    prefixes: carbon, material-symbols, solar;
-    prefix: "iconify";
-    scale: 1.2;
-};
+@plugin '@iconify/tailwind4' {
+	prefixes: carbon, material-symbols, solar;
+	prefix: 'iconify';
+	scale: 1.2;
+}
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (@media not print { &:where(.dark, .dark *) });
 /* b/w
 *  bg
 *   bg-1
@@ -29,253 +29,249 @@
 *  destructive
 * */
 :root {
-    --black: #050c0e;
-    --white: #f8f8ff;
-    --dark: #2B3042;
-    --light: #CCD3FF;
+	--black: #050c0e;
+	--white: #f8f8ff;
+	--dark: #2b3042;
+	--light: #ccd3ff;
 
-    --first: #354276;
-    --first-light: #4C5887;
-    --first-light-2: #687299;
-    --first-dark: #202D63;
-    --first-dark-2: #111E52;
-    --second: #8CA3FF;
-    --second-light: #AEBEFF;
-    --second-light-2: #D9E0FF;
-    --second-dark: #6D8AFF;
-    --second-dark-2: #4E71FF;
-    --green-light: #9CD3A5;
-    --green: #35753F;
-    --green-dark: #132A16;
-    --red-light: #D92C26;
-    /* --red-light: #B3566C; */
-    --red: #753543;
-    --red-dark: #381920;
-    --yellow: #F4D06F;
-    --yellow-2: #FCF6BD;
+	--first: #354276;
+	--first-light: #4c5887;
+	--first-light-2: #687299;
+	--first-dark: #202d63;
+	--first-dark-2: #111e52;
+	--second: #8ca3ff;
+	--second-light: #aebeff;
+	--second-light-2: #d9e0ff;
+	--second-dark: #6d8aff;
+	--second-dark-2: #4e71ff;
+	--green-light: #9cd3a5;
+	--green: #35753f;
+	--green-dark: #132a16;
+	--red-light: #d92c26;
+	/* --red-light: #B3566C; */
+	--red: #753543;
+	--red-dark: #381920;
+	--yellow: #f4d06f;
+	--yellow-2: #fcf6bd;
 
-    --background: var(--white);
-    --header: var(--second-light-2);
-    --foreground: var(--second-dark-2);
-    --border: var(--second-dark);
-    --hover: var(--yellow);
-    --active: var(--green);
-    --text-dark: var(--black);
-    --text-light: var(--white);
-    --text-muted: var(--second-light-2);
-    --input: --alpha(var(--first)/20%);
-    --input-foreground: var(--second-light-2);
-    --ring: var(--color-active);
-    --ring-destructive: var(--red-light);
+	--background: var(--white);
+	--header: var(--second-light-2);
+	--foreground: var(--second-dark-2);
+	--border: var(--second-dark);
+	--hover: var(--yellow);
+	--active: var(--green);
+	--text-dark: var(--black);
+	--text-light: var(--white);
+	--text-muted: var(--second-light-2);
+	--input: --alpha(var(--first)/20%);
+	--input-foreground: var(--second-light-2);
+	--ring: var(--color-active);
+	--ring-destructive: var(--red-light);
 
-    --radius: 0.0rem;
+	--radius: 0rem;
 
+	--blueprint-dark: #354276;
+	--blueprint-light: #ccd3ff;
+	--blueprint-red: #fd8674;
+	--blueprint-orange: #ffbc63;
+	--blueprint-yellow: #f9f871;
+	--blueprint-green: #00b38a;
+	--blueprint-background: #050c0e;
+	--blueprint-background-hover: #0f2124;
+	--blueprint-border: #0f2124;
+	--blueprint-text: #2d545a;
+	--blueprint-active: #0df5d4;
+	--blueprint-accent: #ff9f1c;
+	--blueprint-accent-hover: #ffb703;
 
-    --blueprint-dark: #354276;
-    --blueprint-light: #ccd3ff;
-    --blueprint-red: #fd8674;
-    --blueprint-orange: #ffbc63;
-    --blueprint-yellow: #f9f871;
-    --blueprint-green: #00b38a;
-    --blueprint-background: #050c0e;
-    --blueprint-background-hover: #0f2124;
-    --blueprint-border: #0f2124;
-    --blueprint-text: #2d545a;
-    --blueprint-active: #0df5d4;
-    --blueprint-accent: #ff9f1c;
-    --blueprint-accent-hover: #ffb703;
+	--card: var(--background);
+	--card-foreground: var(--foreground);
+	--popover: var(--second-light);
+	--popover-foreground: var(--text-dark);
+	--primary: var(--first);
+	--primary-foreground: var(--text-light);
+	--secondary: var(--second);
+	--secondary-foreground: var(--text-dark);
+	--muted: var(--second);
+	--muted-foreground: var(--text-muted);
+	--accent: var(--first);
+	--accent-foreground: var(--white);
+	--destructive: var(--red-light);
+	--sidebar: var(--dark);
+	--sidebar-foreground: var(--foreground);
+	--sidebar-primary: var(--first);
+	--sidebar-primary-foreground: var(--first-light);
+	--sidebar-accent: var(--first-dark);
+	--sidebar-accent-foreground: var(--first-light-2);
+	--sidebar-border: var(--border);
+	--sidebar-ring: var(--ring);
+}
+@media not print {
+	.dark {
+		--background: var(--dark);
+		--foreground: var(--white);
 
-  --card: var(--background);
-  --card-foreground: var(--foreground);
-  --popover: var(--second-light);
-  --popover-foreground: var(--text-dark);
-  --primary: var(--first);
-  --primary-foreground: var(--text-light);
-  --secondary: var(--second);
-  --secondary-foreground: var(--text-dark);
-  --muted: var(--second);
-  --muted-foreground: var(--text-muted);
-  --accent: var(--first);
-  --accent-foreground: var(--white);
-  --destructive: var(--red-light);
-  --sidebar: var(--dark);
-  --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--first);
-  --sidebar-primary-foreground: var(--first-light);
-  --sidebar-accent: var(--first-dark);
-  --sidebar-accent-foreground: var(--first-light-2);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
+		--header: var(--second-dark-2);
+		--card: var(--background);
+		--card-foreground: var(--foreground);
+		--popover: var(--first-light);
+		--popover-foreground: var(--foreground);
+		--primary: var(--first);
+		--primary-foreground: var(--text-light);
+		--secondary: var(--second);
+		--secondary-foreground: var(--text-dark);
+		--muted: var(--second-light);
+		--muted-foreground: var(--text-muted);
+		--accent: var(--first);
+		--accent-foreground: var(--white);
+		--destructive: var(--red-light);
+		--ring: var(--color-active);
+		--sidebar: var(--dark);
+		--sidebar-foreground: var(--foreground);
+		--sidebar-primary: var(--first);
+		--sidebar-primary-foreground: var(--first-light);
+		--sidebar-accent: var(--first-dark);
+		--sidebar-accent-foreground: var(--first-light-2);
+		--sidebar-border: var(--border);
+		--sidebar-ring: var(--ring);
+	}
 }
 
-
-.dark {
-    --background: var(--dark);
-    --foreground: var(--white);
-
-    --header: var(--second-dark-2);
-    --card: var(--background);
-    --card-foreground: var(--foreground);
-    --popover: var(--first-light);
-    --popover-foreground: var(--foreground);
-    --primary: var(--first);
-    --primary-foreground: var(--text-light);
-    --secondary: var(--second);
-    --secondary-foreground: var(--text-dark);
-    --muted: var(--second-light);
-    --muted-foreground: var(--text-muted);
-    --accent: var(--first);
-    --accent-foreground: var(--white);
-    --destructive: var(--red-light);
-    --ring: var(--color-active);
-    --sidebar: var(--dark);
-    --sidebar-foreground: var(--foreground);
-    --sidebar-primary: var(--first);
-    --sidebar-primary-foreground: var(--first-light);
-    --sidebar-accent: var(--first-dark);
-    --sidebar-accent-foreground: var(--first-light-2);
-    --sidebar-border: var(--border);
-    --sidebar-ring: var(--ring);
-};
-
-
-
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --text-xsm: var(--text-[10px]);
-  --radius-xl: calc(var(--radius) + 4px);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--text-xsm: var(--text-[10px]);
+	--radius-xl: calc(var(--radius) + 4px);
 
-  --color-background: var(--background);
-  --color-header: var(--header);
-  --color-header-active: var(--text-light);
-  --color-foreground: var(--foreground);
+	--color-background: var(--background);
+	--color-header: var(--header);
+	--color-header-active: var(--text-light);
+	--color-foreground: var(--foreground);
 
-  --color-border: var(--border);
-  --color-hover: var(--hover);
-  --color-active: var(--active);
-  --color-ring: var(--ring);
-  --color-ring-destructive: var(--ring-destructive);
-  --color-destructive: var(--destructive);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
+	--color-border: var(--border);
+	--color-hover: var(--hover);
+	--color-active: var(--active);
+	--color-ring: var(--ring);
+	--color-ring-destructive: var(--ring-destructive);
+	--color-destructive: var(--destructive);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
 
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: --alpha(var(--muted-foreground)/70%);
-  --color-input: var(--input);
-  --color-input-foreground: var(--input-foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: --alpha(var(--muted-foreground)/70%);
+	--color-input: var(--input);
+	--color-input-foreground: var(--input-foreground);
 
-
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
 }
 
 @layer components {
-    * {
-        --tw-ring-color: var(--color-ring);
-    }
+	* {
+		--tw-ring-color: var(--color-ring);
+	}
 }
 
 @layer base {
-    @import '@xyflow/svelte/dist/base.css';
-  * {
-    @apply border-border outline-ring/50;
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-    .svelte-flow__controls-button {
+	@import '@xyflow/svelte/dist/base.css';
+	* {
+		@apply border-border outline-ring/50;
+		@apply border-border outline-ring/50;
+	}
+	body {
+		@apply bg-background text-foreground;
+	}
+	.svelte-flow__controls-button {
 		height: auto;
 		width: auto;
-        background-color: var(--color-secondary);
-        color: var(--color-primary);
-        &:hover {
-            background-color: var(--color-hover);
-        }
-    }
-    .svelte-flow__panel {
-        background-color: var(--color-transparent);
-    }
+		background-color: var(--color-secondary);
+		color: var(--color-primary);
+		&:hover {
+			background-color: var(--color-hover);
+		}
+	}
+	.svelte-flow__panel {
+		background-color: var(--color-transparent);
+	}
 }
 
 .svelte-flow {
-    --xy-background-color-default: var(--color-background);
-/*     --xy-node-color-default: var(--color-stone-300); */
-    --xy-node-border-radius-default: var(--radius);
-/*     --xy-node-border-default: 1px solid var(--color-slate-300); */
-/*    --xy-node-background-color-default: var(--color-slate-200);*/
-/*     --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%); */
-/*     --xy-controls-button-background-color-default: var(--color-stone-50); */
-/*     --xy-controls-button-background-color-hover: var(--color-blueprint); */
-/*     --xy-resize-background-color-default: var(--color-orange-200); */
-    --xy-edge-stroke: --alpha(var(--color-accent)/80%);
-    /* --xy-edge-stroke-width-default: 1px; */
-    --xy-edge-stroke-selected: var(--color-active);
-/*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
+	--xy-background-color-default: var(--color-background);
+	/*     --xy-node-color-default: var(--color-stone-300); */
+	--xy-node-border-radius-default: var(--radius);
+	/*     --xy-node-border-default: 1px solid var(--color-slate-300); */
+	/*    --xy-node-background-color-default: var(--color-slate-200);*/
+	/*     --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%); */
+	/*     --xy-controls-button-background-color-default: var(--color-stone-50); */
+	/*     --xy-controls-button-background-color-hover: var(--color-blueprint); */
+	/*     --xy-resize-background-color-default: var(--color-orange-200); */
+	--xy-edge-stroke: --alpha(var(--color-accent)/80%);
+	/* --xy-edge-stroke-width-default: 1px; */
+	--xy-edge-stroke-selected: var(--color-active);
+	/*    --xy-node-default.selectable.selected: var(--color-emerald-500);*/
 }
 /**/
 .svelte-flow.dark {
-    --xy-background-color-default: var(--color-background);
-    /* --xy-node-color-default: var(--color-stone-800); */
-    --xy-node-border-radius-default: var(--radius);
-    --xy-node-border-default: 1px solid var(--color-foreground);
-/*    --xy-node-background-color-default: var(--color-slate-600);*/
-/*    --xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);*/
-    /* --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%); */
-    /* --xy-controls-button-background-color-default: var(--color-stone-700); */
-    /* --xy-controls-button-background-color-hover: var(--color-stone-500); */
-    /* --xy-resize-background-color-default: var(--color-orange-500); */
-    --xy-edge-stroke: --alpha(var(--color-foreground)/60%);
-    --xy-edge-stroke-selected: var(--color-active);
-    /* --xy-node-default.selectable.selected: var(--color-emerald-500); */
+	--xy-background-color-default: var(--color-background);
+	/* --xy-node-color-default: var(--color-stone-800); */
+	--xy-node-border-radius-default: var(--radius);
+	--xy-node-border-default: 1px solid var(--color-foreground);
+	/*    --xy-node-background-color-default: var(--color-slate-600);*/
+	/*    --xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);*/
+	/* --xy-node-group-background-color-default: --alpha(var(--color-stone-400)/10%); */
+	/* --xy-controls-button-background-color-default: var(--color-stone-700); */
+	/* --xy-controls-button-background-color-hover: var(--color-stone-500); */
+	/* --xy-resize-background-color-default: var(--color-orange-500); */
+	--xy-edge-stroke: --alpha(var(--color-foreground)/60%);
+	--xy-edge-stroke-selected: var(--color-active);
+	/* --xy-node-default.selectable.selected: var(--color-emerald-500); */
 }
 
 .svelte-flow__resize-control.line {
-    border-width: 1px;
-    /* width: 4em; */
+	border-width: 1px;
+	/* width: 4em; */
 }
 .svelte-flow__resize-control.handle {
-    border-width: 0px;
+	border-width: 0px;
 }
 
 .svelte-flow__node {
-    height: fit-content;
-    width: fit-content;
-    display: flex;
-    /* align-items: center; */
-    /* border: 1px solid var(--color-stone-400); */
+	height: fit-content;
+	width: fit-content;
+	display: flex;
+	/* align-items: center; */
+	/* border: 1px solid var(--color-stone-400); */
 }
 .svelte-flow__node.selectable {
-    box-shadow: var(--shadow-sm);
+	box-shadow: var(--shadow-sm);
 }
 
 .svelte-flow__node.selectable:hover {
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--color-hover);
-    /* border: 1px solid --alpha(var(--color-blueprint)/50%); */
+	box-shadow: var(--shadow-lg);
+	border: 1px solid var(--color-hover);
+	/* border: 1px solid --alpha(var(--color-blueprint)/50%); */
 }
 
 .svelte-flow__node.selected {
-    border: 1px solid var(--color-active);
+	border: 1px solid var(--color-active);
 }
