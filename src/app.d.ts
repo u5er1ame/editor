@@ -48,6 +48,9 @@ declare global {
 			graph?: {
 				selectedNodeId: string;
 			};
+			map?: {
+				selectedFeatureId: string;
+			};
 		}
 		// interface Platform {}
 	}

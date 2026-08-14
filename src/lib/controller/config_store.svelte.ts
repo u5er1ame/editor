@@ -25,6 +25,13 @@ export class ConfigStore {
 			case 'connects':
 				config.graph = {};
 				config.table = {};
+				config.map = {};
+				break;
+			case 'levels':
+			case 'area_name':
+			case 'shops':
+				config.table = {};
+				config.map = {};
 				break;
 			default:
 				// All tables have table view
