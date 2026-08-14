@@ -41,6 +41,7 @@ export const ElectricRoomSchema = z.object({
 	name: z.string(),
 	level: z.custom<RecordId<'levels'>>()
 });
+export type ElectricRoom = z.infer<typeof ElectricRoomSchema>;
 export const ClientElectricRoomSchema = ElectricRoomSchema.extend({
 	level: LevelSchema
 });
@@ -51,6 +52,7 @@ export const BoardSchema = z.object({
 	name: z.string(),
 	room: z.custom<RecordId<'electric_rooms'>>()
 });
+export type Board = z.infer<typeof BoardSchema>;
 export const ClientBoardSchema = BoardSchema.extend({
 	room: ClientElectricRoomSchema
 });
@@ -63,6 +65,7 @@ export const BreakerSchema = z.object({
 	description: z.string().optional(), // FIXME: is this should be generated from graph?
 	board: z.custom<RecordId<'boards'>>()
 });
+export type Breaker = z.infer<typeof BreakerSchema>;
 export const ClientBreakerSchema = BreakerSchema.extend({
 	board: ClientBoardSchema
 });

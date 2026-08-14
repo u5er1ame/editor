@@ -6,7 +6,7 @@ import * as Dialog from "$lib/components/ui/dialog";
 import * as Input from "$lib/components/ui/input";
 import * as Field from "$lib/components/ui/field";
 
-import type { Board } from "$lib/server/schemas";
+import type { Board } from "$lib/model/schemas";
 	import { twMerge } from "tailwind-merge";
 	import { resizer } from "$lib/utils";
 

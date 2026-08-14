@@ -2,7 +2,7 @@
 	import type { IApi, IColumn, IRow } from '@svar-ui/svelte-grid';
 	import { Button } from '$lib/components/ui/button';
 	import { CircuitBoard } from '@lucide/svelte/icons';
-	import { getContext } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	let {
 		row,
@@ -16,28 +16,17 @@
 		api: IApi;
 		onaction?: (ev: { action: string; data?: any }) => void;
 	} = $props();
-	let d = $state();
-	$effect(() => {
-		d = api.getState();
-	});
+
 	function handleClick() {
 		const rowId = row.id;
-		const tableName = column.id;
-
-		// Emit action to show in graph
-		onaction?.({
-			action: 'show-in-graph',
-			data: { rowId, tableName }
-		});
-
-		// Also try to navigate via URL
 		if (rowId) {
-			const url = new URL(window.location.href);
-			url.searchParams.set('table', tableName as string);
-			url.searchParams.set('row', rowId as string);
-			url.searchParams.set('view', 'graph');
-			window.history.pushState({}, '', url.toString());
-			window.dispatchEvent(new PopStateEvent('popstate'));
+			onaction?.({
+				action: 'show-in-graph',
+				data: { rowId, tableName: column.id }
+			});
+			goto('/graph', {
+				state: { graph: { selectedNodeId: String(rowId) } }
+			});
 		}
 	}
 </script>

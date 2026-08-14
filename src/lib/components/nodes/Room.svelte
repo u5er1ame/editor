@@ -5,7 +5,7 @@
 
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
-	import { browser } from '$app/env';
+	import { browser } from '$app/environment';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { fade } from 'svelte/transition';
 	import { useResizeObserver } from 'runed';
@@ -19,7 +19,7 @@
 		type NodeProps
 	} from '@xyflow/svelte';
 
-	import type { ElectricRoom } from '$lib/server/schemas';
+	import type { ElectricRoom } from '$lib/model/schemas';
 	import EditToolbar from './EditToolbar.svelte';
 	import { resizer } from '$lib/utils';
 

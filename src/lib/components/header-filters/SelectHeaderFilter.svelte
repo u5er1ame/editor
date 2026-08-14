@@ -8,15 +8,30 @@
 		api,
 		column,
 		onaction,
+		cell,
 		...rest
 	}: {
 		api?: any;
 		column?: any;
 		onaction?: (ev: { action: string; data?: any }) => void;
+		cell?: any;
 	} = $props();
 
 	let open = $state(false);
 	let value = $state<string | undefined>(undefined);
+
+	// Print path: SVAR passes the header cell object as `cell` and no `onaction`.
+	const isPrint = $derived(!onaction && cell);
+	const labelText = $derived.by(() => {
+		if (!isPrint || !cell) return '';
+		if (typeof cell === 'object' && 'text' in cell && cell.text) return cell.text;
+		const headers = column?.header;
+		if (Array.isArray(headers)) {
+			const text = headers.find((h: any) => h && h.text)?.text;
+			if (text) return text;
+		}
+		return column?.id ?? '';
+	});
 
 	// Extract config from header cell
 	const config = $derived.by(() => {
@@ -35,6 +50,7 @@
 	const valueKey = $derived(config?.valueKey ?? 'id');
 	const filterPath = $derived(config?.filterPath);
 	const displayFormat = $derived(config?.displayFormat);
+	const showRawLabel = $derived(config?.showRawLabel);
 
 	// Fetch data from the table
 	const fetchData = $derived.by(() => {
@@ -71,7 +87,7 @@
 					values.push(resolvePath(item, key) ?? '');
 				}
 				label = values.filter(Boolean).join(' / ');
-			} else {
+			} else if (!showRawLabel) {
 				// Default: show parent if exists
 				const parentKeys = Object.keys(item).filter(
 					(k) => typeof item[k] === 'object' && item[k] !== null && item[k].name
@@ -137,6 +153,9 @@
 </script>
 
 <div class="header-filter relative w-full">
+	{#if isPrint}
+		<span class="truncate text-xs">{labelText}</span>
+	{:else}
 	<Select.Root type="single" bind:open bind:value onValueChange={handleChange}>
 		<Select.Trigger class="h-8 w-full pr-7 text-xs">
 			<span class="truncate">
@@ -156,7 +175,8 @@
 			{/if}
 		</Select.Content>
 	</Select.Root>
-	{#if value}
+	{/if}
+	{#if !isPrint && value}
 		<button
 			type="button"
 			class="absolute top-1/2 right-1 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded hover:bg-muted"

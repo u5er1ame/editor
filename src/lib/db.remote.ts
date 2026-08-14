@@ -106,7 +106,7 @@ export const getData = query(
 		});
 		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
 		const res = await db.select<ServerData>(new Table(table)).catch((e: any) => {
-			return error(500, { message: e.toString() }); // FIXME: THIS EXPOSES DB ERRORS
+			return error(500, { message: 'Failed to fetch data' });
 		});
 		return jsonify(res ?? []);
 	}
@@ -129,24 +129,6 @@ export const getTableStructure = query(
 	}
 );
 
-// export const getAllTables = query.batch(z.string().refine((v)=>schemaStore.store.has(v), { error: ({input})=>"Cant find schema for table: "+input }),
-// 	async (tables) => {
-// 		const { locals } = getRequestEvent();
-// 		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
-//
-// 		if (!db.isConnected) return
-// 		await db.ready.catch(()=>{ return error(500,"DB not ready") });
-// 		const queries = new Map<string, Data[]>(); // little happy cache
-// 		for (const table of schemaStore.store.keys()) {
-// 			if (queries.has(table)) continue;
-// 			const data = await db.select<Data[]>(new Table(table)).catch(()=>{ return error(500,"cant get table") });
-// 			queries.set(table, data ?? []);
-// 		}
-// 		return (table)=>{
-// 			return queries.get(table) ?? []
-// 		}
-// });
-
 export const generateId = query(z.string(), async (table: string) => {
 	const { locals } = getRequestEvent();
 	const db = locals.db.instance;
@@ -154,12 +136,125 @@ export const generateId = query(z.string(), async (table: string) => {
 	await db.ready.catch(() => {
 		return error(500, 'DB not ready');
 	});
-	// const { locals } = getRequestEvent();
-	// db.use({ database: locals.db.database });
+	db.use({ database: locals.db.database });
 	const [id] = await db.query<[string]>('rand::id()');
 	if (!id) return error(500, 'Failed to generate ID');
 	return { id: new RecordId(table, id).toString() };
 });
+
+export const updateRecord = query(
+	z.object({
+		table: z.string(),
+		id: z.string(),
+		changes: z.record(z.string(), z.any())
+	}),
+	async ({ table, id, changes }) => {
+		const { locals } = getRequestEvent();
+		const db = locals.db.instance;
+		if (!db.isConnected) error(500, 'DB not connected');
+		await db.ready.catch(() => {
+			return error(500, 'DB not ready');
+		});
+		db.use({ database: locals.db.database });
+
+		const entry = schemaStore.store.get(table as Tables);
+		if (!entry) return error(400, `Unknown table: ${table}`);
+
+		const serverSchema = entry.server;
+		const { id: _id, ...dbChanges } = changes;
+
+		const normalized: Record<string, any> = {};
+		for (const [key, val] of Object.entries(dbChanges)) {
+			if (key in serverSchema.shape) {
+				normalized[key] = val && typeof val === 'object' && val.id ? val.id : val;
+			}
+		}
+
+		// Validate only changed fields against server schema
+		const changedFieldsSchema = serverSchema.partial();
+		const validation = changedFieldsSchema.safeParse(normalized);
+		if (!validation.success) {
+			return error(400, { message: validation.error.message });
+		}
+
+		const recordId = new RecordId(table, id.split(':')[1] ?? id);
+		const patched = await db
+			.update(recordId)
+			.merge(normalized)
+			.catch((e: any) => {
+				return error(500, { message: 'Failed to update record' });
+			});
+		return jsonify(patched);
+	}
+);
+
+export const insertRecord = query(
+	z.object({
+		table: z.string(),
+		data: z.record(z.string(), z.any())
+	}),
+	async ({ table, data }) => {
+		const { locals } = getRequestEvent();
+		const db = locals.db.instance;
+		if (!db.isConnected) error(500, 'DB not connected');
+		await db.ready.catch(() => {
+			return error(500, 'DB not ready');
+		});
+		db.use({ database: locals.db.database });
+
+		const entry = schemaStore.store.get(table as Tables);
+		if (!entry) return error(400, `Unknown table: ${table}`);
+
+		const serverSchema = entry.server;
+		const { id: rawId, ...rest } = data;
+
+		const normalized: Record<string, any> = {};
+		for (const [key, val] of Object.entries(rest)) {
+			if (key in serverSchema.shape) {
+				normalized[key] = val && typeof val === 'object' && val.id ? val.id : val;
+			}
+		}
+
+		const toInsert = normalized;
+		if (rawId) {
+			toInsert.id = new RecordId(table, String(rawId).split(':')[1] ?? String(rawId));
+		}
+
+		const validation = serverSchema.safeParse(toInsert);
+		if (!validation.success) {
+			return error(400, { message: validation.error.message });
+		}
+
+		const created = await db
+			.insert(new Table(table), toInsert)
+			.catch((e: any) => {
+				return error(500, { message: 'Failed to insert record' });
+			});
+		return jsonify(created);
+	}
+);
+
+export const deleteRecord = query(
+	z.object({
+		table: z.string(),
+		id: z.string()
+	}),
+	async ({ table, id }) => {
+		const { locals } = getRequestEvent();
+		const db = locals.db.instance;
+		if (!db.isConnected) error(500, 'DB not connected');
+		await db.ready.catch(() => {
+			return error(500, 'DB not ready');
+		});
+		db.use({ database: locals.db.database });
+
+		const recordId = new RecordId(table, id.split(':')[1] ?? id);
+		const deleted = await db.delete(recordId).catch((e: any) => {
+			return error(500, { message: 'Failed to delete record' });
+		});
+		return jsonify(deleted);
+	}
+);
 
 export const expire = query(async () => {
 	const { locals } = getRequestEvent();

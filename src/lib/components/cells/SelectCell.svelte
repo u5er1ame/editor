@@ -9,7 +9,13 @@
 	}: {
 		row: IRow;
 		column: IColumn & {
-			props?: { labelKey?: string; valueKey?: string; displayFormat?: string; fetchTable?: string };
+			props?: {
+				labelKey?: string;
+				valueKey?: string;
+				displayFormat?: string;
+				fetchTable?: string;
+				showRawLabel?: boolean;
+			};
 		};
 	} = $props();
 
@@ -66,6 +72,12 @@
 				values.push(resolvePath(data, key) ?? '');
 			}
 			return values.filter(Boolean).join(' / ');
+		}
+
+		// When the value is the leaf (e.g. boards.room) the parent
+		// context adds noise — show just the raw label.
+		if (column.props?.showRawLabel) {
+			return name;
 		}
 
 		// Default: show direct parent if exists

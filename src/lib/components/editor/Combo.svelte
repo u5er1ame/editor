@@ -11,7 +11,7 @@ let { data, name, value=$bindable(), props, ...rest } = $props();
 let open = $state(false);
 let triggerRef = $state<HTMLButtonElement>(null!);
 const selectedValue = $derived.by(()=>{
-    const item = data.find((f) =>{ if(!f) return false; return createValue(f) == value });
+    const item = data.find((f: any) =>{ if(!f) return false; return createValue(f) == value });
     return item?createLabel(item):undefined;
 });
 
@@ -26,11 +26,18 @@ function closeAndFocusTrigger() {
 }
 
 function createLabel(item: any) {
-        return item[props.labelKey]
+    return item[props.labelKey]
 }
 
 function createValue(item: any) {
 	return item[props.valueKey]
+}
+
+// Build keywords for the Command.Item so search matches the labels
+// users see, not the underlying RecordIds.
+function createKeywords(item: any): string[] {
+	const label = createLabel(item) ?? '';
+	return [String(label), String(item[props.labelKey] ?? ''), String(createValue(item) ?? '')];
 }
 </script>
 
@@ -59,6 +66,7 @@ function createValue(item: any) {
 		    {#each data as item}
 			<Command.Item
 			    value={createValue(item)}
+			    keywords={createKeywords(item)}
 			    onSelect={() => {
 				value = createValue(item);
 				closeAndFocusTrigger();

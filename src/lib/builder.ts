@@ -183,40 +183,50 @@ const fieldConfigs: Record<string, FieldConfigFn> = {
 		return text(key);
 	},
 
-	room: (key, fs) => {
+	room: (key, fs, tableName) => {
 		if (fs.type == 'object') {
-			return ColumnBuilder.withKeyCell(key, 'name', SelectCellComp)
+			const builder = ColumnBuilder.withKeyCell(key, 'name', SelectCellComp)
 				.headertextWithFilter('Room', SelectHeaderFilter, {
 					fetchTable: 'electric_rooms',
 					labelKey: 'name',
 					valueKey: 'id',
 					filterPath: 'id'
 				})
-				.addEditorProps({ displayFormat: '{level.name} / {name}' })
 				.editor({
 					type: 'select',
 					config: { fetchTable: 'electric_rooms', labelKey: 'name', valueKey: 'id' }
-				})
-				.build();
+				});
+			// boards.room: room is the leaf — no parent context needed
+			// other tables (e.g. breakers): room is nested under something, disambiguate with parent
+			if (tableName !== 'boards') {
+				builder.addEditorProps({ displayFormat: '{level.name} / {name}' });
+			} else {
+				builder.addEditorProps({ showRawLabel: true });
+			}
+			return builder.build();
 		}
 		return text(key);
 	},
 
-	board: (key, fs) => {
+	board: (key, fs, tableName) => {
 		if (fs.type == 'object') {
-			return ColumnBuilder.withKeyCell(key, 'name', SelectCellComp)
+			const builder = ColumnBuilder.withKeyCell(key, 'name', SelectCellComp)
 				.headertextWithFilter('Board', SelectHeaderFilter, {
 					fetchTable: 'electric_rooms',
 					labelKey: 'name',
 					valueKey: 'id',
 					filterPath: 'room.id'
 				})
-				.addEditorProps({ displayFormat: '{room.name} / {name}' })
 				.editor({
 					type: 'select',
 					config: { fetchTable: 'boards', labelKey: 'name', valueKey: 'id' }
-				})
-				.build();
+				});
+			// boards.board doesn't make sense (a board has no parent board)
+			// breakers.board: disambiguate by parent room
+			if (tableName === 'breakers') {
+				builder.addEditorProps({ displayFormat: '{room.name} / {name}' });
+			}
+			return builder.build();
 		}
 		return text(key);
 	},

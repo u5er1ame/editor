@@ -1,6 +1,6 @@
 <script lang="ts">
     import { type Edge, type Node, type NodeProps, getOutgoers, Handle, NodeResizer, Position, useNodesInitialized, useOnSelectionChange, useSvelteFlow } from '@xyflow/svelte';
-    import type { Breaker } from '$lib/server/schemas';
+    import type { Breaker } from '$lib/model/schemas';
 	import { twMerge } from 'tailwind-merge';
 	import { resizer } from '$lib/utils';
 
@@ -45,9 +45,9 @@
 <Handle type="target" position={Position.Top} />
 <div class="size-full flex flex-col items-stretch">
     <p class={twMerge("size-full text-sm", out?"text-primary-foreground":"text-muted-foreground " )}>{data.raw[data.labelKey]}</p>
-    {#if data.raw.value}
-        <p class="size-full text-foreground text-xsm">{data?.raw.value}A</p>
-    {/if}
+{#if data.raw.current}
+    <p class="size-full text-foreground text-xsm">{data?.raw.current}A</p>
+{/if}
 </div>
 <Handle type="source" position={Position.Bottom} />
 

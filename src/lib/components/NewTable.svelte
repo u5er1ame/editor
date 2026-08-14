@@ -11,15 +11,15 @@
 
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/svar/Button.svelte';
-	import { getDataClient, generateId } from '$lib/db.remote';
+	import { getDataClient, generateId, updateRecord, insertRecord, deleteRecord } from '$lib/db.remote';
 	import Skeleton from './ui/skeleton/skeleton.svelte';
 	import Editor from './editor/Root.svelte';
 	import type { DBContext } from '../../routes/+layout.svelte';
 	import Theme from './svar/Theme.svelte';
 	import Spinner from './ui/spinner/spinner.svelte';
 	import { toast } from 'svelte-sonner';
-	import { PlusIcon, RefreshCwIcon, Trash2Icon, TrashIcon, PrinterIcon } from '@lucide/svelte';
-	import { getContext } from 'svelte';
+	import { PlusIcon, RefreshCwIcon, Trash2Icon, PrinterIcon } from '@lucide/svelte';
+	import { getContext, tick } from 'svelte';
 	import { registerInlineEditors } from './inline-editors/register';
 	import { replaceState } from '$app/navigation';
 	import { page } from '$app/state';
@@ -30,10 +30,14 @@
 	registerInlineEditors();
 
 	let tbl: IApi | undefined = $state();
+	let new_row_ids = $state(new Set<string>());
 
 	let { table = $bindable(), readonly = $bindable(), config, changes, ...rest } = $props();
 	let selection: IRow | null = $state(null);
-	const isEditor = $derived(getContext<DBContext>('db').userRoles?.includes('EDITOR') ?? false);
+	const isEditor = $derived(
+		(getContext<DBContext>('db').userRoles?.includes('EDITOR') ?? false) ||
+			(getContext<DBContext>('db').userRoles?.includes('OWNER') ?? false)
+	);
 	let showEditor = $state(false);
 
 	// Page state persistence for view transitions using SvelteKit
@@ -83,13 +87,35 @@
 			.filter((itm) => itm);
 		return out;
 	}
-	const editorConfig = createEditorConfig(config.table);
+	const editorConfig = $derived.by(() => createEditorConfig(config.table));
 
 	// Get columns that have header filters
 	const columnsWithFilters = $derived.by(() => {
 		if (!config?.table) return [];
 		return config.table.filter((col: any) => col.props?.headerFilterConfig);
 	});
+
+	function parseError(error: string): string {
+		try {
+			return JSON.parse(error)?.message ?? error;
+		} catch {
+			return error;
+		}
+	}
+
+	function validateRow(data: Record<string, any>, columns: IColumn[]): string[] {
+		const errors: string[] = [];
+		for (const col of columns) {
+			if (col.hidden || col.id === 'id' || !col.header) continue;
+			const key = col.id as string;
+			const val = data[key];
+			if (val === undefined || val === null || val === '') {
+				const label = typeof col.header === 'string' ? col.header : String(col.id);
+				errors.push(label);
+			}
+		}
+		return errors;
+	}
 
 	const init = (api: IApi) => {
 		tbl = api;
@@ -103,11 +129,61 @@
 			}
 		});
 
+		// Restore selection from page state
+		const savedRowId = page.state.selectedRow;
+		if (savedRowId && savedRowId.startsWith(table + ':')) {
+			tick().then(() => {
+				api.exec('select-row', { id: savedRowId });
+			});
+		}
+
+		// Prevent viewers from opening the inline editor.
+		// Returning false from an interceptor cancels the event.
+		api.intercept(
+			'open-editor',
+			async () => {
+				if (!isEditor) {
+					toast.message('You do not have permission to edit records', {
+						duration: 2000,
+						position: 'bottom-center'
+					});
+					return false;
+				}
+				return true;
+			},
+			{ intercept: true }
+		);
+
+		api.on('update-cell', async (ev) => {
+			if (readonly || !isEditor) return;
+			const rowId = String(ev.id);
+			const row = api.getRow(ev.id);
+			if (!row) return;
+
+			const cellChanges: Record<string, any> = {};
+			cellChanges[ev.column as string] = ev.value;
+
+			if (new_row_ids.has(rowId)) {
+				const inserted = await insertRecord({ table, data: { id: rowId, ...row, ...cellChanges } });
+				if (inserted) {
+					new_row_ids.delete(rowId);
+					toast.success('Record created');
+				} else {
+					toast.error('Failed to create record');
+				}
+			} else {
+				const res = await updateRecord({ table, id: rowId, changes: cellChanges });
+				if (!res) {
+					toast.error('Failed to save changes');
+					getDataClient(table).refresh();
+				}
+			}
+		});
+
 		api.intercept(
 			'add-row',
 			async (ev) => {
-				if (readonly == false) return;
-				if (!ev.id) return;
+				if (readonly || !isEditor) return false;
 				return ev;
 			},
 			{ intercept: true }
@@ -127,9 +203,6 @@
 	}
 </script>
 
-{#snippet PrintIcon()}
-	<span class="iconify size-5 align-middle material-symbols--print-rounded"></span>
-{/snippet}
 {#snippet Plus()}
 	<PlusIcon />
 {/snippet}
@@ -153,7 +226,7 @@
 		{:else if getDataClient(table).error}
 			<div class="flex size-full flex-row justify-center">
 				<div class="text-xl text-destructive">
-					{JSON.parse(getDataClient(table).error)?.message ?? getDataClient(table).error.toString()}
+					{parseError(getDataClient(table).error)}
 				</div>
 			</div>
 		{:else if getDataClient(table).ready}
@@ -170,7 +243,7 @@
 				{/if}
 				<!-- Header filters row -->
 				{#if columnsWithFilters.length > 0}
-					<div class="mb-1 flex gap-1">
+					<div class="print-hide mb-1 flex gap-1">
 						{#each columnsWithFilters as col (col.id)}
 							<div class="min-w-0 flex-1">
 								{#if col.props.headerFilterComponent}
@@ -194,6 +267,7 @@
 									if (!res || !res.id) return;
 									const rowId = res.id;
 									await tbl?.exec('add-row', { id: rowId, row: { id: rowId } });
+									new_row_ids.add(rowId);
 									selection = tbl?.getRow(rowId) ?? { id: rowId };
 									showEditor = true;
 								},
@@ -204,10 +278,14 @@
 								id: 'delete-row',
 								comp: 'icon',
 								text: 'Delete Row',
-								onclick: () => {
-									if (selection) {
-										tbl?.exec('delete-row', { id: selection.id });
-									}
+								onclick: async () => {
+									if (!selection || !isEditor) return;
+									const rowId = String(selection.id);
+									await deleteRecord({ table, id: rowId });
+									tbl?.exec('delete-row', { id: selection.id });
+									new_row_ids.delete(rowId);
+									selection = null;
+									getDataClient(table).refresh();
 								},
 								variant: 'destructive',
 								snippet: Trash
@@ -229,7 +307,6 @@
 								text: 'Print',
 								onclick: async () => {
 									if (!tbl) return;
-									// Theme.svelte has @media print styles
 									tbl.exec('print', { mode: 'portrait', paper: 'a4' });
 								},
 								variant: 'secondary',
@@ -252,11 +329,46 @@
 	{#if isEditor}
 		<Editor
 			bind:show={showEditor}
-			onsave={(e: any) => {
-				console.log(e);
+			onsave={async (e: any) => {
+				if (!selection?.id || !isEditor) return;
+				const rowId = String(selection.id);
+				const data: Record<string, any> = { id: rowId };
+				for (const [key, val] of Object.entries(e as Record<string, any>)) {
+					if (key === 'id') continue;
+					data[key] = val && typeof val === 'object' && val.id ? val.id : val;
+				}
+
+				const validationErrors = validateRow(data, config.table);
+				if (validationErrors.length > 0) {
+					toast.error(`Required fields: ${validationErrors.join(', ')}`);
+					return;
+				}
+
+				if (new_row_ids.has(rowId)) {
+					const inserted = await insertRecord({ table, data });
+					if (inserted) {
+						new_row_ids.delete(rowId);
+						getDataClient(table).refresh();
+						toast.success('Record created');
+					} else {
+						toast.error('Failed to create record');
+						return;
+					}
+				} else {
+					const res = await updateRecord({ table, id: rowId, changes: data });
+					if (!res) {
+						toast.error('Failed to save changes');
+						return;
+					}
+					getDataClient(table).refresh();
+				}
+				showEditor = false;
+				selection = null;
 			}}
 			onclose={(e: any) => {
-				tbl?.exec('close-editor', e);
+				if (selection?.id) {
+					tbl?.exec('close-editor', e);
+				}
 			}}
 			bind:values={selection}
 			config={editorConfig} />
@@ -291,4 +403,9 @@
 	:global(.wx-cell:data-[role='gridcell']) {
 		padding: var(--wx-padding);
 	}*/
+	@media print {
+		.print-hide {
+			display: none !important;
+		}
+	}
 </style>

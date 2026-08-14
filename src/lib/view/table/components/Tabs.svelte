@@ -33,7 +33,11 @@
 
 	let { tables, ...rest } = $props();
 	let current_tab: string = $derived(
-		page.state.table?.selected_tab ? page.state.table?.selected_tab : tables.selected_tab
+		page.state.table?.selected_tab
+			? page.state.table?.selected_tab
+			: page.state.selectedTable
+				? page.state.selectedTable
+				: tables.selected_tab
 	);
 	class TableState {
 		name: string = $state('');

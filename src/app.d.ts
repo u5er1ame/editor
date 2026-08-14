@@ -45,6 +45,9 @@ declare global {
 			};
 			selectedRow?: string;
 			selectedTable?: string;
+			graph?: {
+				selectedNodeId: string;
+			};
 		}
 		// interface Platform {}
 	}

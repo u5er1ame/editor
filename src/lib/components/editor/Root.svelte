@@ -1,5 +1,4 @@
 <script lang="ts">
-import { enhance } from "$app/forms";
 import * as Dialog from "$lib/components/ui/dialog";
 import * as Field from "$lib/components/ui/field"
 
@@ -19,12 +18,11 @@ const editors = {
     combo: Combo,
     checkbox: Checkbox,
     none: Text,
-}
-function validationState(element, formData, action, cancel, submitter) {
-    return async ({result, update})=>{
-	console.log("result", result);
-	show = false;
-	await update(result);
+};
+
+async function handleSave() {
+    if (values) {
+        await onsave?.(values);
     }
 }
 </script>
@@ -48,7 +46,7 @@ function validationState(element, formData, action, cancel, submitter) {
 		<Dialog.Header>
 		    <Dialog.Title>Edit record</Dialog.Title>
 		</Dialog.Header>
-		<form use:enhance={validationState} method="POST" action="?/save" class="size-full flex flex-1 flex-col gap-2">
+		<form onsubmit={(e) => { e.preventDefault(); handleSave(); }} class="size-full flex flex-1 flex-col gap-2">
 		    <Field.Set class="size-full">
 			{#each config as fieldConf}
 			    <Field.Field class="size-full">

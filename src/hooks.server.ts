@@ -18,15 +18,7 @@ const colors = {
 	reset: '\x1b[0m'
 };
 
-export const init: ServerInit = () => {
-	// root_access.connect(env.SURREAL_URL, {
-	// 	authentication: {
-	// 		username: env.SURREAL_ROOT_VIEWER_USER,
-	// 		password: env.SURREAL_ROOT_VIEWER_PASS,
-	// 	}
-	// }).catch((e) =>{ return false  });
-	// db.connect(env.SURREAL_URL).catch((e)=>{ return false });
-};
+export const init: ServerInit = () => {};
 
 export const handleError = (e: ErrorEvent) => {
 	let public_message = 'Error';
@@ -45,7 +37,7 @@ export const handleValidationError: HandleValidationError = async ({ event, issu
 	});
 };
 
-const defaut_user = {
+const default_user = {
 	username: env.SURREAL_DEFAULT_USERNAME,
 	password: env.SURREAL_DEFAULT_PASSWORD,
 	namespace: env.SURREAL_DEFAULT_NAMESPACE
@@ -96,7 +88,7 @@ const db_init: Handle = async ({ event, resolve }) => {
 			.catch(() => false);
 
 		return await resolve(event);
-	} catch (e) {
+	} catch (e: any) {
 		console.error(colors.red, '[DB INIT]', colors.reset, e.message);
 		return await resolve(event);
 	}
@@ -104,13 +96,13 @@ const db_init: Handle = async ({ event, resolve }) => {
 
 const check_auth: Handle = async ({ event, resolve }) => {
 	try {
-		if (!event.locals.db.instance.isConnected || !event.locals.db.instance.isConnected) {
+		if (!event.locals.db.instance.isConnected || !event.locals.db.root_instance.isConnected) {
 			return db_init({ event, resolve });
 			// return resolve(event);
 		}
 		if (event.locals.db.token == null) {
 			console.warn('Token not found login as default user');
-			const tokens = await event.locals.db.instance.signin(defaut_user).catch((e) => {
+			const tokens = await event.locals.db.instance.signin(default_user).catch((e) => {
 				return error(503, 'Cant signin as default user');
 			});
 			const decoded = decodeJWT(tokens.access);
@@ -122,8 +114,8 @@ const check_auth: Handle = async ({ event, resolve }) => {
 			event.locals.db = {
 				...event.locals.db,
 				token: tokens.access,
-				username: decoded.ID ?? defaut_user.username,
-				// namespace: decoded.NS ?? defaut_user.namespace,
+				username: decoded.ID ?? default_user.username,
+				// namespace: decoded.NS ?? default_user.namespace,
 				database: decoded.DB ?? event.locals.db.database
 			};
 			return await resolve(event);
@@ -139,7 +131,7 @@ const check_auth: Handle = async ({ event, resolve }) => {
 							console.warn('Token expired deleting it and redirecting to login');
 							event.cookies.delete('sr_token', { path: '/' });
 							event.locals.db.token = null;
-							return await event.locals.db.instance.signin(defaut_user).catch((e) => {
+							return await event.locals.db.instance.signin(default_user).catch((e) => {
 								return error(503, 'Cant signin as default user');
 							});
 						}
@@ -156,7 +148,7 @@ const check_auth: Handle = async ({ event, resolve }) => {
 				...event.locals?.db,
 				token: tokens.access,
 				username: decoded.ID,
-				// namespace: decoded.NS ?? defaut_user.namespace,
+				// namespace: decoded.NS ?? default_user.namespace,
 				database: event.locals.db.database ?? decoded.DB
 			};
 		}
@@ -170,6 +162,5 @@ const check_auth: Handle = async ({ event, resolve }) => {
 export const handle: Handle = sequence(log_request, get_cookies, db_init, check_auth);
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
-	console.log('FETCH', event.request.method, event.url.pathname);
 	return fetch(request);
 };

@@ -35,6 +35,8 @@
 	import type { ServerData } from '$lib/model/schemas';
 	import { flowReady } from '../../routes/graph/+page.svelte';
 	import { resizer } from '$lib/utils';
+	import { page } from '$app/state';
+	import { replaceState } from '$app/navigation';
 
 	let {
 		elk,
@@ -50,6 +52,7 @@
 
 	const { fitView, getZoom, getNode, updateNode, getNodes, getEdges, updateEdge } = useSvelteFlow();
 
+	const nodesStore = $derived(useNodes());
 	const zoom = $derived.by(getZoom);
 	const isHidden = $derived(zoom < 1);
 
@@ -76,15 +79,22 @@
 	const allNodes: Node<{ raw: ServerData; labelKey: string; prio: number }>[] =
 		$derived.by(getNodes);
 	const allEdges = $derived.by(getEdges);
-
 	async function onLayout() {
 		try {
-			// const withLayout = await layout(dbNodes, edges, options);
-			// dbNodes = withLayout.nodes
-			// edges = withLayout.edges
 			await oninitlayout();
 			$flowReady = true;
 			await fitView();
+
+			// Restore selection from page state
+			const selectedNodeId = page.state.graph?.selectedNodeId;
+			if (selectedNodeId) {
+				const node = getNode(selectedNodeId);
+				if (node) {
+					// Unhide node before fitView (hidden nodes break fitView)
+					updateNode(selectedNodeId, { selected: true, hidden: false });
+					await fitView({ nodes: [{ id: selectedNodeId }], duration: 400, padding: 0.2 });
+				}
+			}
 		} catch (e: any) {
 			toast.error(e.message);
 		}
@@ -102,8 +112,10 @@
 	// let selectedNodes = $state<Node[]>([]);
 
 	useOnSelectionChange(({ nodes }) => {
-		// selectedNodesIds = nodes.map((n) => n.id);
-		// selectedNodes = nodes;
+		const selected = nodes.find((n) => n.selected);
+		if (selected) {
+			replaceState('', { graph: { selectedNodeId: selected.id } });
+		}
 	});
 
 	let selectionReady = $state(true);
@@ -200,7 +212,7 @@
 		(cur, pre) => {
 			if (cur == null) return;
 			const updated = GraphViewController.elk2xy(cur);
-			useNodes().update((nodes) => {
+			nodesStore.update((nodes) => {
 				return nodes.map((node) => {
 					if (updated.has(node.id)) {
 						return { ...node, ...updated.get(node.id)! };

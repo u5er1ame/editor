@@ -3,7 +3,7 @@ import { fade } from 'svelte/transition';
 import { onMount } from 'svelte';
 import { toast } from 'svelte-sonner';
 import { ControlButton, NodeResizer, NodeToolbar, Position, useNodes, useOnSelectionChange, useSvelteFlow, type Edge, type Node, type NodeProps } from '@xyflow/svelte';
-import type { Board } from '$lib/server/schemas';
+import type { Board } from '$lib/model/schemas';
 import Dialog, { type FormTypes } from '$lib/components/Dialog.svelte';
 import { type Form } from '$lib/components/Dialog.svelte';
 	import { r, RecordId, StringRecordId } from 'surrealdb';
@@ -100,11 +100,11 @@ let dialogData: Form<FormTypes> = {
 	},
 	errors: [],
     },
-    value: {
+    current: {
         type: "input",
-        label: "Value",
-        description: "enter value",
-        fieldProps: { id: "value", type: "number", placeholder: "100" },
+        label: "Current",
+        description: "enter current (amps)",
+        fieldProps: { id: "current", type: "number", placeholder: "100" },
 	errors: [],
     }
 }
