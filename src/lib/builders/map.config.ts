@@ -26,9 +26,7 @@ export interface MapLayerConfig {
 }
 
 export interface MapConfig {
-	/** Base projection */
-	projection: string;
-	/** Initial center [lon, lat] */
+	/** Initial center [x, y] */
 	center: [number, number];
 	/** Initial zoom level */
 	zoom: number;
@@ -40,15 +38,47 @@ export interface MapConfig {
 	layers: MapLayerConfig[];
 	/** OpenLayers view options */
 	viewOptions?: Partial<OlView>;
+	/** Editor configuration */
+	editor?: MapEditorConfig;
+}
+
+
+export interface MapEditorConfig {
+	/** Whether editing is enabled */
+	enabled: boolean;
+	/** Snap tolerance in pixels */
+	snapTolerance: number;
+	/** Default edit tool */
+	defaultTool: 'select' | 'add-point' | 'remove-point' | 'extrude-edge' | 'split' | 'combine';
+	/** Allow adding points */
+	allowAddPoint: boolean;
+	/** Allow removing points */
+	allowRemovePoint: boolean;
+	/** Allow edge extrude */
+	allowExtrudeEdge: boolean;
+	/** Allow split */
+	allowSplit: boolean;
+	/** Allow combine */
+	allowCombine: boolean;
 }
 
 export class MapConfigBuilder {
+	private _defaultEditorConfig: MapEditorConfig = {
+		enabled: true,
+		snapTolerance: 10,
+		defaultTool: 'select',
+		allowAddPoint: true,
+		allowRemovePoint: true,
+		allowExtrudeEdge: true,
+		allowSplit: true,
+		allowCombine: true
+	};
+
 	private _config: Partial<MapConfig> = {
-		projection: 'EPSG:3857',
-		center: [21.0122, 52.2297], // Warsaw, Poland (matching likely DB location)
-		zoom: 12,
-		minZoom: 1,
-		maxZoom: 19,
+		center: [0, 0],
+		zoom: 15,
+		minZoom: 0,
+		maxZoom: 18,
 		layers: []
 	};
 
@@ -58,13 +88,8 @@ export class MapConfigBuilder {
 		return this._config;
 	}
 
-	projection(proj: string) {
-		this._config.projection = proj;
-		return this;
-	}
-
-	center(lon: number, lat: number) {
-		this._config.center = [lon, lat];
+	center(x: number, y: number) {
+		this._config.center = [x, y];
 		return this;
 	}
 
@@ -106,8 +131,12 @@ export class MapConfigBuilder {
 		return this;
 	}
 
+	editor(config: Partial<MapEditorConfig>) {
+		this._config.editor = { ...this._defaultEditorConfig, ...config };
+		return this;
+	}
+
 	build(): MapConfig {
-		if (!this._config.projection) throw new Error('Config error: projection not set');
 		if (!this._config.center) throw new Error('Config error: center not set');
 		if (this._config.zoom === undefined) throw new Error('Config error: zoom not set');
 		if (!this._config.layers) throw new Error('Config error: layers not set');

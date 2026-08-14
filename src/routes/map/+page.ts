@@ -1,29 +1,18 @@
 import type { PageLoad, PageServerData } from './$types';
 import { MapConfigBuilder } from '$lib/builders/map.config';
-import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style';
 
 export const load: PageLoad = async ({ data }: { data: PageServerData }) => {
-	// Build map configuration
+	// Build map configuration - simple Cartesian coordinates, no projection
 	const mapConfig = MapConfigBuilder.default()
-		.projection('EPSG:3857')
-		.center(21.0122, 52.2297) // Warsaw
-		.zoom(13)
-		.minZoom(1)
-		.maxZoom(19)
+		.center(0, 0)
+		.zoom(0)
+		.minZoom(0)
+		.maxZoom(18)
 		.addLayer({
 			table: 'area_name',
 			geometryKey: 'geometry',
 			idKey: 'id',
 			labelKey: 'name',
-			style: new Style({
-				stroke: new Stroke({
-					color: 'rgba(59, 130, 246, 0.8)',
-					width: 2
-				}),
-				fill: new Fill({
-					color: 'rgba(59, 130, 246, 0.15)'
-				})
-			}),
 			selectable: true,
 			visible: true,
 			zIndex: 1
@@ -33,12 +22,6 @@ export const load: PageLoad = async ({ data }: { data: PageServerData }) => {
 			geometryKey: 'geometry',
 			idKey: 'id',
 			labelKey: 'name',
-			style: new Style({
-				stroke: new Stroke({
-					color: 'rgba(34, 197, 94, 0.9)',
-					width: 3
-				})
-			}),
 			selectable: true,
 			visible: true,
 			zIndex: 2
@@ -48,16 +31,19 @@ export const load: PageLoad = async ({ data }: { data: PageServerData }) => {
 			geometryKey: 'geometry',
 			idKey: 'id',
 			labelKey: 'name',
-			style: new Style({
-				image: new CircleStyle({
-					radius: 8,
-					fill: new Fill({ color: 'rgba(239, 68, 68, 0.7)' }),
-					stroke: new Stroke({ color: '#ef4444', width: 2 })
-				})
-			}),
 			selectable: true,
 			visible: true,
 			zIndex: 3
+		})
+		.editor({
+			enabled: true,
+			snapTolerance: 10,
+			defaultTool: 'select',
+			allowAddPoint: true,
+			allowRemovePoint: true,
+			allowExtrudeEdge: true,
+			allowSplit: true,
+			allowCombine: true
 		})
 		.build();
 
