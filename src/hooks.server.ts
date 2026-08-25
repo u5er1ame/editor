@@ -1,5 +1,8 @@
+import { getTextDirection } from '$lib/paraglide/runtime';
+import { paraglideMiddleware } from '$lib/paraglide/server';
 import { env } from '$env/dynamic/private';
 import { decodeJWT, getTokenMaxAge } from '$lib/utils';
+
 import {
 	error,
 	type Handle,
@@ -7,6 +10,7 @@ import {
 	type HandleValidationError,
 	type ServerInit
 } from '@sveltejs/kit';
+
 import { sequence } from '@sveltejs/kit/hooks';
 import { NotAllowedError, Surreal, SurrealError } from 'surrealdb';
 
@@ -22,19 +26,22 @@ export const init: ServerInit = () => {};
 
 export const handleError = (e: ErrorEvent) => {
 	let public_message = 'Error';
+
 	if (e.error instanceof SurrealError) {
 		public_message = 'Database Error';
 	}
+
 	console.error(colors.red, `[${public_message}]`, colors.reset, e.error.message);
+
 	return { message: public_message };
 };
 
 export const handleValidationError: HandleValidationError = async ({ event, issues }) => {
 	console.log(colors.red, '[VALIDATION ERROR]', colors.reset, issues);
+
 	const message = issues.map((issue) => issue.message).join(', ');
-	error(400, {
-		message
-	});
+
+	error(400, { message });
 };
 
 const default_user = {
@@ -42,11 +49,15 @@ const default_user = {
 	password: env.SURREAL_DEFAULT_PASSWORD,
 	namespace: env.SURREAL_DEFAULT_NAMESPACE
 };
+
 const log_request: Handle = async ({ event, resolve }) => {
 	const type = event.isRemoteRequest ? '[REMOTE]' : '[REQ]';
 	let remoteFuncName = '';
+
 	if (event.request.url.includes('remote')) remoteFuncName = event.request.url.split('/').pop()!;
+
 	const method = event.isRemoteRequest ? remoteFuncName : event.request.method;
+
 	console.log(
 		colors.blue,
 		type,
@@ -58,26 +69,25 @@ const log_request: Handle = async ({ event, resolve }) => {
 		colors.reset,
 		event.url?.searchParams.toString()
 	);
+
 	return await resolve(event);
 };
 
 const get_cookies: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get('sr_token') ?? null;
 	const database = event.cookies.get('sr_db') ?? 'main';
-	event.locals.db = {
-		...event.locals.db,
-		token,
-		database
-	};
+
+	event.locals.db = { ...event.locals.db, token, database };
+
 	return await resolve(event);
 };
 
 const db_init: Handle = async ({ event, resolve }) => {
 	try {
-		event.locals.db.instance = new Surreal();
+		event.locals.db.instance = new Surreal({ fetchImpl: event.fetch });
 		await event.locals.db.instance.connect(env.SURREAL_URL).catch(() => false);
+		event.locals.db.root_instance = new Surreal({ fetchImpl: event.fetch });
 
-		event.locals.db.root_instance = new Surreal();
 		await event.locals.db.root_instance
 			.connect(env.SURREAL_URL, {
 				authentication: {
@@ -90,6 +100,7 @@ const db_init: Handle = async ({ event, resolve }) => {
 		return await resolve(event);
 	} catch (e: any) {
 		console.error(colors.red, '[DB INIT]', colors.reset, e.message);
+
 		return await resolve(event);
 	}
 };
@@ -98,19 +109,22 @@ const check_auth: Handle = async ({ event, resolve }) => {
 	try {
 		if (!event.locals.db.instance.isConnected || !event.locals.db.root_instance.isConnected) {
 			return db_init({ event, resolve });
+
 			// return resolve(event);
 		}
+
 		if (event.locals.db.token == null) {
 			console.warn('Token not found login as default user');
+
 			const tokens = await event.locals.db.instance.signin(default_user).catch((e) => {
 				return error(503, 'Cant signin as default user');
 			});
+
 			const decoded = decodeJWT(tokens.access);
 			const maxAge = getTokenMaxAge(decoded);
-			event.cookies.set('sr_token', tokens.access, {
-				path: '/',
-				maxAge
-			});
+
+			event.cookies.set('sr_token', tokens.access, { path: '/', maxAge });
+
 			event.locals.db = {
 				...event.locals.db,
 				token: tokens.access,
@@ -118,11 +132,13 @@ const check_auth: Handle = async ({ event, resolve }) => {
 				// namespace: decoded.NS ?? default_user.namespace,
 				database: decoded.DB ?? event.locals.db.database
 			};
+
 			return await resolve(event);
 		} else {
 			if (!event.route.id || event.url.pathname.startsWith('/api/v1/db/signin')) {
 				return await resolve(event);
 			}
+
 			const tokens = await event.locals.db.instance
 				.authenticate(event.locals.db.token)
 				.catch(async (e) => {
@@ -131,19 +147,21 @@ const check_auth: Handle = async ({ event, resolve }) => {
 							console.warn('Token expired deleting it and redirecting to login');
 							event.cookies.delete('sr_token', { path: '/' });
 							event.locals.db.token = null;
+
 							return await event.locals.db.instance.signin(default_user).catch((e) => {
 								return error(503, 'Cant signin as default user');
 							});
 						}
 					}
+
 					return error(400, e);
 				});
+
 			const decoded = decodeJWT(tokens.access);
 			const maxAge = getTokenMaxAge(decoded);
-			event.cookies.set('sr_token', tokens.access, {
-				path: '/',
-				maxAge
-			});
+
+			event.cookies.set('sr_token', tokens.access, { path: '/', maxAge });
+
 			event.locals.db = {
 				...event.locals?.db,
 				token: tokens.access,
@@ -152,15 +170,36 @@ const check_auth: Handle = async ({ event, resolve }) => {
 				database: event.locals.db.database ?? decoded.DB
 			};
 		}
+
 		return await resolve(event);
 	} catch (e) {
 		console.error(colors.red, '[AUTH HOOK ERR]', colors.reset, e);
+
 		return await resolve(event);
 	}
 };
 
-export const handle: Handle = sequence(log_request, get_cookies, db_init, check_auth);
+export const originalHandle: Handle = sequence(
+	log_request,
+	get_cookies,
+	db_init,
+	check_auth,
+);
 
-export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
+const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	return fetch(request);
 };
+
+const handleParaglide: Handle = ({ event, resolve }) =>
+	paraglideMiddleware(event.request, ({ request, locale }) => {
+		event.request = request;
+
+		return resolve(event, {
+			transformPageChunk: ({ html }) =>
+				html
+					.replace('%paraglide.lang%', locale)
+					.replace('%paraglide.dir%', getTextDirection(locale))
+		});
+	});
+
+export const handle = sequence(originalHandle, handleParaglide);

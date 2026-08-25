@@ -17,6 +17,14 @@ const views: View[] = [
 	{
 		name: 'Map',
 		href: '/map'
+	},
+	{
+		name: 'Search',
+		href: '/search'
+	},
+	{
+		name: 'Admin',
+		href: '/admin'
 	}
 ];
 
