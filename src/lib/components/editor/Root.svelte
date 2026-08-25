@@ -9,6 +9,7 @@ import Text from "$lib/components/editor/Text.svelte";
 import Combo from "$lib/components/editor/Combo.svelte";
 import { getDataClient } from "$lib/db.remote";
 import Button from "$lib/components/ui/button/button.svelte"
+import * as m from '$lib/paraglide/messages.js';
 
 let { onsave, onclose, show=$bindable(false), values=$bindable(null), config, fieldRef=$bindable(null), ...rest } = $props();
 
@@ -44,7 +45,7 @@ async function handleSave() {
 		}}
 	    >
 		<Dialog.Header>
-		    <Dialog.Title>Edit record</Dialog.Title>
+		    <Dialog.Title>{m.editor_edit_record()}</Dialog.Title>
 		</Dialog.Header>
 		<form onsubmit={(e) => { e.preventDefault(); handleSave(); }} class="size-full flex flex-1 flex-col gap-2">
 		    <Field.Set class="size-full">
@@ -78,7 +79,7 @@ async function handleSave() {
 				</Field.Content>
 			    </Field.Field>
 			{/each}
-			<Button type="submit" variant="default" class="hover:bg-hover cursor-pointer" title="Save">Save</Button>
+			<Button type="submit" variant="default" class="hover:bg-hover cursor-pointer" title="{m.action_save()}">{m.action_save()}</Button>
 		    </Field.Set>
 		</form>
 	    </Dialog.Content>

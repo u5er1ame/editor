@@ -3,20 +3,28 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { replaceState } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
 
 	import Map from 'ol/Map';
 	import View from 'ol/View';
 	import Feature from 'ol/Feature';
-	import { Polygon, LineString } from 'ol/geom';
+	import GeoJSON from 'ol/format/GeoJSON';
 	import VectorLayer from 'ol/layer/Vector';
 	import VectorSource from 'ol/source/Vector';
 	import Select from 'ol/interaction/Select';
 	import { singleClick } from 'ol/events/condition';
 	import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style';
+	import { mode } from 'mode-watcher';
 
 	import { MapViewController, type MapTableData } from '$lib/view/map.svelte';
 	import type { MapConfig } from '$lib/builders/map.config';
-	import { GeometryEditor } from '$lib/view/map/editor.svelte';
+	import { GeometryEditor, type EditMode } from '$lib/view/map/editor.svelte';
+	import {
+		CONSTRAINT_EXTENT,
+		createBackgroundLayer,
+		readThemeColors
+	} from '$lib/view/map/background';
+	import { saveGeometry } from '$lib/db.remote';
 	import type { DBContext } from '../+layout.svelte';
 
 	let { data } = $props();
@@ -29,20 +37,18 @@
 
 	// OL objects - no $state to avoid proxy issues
 	let olMap: Map | null = null;
-	let editor: GeometryEditor | null = null;
+	let editor: GeometryEditor | null = $state(null);
 	let defaultStyle: Style | null = null;
+	let bg: ReturnType<typeof createBackgroundLayer> | null = null;
 
-	// UI-only reactive state
-	let activeTool = $state<'select' | 'add-point' | 'remove-point' | 'extrude-edge' | 'split' | 'combine'>('select');
-	let snapEnabled = $state(true);
-	let hasChanges = $state(false);
+	// UI-only reactive state derived from editor
 	let selectedFeatureName = $state<string | null>(null);
+	let activeMode = $state<EditMode>('select');
 
 	onMount(() => {
 		if (!browser || !mapContainer) return;
 
 		const mapConfig = data.mapConfig as MapConfig;
-
 
 		// Styles (browser-only)
 		defaultStyle = new Style({
@@ -55,37 +61,8 @@
 			fill: new Fill({ color: 'rgba(59, 130, 246, 0.15)' })
 		});
 
-		// Grid - huge extent with large renderBuffer
-		const gridSize = 2000;
-		const EXTENT = 100000;
-
-		const bgLayer = new VectorLayer({
-			source: new VectorSource({
-				features: [new Feature({
-					geometry: new Polygon([[
-						[-EXTENT, -EXTENT], [EXTENT, -EXTENT],
-						[EXTENT, EXTENT], [-EXTENT, EXTENT], [-EXTENT, -EXTENT]
-					]])
-				})]
-			}),
-			style: new Style({ fill: new Fill({ color: '#ffffff' }) }),
-			renderBuffer: 1000000,
-			zIndex: -2
-		});
-
-		const gridFeatures: Feature[] = [];
-		for (let x = -EXTENT; x <= EXTENT; x += gridSize) {
-			gridFeatures.push(new Feature({ geometry: new LineString([[x, -EXTENT], [x, EXTENT]]) }));
-		}
-		for (let y = -EXTENT; y <= EXTENT; y += gridSize) {
-			gridFeatures.push(new Feature({ geometry: new LineString([[-EXTENT, y], [EXTENT, y]]) }));
-		}
-		const gridLayer = new VectorLayer({
-			source: new VectorSource({ features: gridFeatures }),
-			style: new Style({ stroke: new Stroke({ color: '#e5e7eb', width: 1 }) }),
-			renderBuffer: 1000000,
-			zIndex: -1
-		});
+		// Infinite canvas background (tile-based, no fit/zoom interference)
+		bg = createBackgroundLayer(readThemeColors(mode.current === 'dark'));
 
 		// Vector layers from data
 		const vectorLayers: VectorLayer<VectorSource>[] = [];
@@ -95,13 +72,19 @@
 			const layerConfig = mapConfig.layers.find((l) => l.table === tableData.table);
 			if (layerConfig && tableData.features.length > 0) {
 				const layer = MapViewController.createLayer(tableData.features, layerConfig);
-				layer.getSource()?.getFeatures().forEach((f) => f.setStyle(defaultStyle!));
+				layer
+					.getSource()
+					?.getFeatures()
+					.forEach((f) => f.setStyle(defaultStyle!));
 				vectorLayers.push(layer);
 			}
 		}
 
 		// Compute data extent for initial zoom
-		let dataMinX = Infinity, dataMinY = Infinity, dataMaxX = -Infinity, dataMaxY = -Infinity;
+		let dataMinX = Infinity,
+			dataMinY = Infinity,
+			dataMaxX = -Infinity,
+			dataMaxY = -Infinity;
 		for (const layer of vectorLayers) {
 			const source = layer.getSource();
 			if (source) {
@@ -118,39 +101,38 @@
 		// Map - fit to data extent
 		olMap = new Map({
 			target: mapContainer,
-			layers: [bgLayer, gridLayer, ...vectorLayers],
+			layers: [bg!.layer, ...vectorLayers],
 			view: new View({
 				projection: 'EPSG:3857',
 				center: [(dataMinX + dataMaxX) / 2, (dataMinY + dataMaxY) / 2],
-				zoom: 0,
-				minZoom: 0,
+				zoom: 10,
+				minZoom: 6,
 				maxZoom: 18,
+				// extent: CONSTRAINT_EXTENT,
 				constrainResolution: false
 			})
 		});
 
 		// Fit to data extent
 		const padding = 50;
-		olMap.getView().fit([dataMinX, dataMinY, dataMaxX, dataMaxY], { padding: [padding, padding, padding, padding] });
+		olMap.getView().fit([dataMinX, dataMinY, dataMaxX, dataMaxY], {
+			padding: [padding, padding, padding, padding]
+		});
 
 		// Editor - only initialize if user can edit
 		if (canEdit) {
 			editor = new GeometryEditor(olMap, vectorLayers, {
-				onFeatureSelect: (feature) => {
+				onSelect: (feature) => {
 					if (feature) {
 						const id = feature.getId()?.toString();
-						const name = feature.get('name') || id || 'Unknown';
-						selectedFeatureName = name;
+						selectedFeatureName = feature.get('name') || id || 'Unknown';
 						if (id) replaceState('', { map: { selectedFeatureId: id } });
 					} else {
 						selectedFeatureName = null;
 						replaceState('', { map: undefined });
 					}
-				},
-				onToolChange: (tool) => { activeTool = tool; },
-				onSaveRequired: (changes) => { hasChanges = changes; }
+				}
 			});
-			snapEnabled = editor.snapEnabled;
 		} else {
 			// View-only: simple click selection without editing
 			const select = new Select({
@@ -195,61 +177,125 @@
 		};
 	});
 
-	function handleSave() {
+	// React to dark/light mode changes
+	$effect(() => {
+		const isDark = mode.current === 'dark';
+		if (!bg) return;
+		// Wait for CSS variables to settle after class toggle
+		requestAnimationFrame(() => {
+			bg!.setColors(readThemeColors(isDark));
+		});
+	});
+
+	async function handleSave() {
 		if (!editor) return;
 		const edited = editor.getEditedFeatures();
-		alert(`Saved ${edited.length} features`);
-		editor.resetEdits();
-		hasChanges = false;
+		const geoJsonFormat = new GeoJSON();
+
+		let savedCount = 0;
+		let failedCount = 0;
+		for (const feature of edited) {
+			const id = feature.getId()?.toString();
+			const geom = feature.getGeometry();
+			if (!id || !geom) continue;
+			const geoJson = geoJsonFormat.writeGeometryObject(geom, {
+				dataProjection: 'EPSG:3857',
+				featureProjection: 'EPSG:3857'
+			});
+			const table = id.split(':')[0];
+			const result = await saveGeometry({ table, id, geometry: geoJson as any });
+			if (result) savedCount++;
+			else failedCount++;
+		}
+
+		if (failedCount > 0) {
+			toast.error(`Failed to save ${failedCount} feature(s)`);
+		} else {
+			toast.success(`Saved ${savedCount} feature(s)`);
+		}
+		editor?.resetEdits();
 	}
 
 	function handleReset() {
 		if (!olMap || !defaultStyle) return;
 		olMap.getAllLayers().forEach((layer) => {
 			if (layer instanceof VectorLayer) {
-				layer.getSource()?.getFeatures().forEach((f) => f.setStyle(defaultStyle!));
+				layer
+					.getSource()
+					?.getFeatures()
+					.forEach((f) => f.setStyle(defaultStyle!));
 			}
 		});
 		editor?.resetEdits();
-		hasChanges = false;
 	}
 
-	function setTool(tool: typeof activeTool) {
-		editor?.setTool(tool);
-		activeTool = tool;
+	function setMode(m: EditMode) {
+		editor?.setMode(m);
+		activeMode = m;
 	}
 
 	function toggleSnap() {
 		editor?.toggleSnap();
-		snapEnabled = editor?.snapEnabled ?? !snapEnabled;
 	}
 
 	function zoomToFitAll() {
 		if (!olMap) return;
-		const extent = olMap.getAllLayers().reduce((acc, layer) => {
-			if (layer instanceof VectorLayer) {
-				const source = layer.getSource();
-				if (source) {
-					const e = source.getExtent();
-					if (e && !e.every((v) => v === Infinity || v === -Infinity)) {
-						return acc ?? e;
+		const extent = olMap.getAllLayers().reduce(
+			(acc, layer) => {
+				if (layer instanceof VectorLayer) {
+					const source = layer.getSource();
+					if (source) {
+						const e = source.getExtent();
+						if (e && !e.every((v) => v === Infinity || v === -Infinity)) {
+							return acc ?? e;
+						}
 					}
 				}
-			}
-			return acc;
-		}, null as [number, number, number, number] | null);
+				return acc;
+			},
+			null as [number, number, number, number] | null
+		);
 		if (extent) {
 			olMap.getView().fit(extent, { duration: 500, padding: [50, 50, 50, 50] });
 		}
 	}
 
-	const tools = [
-		{ id: 'select' as const, label: 'Select', icon: '🎯', desc: 'Select feature' },
-		{ id: 'add-point' as const, label: 'Add Point', icon: '➕', desc: 'Add vertex to edge' },
-		{ id: 'remove-point' as const, label: 'Remove Point', icon: '➖', desc: 'Remove vertex' },
-		{ id: 'extrude-edge' as const, label: 'Extrude', icon: '↔️', desc: 'Move entire edge' },
-		{ id: 'split' as const, label: 'Split', icon: '✂️', desc: 'Split polygon' },
-		{ id: 'combine' as const, label: 'Combine', icon: '🔗', desc: 'Merge polygons' }
+	const modes = [
+		{
+			id: 'select' as const,
+			label: 'Select',
+			icon: 'iconify material-symbols--near-me',
+			desc: 'Select feature',
+			requiresSelection: false
+		},
+		{
+			id: 'move' as const,
+			label: 'Move',
+			icon: 'iconify material-symbols--open-with',
+			desc: 'Drag to move features',
+			requiresSelection: true
+		},
+		{
+			id: 'point-edit' as const,
+			label: 'Points',
+			icon: 'iconify material-symbols--gesture',
+			desc: 'Edit vertices',
+			requiresSelection: true
+		},
+		{
+			id: 'extrude' as const,
+			label: 'Extrude',
+			icon: 'iconify material-symbols--expand',
+			desc: 'Move edge to reshape polygon',
+			requiresSelection: true
+		},
+		{
+			id: 'split' as const,
+			label: 'Split',
+			icon: 'iconify material-symbols--content-cut',
+			desc: 'Cut polygon with a line',
+			requiresSelection: true
+		}
 	];
 </script>
 
@@ -259,47 +305,43 @@
 
 		{#if canEdit}
 			<!-- Editor toolbar - only shown for editors -->
-			<div class="absolute left-4 top-4 z-20 flex flex-col gap-2">
-				<div class="flex flex-col gap-1 rounded-lg bg-background/95 p-2 shadow-lg">
-					{#each tools as tool}
+			<div class="absolute top-4 left-4 z-20 flex flex-col gap-2">
+				<div class="flex flex-col gap-1 rounded-lg bg-popover p-2 shadow-lg">
+					{#each modes as m}
 						<button
-							class="flex items-center gap-2 rounded px-3 py-2 text-sm transition-colors
-								{activeTool === tool.id ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}"
-							title={tool.desc}
-							onclick={() => setTool(tool.id)}
-						>
-							<span>{tool.icon}</span>
-							<span>{tool.label}</span>
+							class="flex items-center gap-2 rounded px-3 py-2 text-sm transition-colors disabled:text-muted-foreground disabled:hover:bg-transparent
+								{activeMode === m.id ? 'bg-active text-primary-foreground' : 'hover:bg-hover'}"
+							title={m.desc}
+							onclick={() => setMode(m.id)}>
+							<span class="{m.icon} size-4"></span>
+							<span>{m.label}</span>
 						</button>
 					{/each}
 				</div>
 
-				<div class="rounded-lg bg-background/95 p-2 shadow-lg">
+				<div class="rounded-lg bg-popover p-2 shadow-lg">
 					<button
 						class="flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors
-							{snapEnabled ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}"
+							{editor?.snapEnabled ? 'bg-active text-white' : ' text-gray-700'}"
 						title="Toggle snap"
-						onclick={toggleSnap}
-					>
-						<span>🧲</span>
-						<span>Snap {snapEnabled ? 'ON' : 'OFF'}</span>
+						onclick={() => toggleSnap()}>
+						<span class="iconify size-4 solar--magnet-bold-duotone"></span>
+						<span>Snap {editor?.snapEnabled ? 'ON' : 'OFF'}</span>
 					</button>
 				</div>
 
-				{#if hasChanges}
-					<div class="rounded-lg bg-background/95 p-2 shadow-lg">
+				{#if editor?.hasChanges}
+					<div class="rounded-lg bg-popover p-2 shadow-lg">
 						<button
-							class="flex w-full items-center gap-2 rounded bg-green-500 px-3 py-2 text-sm text-white hover:bg-green-600"
-							onclick={handleSave}
-						>
-							<span>💾</span>
+							class="flex w-full items-center gap-2 rounded bg-active px-3 py-2 text-sm text-white hover:bg-hover"
+							onclick={handleSave}>
+							<span class="iconify size-4 material-symbols--save"></span>
 							<span>Save Changes</span>
 						</button>
 						<button
-							class="mt-1 flex w-full items-center gap-2 rounded bg-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-300"
-							onclick={handleReset}
-						>
-							<span>↩️</span>
+							class="mt-1 flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-gray-700 hover:bg-hover"
+							onclick={() => handleReset()}>
+							<span class="iconify size-4 material-symbols--restart-alt"></span>
 							<span>Reset</span>
 						</button>
 					</div>
@@ -307,13 +349,15 @@
 			</div>
 		{:else}
 			<!-- Viewer badge -->
-			<div class="absolute left-4 top-4 z-20 rounded-lg bg-background/95 px-3 py-2 shadow-lg">
-				<span class="text-sm text-muted-foreground">👁️ View only</span>
+			<div class="absolute top-4 left-4 z-20 rounded-lg bg-popover px-3 py-2 shadow-lg">
+				<span class="iconify size-4 text-muted-foreground material-symbols--visibility"></span>
+				<span class="text-sm text-muted-foreground">View only</span>
 			</div>
 		{/if}
 
 		{#if selectedFeatureName}
-			<div class="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-lg bg-background/95 px-4 py-2 shadow-lg">
+			<div
+				class="absolute top-4 left-1/2 z-20 -translate-x-1/2 rounded-lg bg-popover px-4 py-2 shadow-lg">
 				<span class="text-sm font-medium">{selectedFeatureName}</span>
 			</div>
 		{/if}
@@ -321,29 +365,17 @@
 		<!-- Bottom controls -->
 		<div class="absolute bottom-4 left-4 z-20">
 			<button
-				class="rounded-lg bg-background/95 px-3 py-2 text-sm shadow-lg hover:bg-accent"
-				onclick={zoomToFitAll}
-			>
+				class="rounded-lg bg-popover px-3 py-2 text-sm shadow-lg hover:bg-hover"
+				onclick={zoomToFitAll}>
 				🗺️ Fit All
 			</button>
 		</div>
 
 		<!-- Legend -->
-		<div class="absolute bottom-4 right-4 z-20 rounded-lg bg-background/95 p-3 shadow-lg">
+		<div class="absolute right-4 bottom-4 z-20 rounded-lg bg-popover p-3 shadow-lg">
 			<h4 class="mb-2 text-sm font-semibold">Layers</h4>
 			<ul class="space-y-1 text-xs">
-				<li class="flex items-center gap-2">
-					<span class="h-3 w-3 rounded-full bg-red-500"></span>
-					<span>Locations</span>
-				</li>
-				<li class="flex items-center gap-2">
-					<span class="h-3 w-3 rounded bg-blue-500/30 ring-1 ring-blue-500"></span>
-					<span>Areas</span>
-				</li>
-				<li class="flex items-center gap-2">
-					<span class="h-0.5 w-4 bg-green-500"></span>
-					<span>Cables</span>
-				</li>
+				<!-- TODO: calculate list of layers and colors from styles  -->
 			</ul>
 		</div>
 	</div>

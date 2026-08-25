@@ -62,7 +62,7 @@
 	--active: var(--green);
 	--text-dark: var(--black);
 	--text-light: var(--white);
-	--text-muted: var(--second-light-2);
+	--text-muted: var(--second-light);
 	--input: --alpha(var(--first)/20%);
 	--input-foreground: var(--second-light-2);
 	--ring: var(--color-active);
@@ -121,7 +121,7 @@
 		--secondary: var(--second);
 		--secondary-foreground: var(--text-dark);
 		--muted: var(--second-light);
-		--muted-foreground: var(--text-muted);
+		--muted-foreground: var(--color-gray-700);
 		--accent: var(--first);
 		--accent-foreground: var(--white);
 		--destructive: var(--red-light);

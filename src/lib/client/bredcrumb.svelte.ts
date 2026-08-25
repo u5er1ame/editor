@@ -1,6 +1,7 @@
 import { useNodes, type Node } from "@xyflow/svelte";
 import { watch } from "runed";
 import { SvelteSet } from "svelte/reactivity";
+import * as m from '$lib/paraglide/messages.js';
 
 const breakerTypes = ['breakers', 'unsaved_breakers', 'root_breakers', 'unsaved_root_breakers'];
 const boardTypes = ['boards', 'unsaved_boards'];
@@ -55,13 +56,13 @@ export class CrumbBuilder {
 		}).values().toArray();
 	});
 	titles = $derived.by(() => {
-		const default_title = ['Помещения', 'Щиты', 'Автоматы'];
+		const default_title = [m.breadcrumb_rooms(), m.breadcrumb_boards(), m.breadcrumb_breakers()];
 		return this.selection_grouped.map((item, idx) => {
 		if (item.length == 0) {
 			return default_title[idx];
 		}
 		if (item.length > 1) {
-			return 'выбрано ' + item.length;
+			return item.length + ' selected';
 		} else {
 			return item[0].data.raw[item[0].data.labelKey];
 		}
