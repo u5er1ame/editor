@@ -8,6 +8,20 @@ import z from 'zod/v4';
 import { schemaStore, type ClientData, type ServerData } from './model/schemas';
 import type { Tables } from './model/types';
 
+// ── Helpers ──────────────────────────────────────────────────────────
+/** Ensure the DB connection is alive, ready, and switched to the active database. */
+async function getDb() {
+	const { locals, fetch } = getRequestEvent();
+	const db = locals.db.instance;
+	if (!db.isConnected) error(500, 'DB not connected');
+	await db.ready.catch(() => {
+		return error(500, 'DB not ready');
+	});
+	db.use({ database: locals.db.database });
+	return db;
+}
+
+// ── System / auth queries ────────────────────────────────────────────
 export const connect_system = query(async () => {
 	const { locals } = getRequestEvent();
 	const root_access = locals.db.root_instance;
@@ -62,32 +76,21 @@ export const getNamespaceInfo = query(async () => {
 	return res ?? {};
 });
 
+// ── Database info ────────────────────────────────────────────────────
 export const getDatabaseInfo = query(async () => {
-	const { locals } = getRequestEvent();
-	const db = locals.db.instance;
-	if (!db.isConnected) error(500, 'DB not connected');
-	await db.ready.catch(() => {
-		return error(500, 'DB not ready');
-	});
-	db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
+	const db = await getDb();
 	const [res] = await db.query<[DatabaseInfo]>('info for db structure');
 	return res ?? {};
 });
 
+// ── Data queries ─────────────────────────────────────────────────────
 export const getDataClient = query(
 	z.custom<Tables>((v) => typeof v === 'string' && schemaStore.store.has(v as Tables), {
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
-		const { locals } = getRequestEvent();
-		const db = locals.db.instance;
-		if (!db.isConnected) error(500, 'DB not connected');
-		await db.ready.catch(() => {
-			return error(500, 'DB not ready');
-		});
-		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
+		const db = await getDb();
 		const query = schemaStore.store.get(table)!.query;
-		// const res = await db.select<Data>(new Table(table)).catch((e)=>{ return error(500,e) });
 		const [res] = await db.query<[ClientData[]]>(query);
 		return jsonify(res ?? []);
 	}
@@ -98,13 +101,7 @@ export const getData = query(
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
-		const { locals } = getRequestEvent();
-		const db = locals.db.instance;
-		if (!db.isConnected) error(500, 'DB not connected');
-		await db.ready.catch(() => {
-			return error(500, 'DB not ready');
-		});
-		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
+		const db = await getDb();
 		const res = await db.select<ServerData>(new Table(table)).catch((e: any) => {
 			return error(500, { message: 'Failed to fetch data' });
 		});
@@ -117,31 +114,20 @@ export const getTableStructure = query(
 		error: (iss) => `Schema not found for table ${iss.input}`
 	}),
 	async (table) => {
-		const { locals } = getRequestEvent();
-		const db = locals.db.instance;
-		if (!db.isConnected) error(500, 'DB not connected');
-		await db.ready.catch(() => {
-			return error(500, 'DB not ready');
-		});
-		db.use({ database: locals.db.database }); // WARN: this could fail but should be set at this point!
+		const db = await getDb();
 		const [res] = await db.query(surql`info for table ${table} structure`);
 		return res ?? [];
 	}
 );
 
 export const generateId = query(z.string(), async (table: string) => {
-	const { locals } = getRequestEvent();
-	const db = locals.db.instance;
-	if (!db.isConnected) error(500, 'DB not connected');
-	await db.ready.catch(() => {
-		return error(500, 'DB not ready');
-	});
-	db.use({ database: locals.db.database });
+	const db = await getDb();
 	const [id] = await db.query<[string]>('rand::id()');
 	if (!id) return error(500, 'Failed to generate ID');
 	return { id: new RecordId(table, id).toString() };
 });
 
+// ── Mutations ────────────────────────────────────────────────────────
 export const updateRecord = query(
 	z.object({
 		table: z.string(),
@@ -149,13 +135,7 @@ export const updateRecord = query(
 		changes: z.record(z.string(), z.any())
 	}),
 	async ({ table, id, changes }) => {
-		const { locals } = getRequestEvent();
-		const db = locals.db.instance;
-		if (!db.isConnected) error(500, 'DB not connected');
-		await db.ready.catch(() => {
-			return error(500, 'DB not ready');
-		});
-		db.use({ database: locals.db.database });
+		const db = await getDb();
 
 		const entry = schemaStore.store.get(table as Tables);
 		if (!entry) return error(400, `Unknown table: ${table}`);
@@ -194,13 +174,7 @@ export const insertRecord = query(
 		data: z.record(z.string(), z.any())
 	}),
 	async ({ table, data }) => {
-		const { locals } = getRequestEvent();
-		const db = locals.db.instance;
-		if (!db.isConnected) error(500, 'DB not connected');
-		await db.ready.catch(() => {
-			return error(500, 'DB not ready');
-		});
-		db.use({ database: locals.db.database });
+		const db = await getDb();
 
 		const entry = schemaStore.store.get(table as Tables);
 		if (!entry) return error(400, `Unknown table: ${table}`);
@@ -225,11 +199,9 @@ export const insertRecord = query(
 			return error(400, { message: validation.error.message });
 		}
 
-		const created = await db
-			.insert(new Table(table), toInsert)
-			.catch((e: any) => {
-				return error(500, { message: 'Failed to insert record' });
-			});
+		const created = await db.insert(new Table(table), toInsert).catch((e: any) => {
+			return error(500, { message: 'Failed to insert record' });
+		});
 		return jsonify(created);
 	}
 );
@@ -240,13 +212,7 @@ export const deleteRecord = query(
 		id: z.string()
 	}),
 	async ({ table, id }) => {
-		const { locals } = getRequestEvent();
-		const db = locals.db.instance;
-		if (!db.isConnected) error(500, 'DB not connected');
-		await db.ready.catch(() => {
-			return error(500, 'DB not ready');
-		});
-		db.use({ database: locals.db.database });
+		const db = await getDb();
 
 		const recordId = new RecordId(table, id.split(':')[1] ?? id);
 		const deleted = await db.delete(recordId).catch((e: any) => {
@@ -256,6 +222,32 @@ export const deleteRecord = query(
 	}
 );
 
+export const saveGeometry = query(
+	z.object({
+		table: z.string(),
+		id: z.string(),
+		geometry: z.object({
+			type: z.string(),
+			coordinates: z.any()
+		})
+	}),
+	async ({ table, id, geometry }) => {
+		const db = await getDb();
+		const entry = schemaStore.store.get(table as Tables);
+		if (!entry) return error(400, `Unknown table: ${table}`);
+
+		const recordId = new RecordId(table, id.split(':')[1] ?? id);
+		const patched = await db
+			.update(recordId)
+			.merge({ geometry })
+			.catch((e: any) => {
+				return error(500, { message: 'Failed to save geometry' });
+			});
+		return jsonify(patched);
+	}
+);
+
+// ── Session ──────────────────────────────────────────────────────────
 export const expire = query(async () => {
 	const { locals } = getRequestEvent();
 	const db = locals.db.instance;
