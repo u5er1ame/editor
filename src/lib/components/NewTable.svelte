@@ -24,6 +24,7 @@
 	import { replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import { twMerge } from 'tailwind-merge';
+	import * as m from '$lib/paraglide/messages.js';
 
 	registerToolbarItem('print', Button);
 	registerToolbarItem('icon', Button);
@@ -167,14 +168,14 @@
 				const inserted = await insertRecord({ table, data: { id: rowId, ...row, ...cellChanges } });
 				if (inserted) {
 					new_row_ids.delete(rowId);
-					toast.success('Record created');
+					toast.success(m.toast_created());
 				} else {
-					toast.error('Failed to create record');
+					toast.error(m.toast_error_create());
 				}
 			} else {
 				const res = await updateRecord({ table, id: rowId, changes: cellChanges });
 				if (!res) {
-					toast.error('Failed to save changes');
+					toast.error(m.toast_error_save());
 					getDataClient(table).refresh();
 				}
 			}
@@ -261,7 +262,7 @@
 							{
 								id: 'add-row',
 								comp: 'icon',
-								text: 'Add Row',
+								text: m.action_add(),
 								onclick: async () => {
 									const res = (await generateId(table)) as { id: string } | undefined;
 									if (!res || !res.id) return;
@@ -277,7 +278,7 @@
 							{
 								id: 'delete-row',
 								comp: 'icon',
-								text: 'Delete Row',
+								text: m.action_delete(),
 								onclick: async () => {
 									if (!selection || !isEditor) return;
 									const rowId = String(selection.id);
@@ -293,7 +294,7 @@
 							{
 								id: 'refresh',
 								comp: 'icon',
-								text: 'Refresh',
+								text: m.action_refresh(),
 								onclick: async () => {
 									getDataClient(table).refresh();
 									refresh = !refresh;
@@ -304,7 +305,7 @@
 							{
 								id: 'print',
 								comp: 'icon',
-								text: 'Print',
+								text: m.action_print(),
 								onclick: async () => {
 									if (!tbl) return;
 									tbl.exec('print', { mode: 'portrait', paper: 'a4' });

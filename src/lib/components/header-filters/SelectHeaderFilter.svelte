@@ -20,8 +20,10 @@
 	let open = $state(false);
 	let value = $state<string | undefined>(undefined);
 
-	// Print path: SVAR passes the header cell object as `cell` and no `onaction`.
+	// Print mode detection: SVAR passes `cell` and no `onaction` when printing
 	const isPrint = $derived(!onaction && cell);
+
+	// Label text for print mode
 	const labelText = $derived.by(() => {
 		if (!isPrint || !cell) return '';
 		if (typeof cell === 'object' && 'text' in cell && cell.text) return cell.text;
@@ -52,8 +54,9 @@
 	const displayFormat = $derived(config?.displayFormat);
 	const showRawLabel = $derived(config?.showRawLabel);
 
-	// Fetch data from the table
+	// Only fetch data when NOT in print mode to avoid errors
 	const fetchData = $derived.by(() => {
+		if (isPrint) return { loading: false, ready: false, current: [] };
 		if (!fetchTable) return { loading: false, ready: false, current: [] };
 		return getDataClient(fetchTable as any);
 	});
@@ -154,35 +157,37 @@
 
 <div class="header-filter relative w-full">
 	{#if isPrint}
+		<!-- Print mode: just show the label text, no interactive elements -->
 		<span class="truncate text-xs">{labelText}</span>
 	{:else}
-	<Select.Root type="single" bind:open bind:value onValueChange={handleChange}>
-		<Select.Trigger class="h-8 w-full pr-7 text-xs">
-			<span class="truncate">
-				{value ? (options.find((o) => o.id === value)?.label ?? 'Filter') : 'All'}
-			</span>
-		</Select.Trigger>
-		<Select.Content>
-			{#if isLoading}
-				<div class="flex items-center justify-center p-4">
-					<Spinner size="16" />
-				</div>
-			{:else}
-				<Select.Item value="" label="All" />
-				{#each options as option (option.id)}
-					<Select.Item value={option.id} label={option.label} />
-				{/each}
-			{/if}
-		</Select.Content>
-	</Select.Root>
-	{/if}
-	{#if !isPrint && value}
-		<button
-			type="button"
-			class="absolute top-1/2 right-1 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded hover:bg-muted"
-			onclick={handleClear}
-			title="Clear filter">
-			<XIcon class="h-3 w-3" />
-		</button>
+		<!-- Normal mode: interactive select filter -->
+		<Select.Root type="single" bind:open bind:value onValueChange={handleChange}>
+			<Select.Trigger class="h-8 w-full pr-7 text-xs">
+				<span class="truncate">
+					{value ? (options.find((o) => o.id === value)?.label ?? 'Filter') : 'All'}
+				</span>
+			</Select.Trigger>
+			<Select.Content>
+				{#if isLoading}
+					<div class="flex items-center justify-center p-4">
+						<Spinner size="16" />
+					</div>
+				{:else}
+					<Select.Item value="" label="All" />
+					{#each options as option (option.id)}
+						<Select.Item value={option.id} label={option.label} />
+					{/each}
+				{/if}
+			</Select.Content>
+		</Select.Root>
+		{#if value}
+			<button
+				type="button"
+				class="absolute top-1/2 right-1 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded hover:bg-muted"
+				onclick={handleClear}
+				title="Clear filter">
+				<XIcon class="h-3 w-3" />
+			</button>
+		{/if}
 	{/if}
 </div>
