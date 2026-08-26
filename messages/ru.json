@@ -23,7 +23,7 @@
 	"status_disconnected": "Отключено",
 	"role_owner": "Владелец",
 	"role_editor": "Редактор",
-	"role_viewer": "Наблюдатель",
+	"role_viewer": "Пользователь",
 	"breadcrumb_rooms": "Помещения",
 	"breadcrumb_boards": "Щиты",
 	"breadcrumb_breakers": "Автоматы",
