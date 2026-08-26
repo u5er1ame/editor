@@ -25,7 +25,10 @@
 		readThemeColors
 	} from '$lib/view/map/background';
 	import { saveGeometry } from '$lib/db.remote';
-	import type { DBContext } from '../+layout.svelte';
+	import { MALL_LOCAL_PROJECTION } from '$lib/view/map/projection';
+	import type { DBContext } from '$lib/app/session/db-context.svelte';
+	import SearchPointForm from '$lib/features/map/components/SearchPointForm.svelte';
+	import { createSearchPointLayer, type SearchPointMapData } from '$lib/features/map/point-layer';
 
 	let { data } = $props();
 
@@ -40,6 +43,16 @@
 	let editor: GeometryEditor | null = $state(null);
 	let defaultStyle: Style | null = null;
 	let bg: ReturnType<typeof createBackgroundLayer> | null = null;
+	let searchPointLayer: ReturnType<typeof createSearchPointLayer> | null = null;
+	let searchPointFormOpen = $state(false);
+	let placingSearchPoint = $state(false);
+	let draftPoint = $state<{ x: number; y: number } | null>(null);
+	let searchPoints = $state<SearchPointMapData[]>([]);
+
+	onMount(() => {
+		searchPoints =
+			(data as typeof data & { searchPoints?: SearchPointMapData[] }).searchPoints ?? [];
+	});
 
 	// UI-only reactive state derived from editor
 	let selectedFeatureName = $state<string | null>(null);
@@ -75,7 +88,8 @@
 				layer
 					.getSource()
 					?.getFeatures()
-					.forEach((f) => f.setStyle(defaultStyle!));
+					.forEach((f: Feature) => f.setStyle(defaultStyle!));
+				layer.set('table', tableData.table);
 				vectorLayers.push(layer);
 			}
 		}
@@ -103,7 +117,7 @@
 			target: mapContainer,
 			layers: [bg!.layer, ...vectorLayers],
 			view: new View({
-				projection: 'EPSG:3857',
+				projection: MALL_LOCAL_PROJECTION,
 				center: [(dataMinX + dataMaxX) / 2, (dataMinY + dataMaxY) / 2],
 				zoom: 10,
 				minZoom: 6,
@@ -118,6 +132,22 @@
 		olMap.getView().fit([dataMinX, dataMinY, dataMaxX, dataMaxY], {
 			padding: [padding, padding, padding, padding]
 		});
+
+		searchPointLayer = createSearchPointLayer(
+			olMap,
+			searchPoints,
+			({ feature, coordinate }) => {
+				if (!placingSearchPoint) return;
+				placingSearchPoint = false;
+				draftPoint = { x: coordinate[0], y: coordinate[1] };
+				searchPointLayer?.removeFeature(feature);
+				searchPointLayer?.setPlacementActive(false);
+				searchPointFormOpen = true;
+			},
+			(feature) => {
+				selectedFeatureName = feature.get('description') || feature.getId()?.toString() || 'Search point';
+			}
+		);
 
 		// Editor - only initialize if user can edit
 		if (canEdit) {
@@ -173,6 +203,7 @@
 
 		return () => {
 			editor?.destroy();
+			searchPointLayer?.destroy();
 			olMap?.setTarget(undefined);
 		};
 	});
@@ -199,8 +230,8 @@
 			const geom = feature.getGeometry();
 			if (!id || !geom) continue;
 			const geoJson = geoJsonFormat.writeGeometryObject(geom, {
-				dataProjection: 'EPSG:3857',
-				featureProjection: 'EPSG:3857'
+				dataProjection: MALL_LOCAL_PROJECTION,
+				featureProjection: MALL_LOCAL_PROJECTION
 			});
 			const table = id.split(':')[0];
 			const result = await saveGeometry({ table, id, geometry: geoJson as any });
@@ -223,11 +254,52 @@
 				layer
 					.getSource()
 					?.getFeatures()
-					.forEach((f) => f.setStyle(defaultStyle!));
+					.forEach((f: Feature) => f.setStyle(defaultStyle!));
 			}
 		});
 		editor?.resetEdits();
 	}
+
+	function beginSearchPointPlacement() {
+		if (!canEdit) return;
+		placingSearchPoint = true;
+		searchPointLayer?.setPlacementActive(true);
+	}
+
+	function cancelSearchPointPlacement() {
+		placingSearchPoint = false;
+		searchPointLayer?.setPlacementActive(false);
+	}
+
+	function handleSearchPointCreated(point: SearchPointMapData) {
+		searchPoints = [...searchPoints, point];
+		searchPointLayer?.addPoint(point);
+		draftPoint = null;
+	}
+
+	function handleSearchPointClose() {
+		draftPoint = null;
+		cancelSearchPointPlacement();
+	}
+
+	function getPointZone() {
+		if (!draftPoint || !olMap) return { id: null, label: null };
+		const areaLayer = olMap
+			.getLayers()
+			.getArray()
+			.find((layer) => layer.get('table') === 'zones') as VectorLayer<VectorSource> | undefined;
+		const point = draftPoint;
+		const feature = areaLayer?.getSource()?.getFeatures().find((candidate) => {
+			const geometry = candidate.getGeometry();
+			return geometry?.getType() === 'Polygon' && geometry.intersectsCoordinate([point.x, point.y]);
+		});
+		return {
+			id: feature?.getId()?.toString() ?? null,
+			label: feature?.get('name') ?? null
+		};
+	}
+
+	const draftZone = $derived.by(() => getPointZone());
 
 	function setMode(m: EditMode) {
 		editor?.setMode(m);
@@ -246,7 +318,7 @@
 					const source = layer.getSource();
 					if (source) {
 						const e = source.getExtent();
-						if (e && !e.every((v) => v === Infinity || v === -Infinity)) {
+						if (e && !e.every((v: number) => v === Infinity || v === -Infinity)) {
 							return acc ?? e;
 						}
 					}
@@ -306,7 +378,13 @@
 		{#if canEdit}
 			<!-- Editor toolbar - only shown for editors -->
 			<div class="absolute top-4 left-4 z-20 flex flex-col gap-2">
-				<div class="flex flex-col gap-1 rounded-lg bg-popover p-2 shadow-lg">
+				<button
+					class="rounded-lg bg-popover px-3 py-2 text-left text-sm shadow-lg hover:bg-hover"
+					onclick={placingSearchPoint ? cancelSearchPointPlacement : beginSearchPointPlacement}
+				>
+					{placingSearchPoint ? 'Cancel point placement' : 'Add searchable point'}
+				</button>
+			<div class="flex flex-col gap-1 rounded-lg bg-popover p-2 shadow-lg">
 					{#each modes as m}
 						<button
 							class="flex items-center gap-2 rounded px-3 py-2 text-sm transition-colors disabled:text-muted-foreground disabled:hover:bg-transparent
@@ -380,3 +458,13 @@
 		</div>
 	</div>
 </div>
+
+<SearchPointForm
+	bind:open={searchPointFormOpen}
+	x={draftPoint?.x ?? null}
+	y={draftPoint?.y ?? null}
+	zoneId={draftZone.id}
+	zoneLabel={draftZone.label}
+	onCreated={handleSearchPointCreated}
+	onClose={handleSearchPointClose}
+/>
