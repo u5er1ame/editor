@@ -17,10 +17,19 @@ declare global {
 				root_instance: Surreal;
 				token: Token | null;
 				username?: string;
+				namespace?: string;
 				database?: string;
 			};
 		}
 		interface PageData {
+			searchPoints?: Array<{
+				id: string;
+				description: string;
+				photo: string | null;
+				x: number;
+				y: number;
+				zone_id: string | null;
+			}>;
 			db: {
 				isConnected: boolean;
 				isAuth: boolean;
@@ -28,7 +37,7 @@ declare global {
 				namespace?: string;
 				database?: string;
 			};
-			tables: {
+			tables?: {
 				selected_tab: string;
 				info: DatabaseInfo['tables'];
 				data?: any;
