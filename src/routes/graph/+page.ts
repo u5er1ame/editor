@@ -9,7 +9,7 @@ import {
 	type ServerData
 } from '$lib/model/schemas';
 import type { BaseConfig } from '$lib/model/types';
-import { baseConfigStore } from '$lib/controller/config_store.svelte';
+import { createBaseConfigStore } from '$lib/controller/config_store.svelte';
 import { addFieldsMetadata, addTableMetadata } from '$lib/builder';
 import { getData } from '$lib/db.remote';
 import { GraphViewController } from '$lib/view/graph.svelte';
@@ -23,16 +23,20 @@ export const load: PageLoad = async ({
 	fetch
 }): Promise<PageServerData> => {
 	const config: BaseConfig[] = [];
+	const baseConfigStore = createBaseConfigStore();
 	let records: ServerData[] = [];
 
 	for (const table of data.tables.info.tables) {
 		if (!schemaStore.store.has(table.name)) {
-			error(404, 'Cant find schema for table: ' + table.name);
+			continue;
+			// error(404, 'Cant find schema for table: ' + table.name);
 		}
 		const schemas: ModelRegistry = schemaStore.store.get(table.name)!;
+		if (!schemas) continue;
 		if (!baseConfigStore.base.has(schemas.client)) {
 			console.warn('no config for schema', table.name, 'using default');
 			const default_config = schemaStore.defaultConfig(table.name);
+			if (!default_config) continue;
 			baseConfigStore.addConfig(schemas.client, default_config); // WARN: idk should i do it?
 		}
 	}
@@ -43,6 +47,7 @@ export const load: PageLoad = async ({
 
 	for (const table of node_tables) {
 		const schemas: ModelRegistry = schemaStore.store.get(table.name)!;
+		if (!schemas) continue;
 		const cfg = baseConfigStore.base.get(schemas.client);
 		if (!cfg?.graph) continue;
 		let meta = addTableMetadata(table.name);
@@ -56,7 +61,7 @@ export const load: PageLoad = async ({
 				);
 			}
 			if (meta.graph.type != 'node') error(400, 'Unexpected graph type');
-			nodeTypes[table.name] = meta.graph.component;
+			nodeTypes[table.name] = meta.graph?.component;
 			val.forEach((item) => {
 				const node = GraphViewController.toNode(item, meta.graph);
 				nodes.push(node);
@@ -76,6 +81,7 @@ export const load: PageLoad = async ({
 	const edge_tables = data.tables.info.tables.filter((t) => t.kind.kind == 'RELATION');
 	for (const table of edge_tables) {
 		const schemas: ModelRegistry = schemaStore.store.get(table.name)!;
+		if (!schemas) continue;
 		const cfg = baseConfigStore.base.get(schemas.client);
 		if (!cfg?.graph) continue;
 		let meta = addTableMetadata(table.name);

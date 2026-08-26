@@ -1,15 +1,6 @@
 import { z } from 'zod/v4';
 import type { BaseConfig, Views } from '$lib/model/types';
-import {
-	ClientAreaNameSchema,
-	ClientBoardSchema,
-	ClientBreakerConnectionSchema,
-	ClientBreakerSchema,
-	ClientElectricRoomSchema,
-	LevelSchema,
-	ClientShopSchema,
-	type ClientSchemas
-} from '$lib/model/schemas';
+import { schemaStore, TABLE_DEFINITIONS, type ClientSchemas } from '$lib/model/schemas';
 import type { IColumn } from '@svar-ui/svelte-grid';
 
 export class ConfigStore {
@@ -17,26 +8,6 @@ export class ConfigStore {
 	constructor() {}
 
 	addConfig(schema: ClientSchemas, config: BaseConfig) {
-		// Determine which additional views this table supports
-		switch (config.id) {
-			case 'electric_rooms':
-			case 'boards':
-			case 'breakers':
-			case 'connects':
-				config.graph = {};
-				config.table = {};
-				config.map = {};
-				break;
-			case 'levels':
-			case 'area_name':
-			case 'shops':
-				config.table = {};
-				config.map = {};
-				break;
-			default:
-				// All tables have table view
-				config.table = {};
-		}
 		this.base.add(schema, config);
 		return this;
 	}
@@ -48,17 +19,25 @@ export class ConfigStore {
 	}
 }
 
-export const baseConfigStore = new ConfigStore();
-baseConfigStore.addConfig(ClientBreakerSchema, { id: 'breakers', label: 'Breakers' });
-baseConfigStore.addConfig(ClientBreakerConnectionSchema, {
-	id: 'connects',
-	label: 'Breaker Connections'
-});
-baseConfigStore.addConfig(ClientBoardSchema, { id: 'boards', label: 'Boards' });
-baseConfigStore.addConfig(ClientElectricRoomSchema, {
-	id: 'electric_rooms',
-	label: 'Electric Rooms'
-});
-baseConfigStore.addConfig(LevelSchema, { id: 'levels', label: 'Levels' });
-baseConfigStore.addConfig(ClientShopSchema, { id: 'shops', label: 'Shops' });
-baseConfigStore.addConfig(ClientAreaNameSchema, { id: 'area_name', label: 'Areas' });
+/**
+ * Create route-local view configuration from the shared table registry.
+ *
+ * Keeping this registry local prevents universal page loads from sharing
+ * mutable view metadata between requests or navigations.
+ */
+export function createBaseConfigStore(): ConfigStore {
+	const store = new ConfigStore();
+
+	// View capability and labels come from TABLE_DEFINITIONS. Feature builders
+	// add columns, graph nodes, and map styling without re-registering tables.
+	for (const definition of TABLE_DEFINITIONS) {
+		const registryEntry = schemaStore.store.get(definition.name);
+		if (registryEntry) {
+			const default_config = schemaStore.defaultConfig(definition.name);
+			if (!default_config) continue;
+			store.addConfig(registryEntry.client, default_config);
+		}
+	}
+
+	return store;
+}

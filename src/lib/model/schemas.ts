@@ -22,9 +22,11 @@ export const AreaNameSchema = z.object({
 	name: z.string().min(2),
 	level: z.custom<RecordId<'levels'>>()
 });
+
 export const ClientAreaNameSchema = AreaNameSchema.extend({
 	level: LevelSchema
 });
+
 const AreaNameQuery = new BoundQuery('select * from area_name fetch level');
 export const ShopSchema = z.object({
 	id: z.custom<RecordId<'shops'>>().readonly(),
@@ -110,20 +112,92 @@ export type ClientSchemas =
 	| typeof ClientShopSchema;
 export type ClientData = z.infer<ClientSchemas>;
 
+export type ViewName = 'table' | 'graph' | 'map';
+
 export type ModelRegistry = {
 	server: ServerSchemas;
 	client: ClientSchemas;
 	query: BoundQuery;
+	/** Optional view capabilities used to create the initial UI descriptor. */
+	views?: readonly ViewName[];
+	/** Optional display label; the table name is used when omitted. */
+	label?: string;
 };
-export const TABLES = [
-	'levels',
-	'electric_rooms',
-	'boards',
-	'breakers',
-	'connects',
-	'area_name',
-	'shops'
+
+/**
+ * The only registration point for a supported mall data table.
+ *
+ * This registry describes data access and coarse view capabilities only.
+ * Columns, graph nodes, and map layer styling remain feature-owned config.
+ */
+export const TABLE_DEFINITIONS = [
+	{
+		name: 'levels',
+		label: 'Levels',
+		views: ['table', 'map'] as const,
+		server: LevelSchema,
+		client: LevelSchema,
+		query: LevelQuery
+	},
+	{
+		name: 'electric_rooms',
+		label: 'Electric Rooms',
+		views: ['table', 'graph', 'map'] as const,
+		server: ElectricRoomSchema,
+		client: ClientElectricRoomSchema,
+		query: ElectricRoomQuery
+	},
+	{
+		name: 'boards',
+		label: 'Boards',
+		views: ['table', 'graph', 'map'] as const,
+		server: BoardSchema,
+		client: ClientBoardSchema,
+		query: BoardQuery
+	},
+	{
+		name: 'breakers',
+		label: 'Breakers',
+		views: ['table', 'graph', 'map'] as const,
+		server: BreakerSchema,
+		client: ClientBreakerSchema,
+		query: BreakerQuery
+	},
+	{
+		name: 'connects',
+		label: 'Breaker Connections',
+		views: ['table', 'graph', 'map'] as const,
+		server: BreakerConnectionSchema,
+		client: ClientBreakerConnectionSchema,
+		query: BreakerConnectionQuery
+	},
+	{
+		name: 'area_name',
+		label: 'Areas',
+		views: ['table', 'map'] as const,
+		server: AreaNameSchema,
+		client: ClientAreaNameSchema,
+		query: AreaNameQuery
+	},
+
+	{
+		name: 'shops',
+		label: 'Shops',
+		views: ['table', 'map'] as const,
+		server: ShopSchema,
+		client: ClientShopSchema,
+		query: ShopQuery
+	}
 ] as const;
+
+export type TableName = (typeof TABLE_DEFINITIONS)[number]['name'];
+export const TABLES = Object.freeze(
+	TABLE_DEFINITIONS.map(({ name }) => name)
+) as readonly TableName[];
+
+export function getTableDefinition(name: TableName) {
+	return TABLE_DEFINITIONS.find((definition) => definition.name === name);
+}
 
 export class SchemaRegistry {
 	store = new Map<Tables, ModelRegistry>();
@@ -133,43 +207,34 @@ export class SchemaRegistry {
 		this.store.set(table_name, data);
 	}
 
-	defaultConfig(name: Tables): BaseConfig {
-		if (!this.store.has(name)) throw new Error('Schema not found in registry');
-		return {
+	defaultConfig(name: Tables): BaseConfig | undefined {
+		const entry = this.store.get(name);
+		// if (!entry) throw new Error('Schema not found in registry');
+    if (!entry) return;
+
+		const config: BaseConfig = {
 			id: name,
-			label: name.charAt(0).toUpperCase() + name.slice(1)
+			label: entry.label ?? name.charAt(0).toUpperCase() + name.slice(1)
 		};
+
+		for (const view of entry.views ?? ['table']) {
+			config[view] = {};
+		}
+
+		return config;
 	}
 }
 // WARN: 1. db schemas (mark fetched fields later)
 // 2. dont add additional info here use ConfigStore instead
 // 3. query field for fetching nested data like in client schemas
 export const schemaStore = new SchemaRegistry();
-// INFO: ADD/REM SCHEMAS HERE
-schemaStore.addSchemas('breakers', {
-	server: BreakerSchema,
-	client: ClientBreakerSchema,
-	query: BreakerQuery
-});
-schemaStore.addSchemas('boards', {
-	server: BoardSchema,
-	client: ClientBoardSchema,
-	query: BoardQuery
-});
-schemaStore.addSchemas('electric_rooms', {
-	server: ElectricRoomSchema,
-	client: ClientElectricRoomSchema,
-	query: ElectricRoomQuery
-});
-schemaStore.addSchemas('levels', { server: LevelSchema, client: LevelSchema, query: LevelQuery });
-schemaStore.addSchemas('shops', { server: ShopSchema, client: ClientShopSchema, query: ShopQuery });
-schemaStore.addSchemas('area_name', {
-	server: AreaNameSchema,
-	client: ClientAreaNameSchema,
-	query: AreaNameQuery
-});
-schemaStore.addSchemas('connects', {
-	server: BreakerConnectionSchema,
-	client: ClientBreakerConnectionSchema,
-	query: BreakerConnectionQuery
-});
+// Add/remove supported data tables in TABLE_DEFINITIONS above.
+for (const definition of TABLE_DEFINITIONS) {
+	schemaStore.addSchemas(definition.name, {
+		server: definition.server,
+		client: definition.client,
+		query: definition.query,
+		views: definition.views,
+		label: definition.label
+	});
+}

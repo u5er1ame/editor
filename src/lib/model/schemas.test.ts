@@ -8,7 +8,9 @@ import {
 	BreakerConnectionSchema,
 	AreaNameSchema,
 	ShopSchema,
-	TABLES
+	TABLES,
+	TABLE_DEFINITIONS,
+	getTableDefinition
 } from './schemas';
 
 // ── Unit tests: SchemaRegistry class logic ─────────────────────────
@@ -33,7 +35,7 @@ describe('SchemaRegistry', () => {
 		const registry = new SchemaRegistry();
 		registry.addSchemas('electric_rooms', {
 			server: ElectricRoomSchema,
-			client: ElectricRoomSchema,
+			client: ElectricRoomSchema as any,
 			query: {} as any
 		});
 		const config = registry.defaultConfig('electric_rooms');
@@ -50,7 +52,7 @@ describe('SchemaRegistry', () => {
 	it('store supports multiple registrations', () => {
 		const registry = new SchemaRegistry();
 		registry.addSchemas('levels', { server: LevelSchema, client: LevelSchema, query: {} as any });
-		registry.addSchemas('boards', { server: BoardSchema, client: BoardSchema, query: {} as any });
+		registry.addSchemas('boards', { server: BoardSchema, client: BoardSchema as any, query: {} as any });
 		expect(registry.store.size).toBe(2);
 		expect(registry.store.has('levels')).toBe(true);
 		expect(registry.store.has('boards')).toBe(true);
@@ -59,7 +61,7 @@ describe('SchemaRegistry', () => {
 	it('addSchemas overwrites existing entry', () => {
 		const registry = new SchemaRegistry();
 		const first = { server: LevelSchema, client: LevelSchema, query: {} as any };
-		const second = { server: BoardSchema, client: BoardSchema, query: {} as any };
+		const second = { server: BoardSchema, client: BoardSchema as any, query: {} as any };
 		registry.addSchemas('levels', first);
 		registry.addSchemas('levels', second);
 		expect(registry.store.get('levels')).toBe(second);
@@ -82,6 +84,30 @@ describe('TABLES constant', () => {
 	it('is a readonly tuple', () => {
 		expect(Array.isArray(TABLES)).toBe(true);
 		expect(TABLES.length).toBe(7);
+		expect(() => (TABLES as string[]).push('unknown')).toThrow();
+	});
+});
+
+describe('TABLE_DEFINITIONS', () => {
+	it('contains one complete definition for every registered table', () => {
+		expect(TABLE_DEFINITIONS).toHaveLength(TABLES.length);
+
+		for (const definition of TABLE_DEFINITIONS) {
+			expect(definition.name).toBeDefined();
+			expect(definition.label).toBeDefined();
+			expect(definition.server).toBeDefined();
+			expect(definition.client).toBeDefined();
+			expect(definition.query).toBeDefined();
+			expect(definition.views.length).toBeGreaterThan(0);
+			expect(getTableDefinition(definition.name)).toBe(definition);
+		}
+	});
+
+	it('uses explicit labels and view capabilities for generated config', () => {
+		expect(getTableDefinition('area_name')?.label).toBe('Areas');
+		expect(getTableDefinition('area_name')?.views).toEqual(['table', 'map']);
+		expect(getTableDefinition('breakers')?.views).toContain('graph');
+
 	});
 });
 

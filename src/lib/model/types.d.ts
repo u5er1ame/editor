@@ -3,9 +3,9 @@ import type { z } from 'zod/v4';
 
 import type { ClientSchemas, TableKeys, TABLES } from '$lib/model/schemas';
 
-export type Views = "table" | "graph" | "map";
+export type Views = 'table' | 'graph' | 'map';
 
-export type Tables = typeof TABLES[number];
+export type Tables = (typeof TABLES)[number];
 
 export type BaseConfig = {
 	id: Tables,
