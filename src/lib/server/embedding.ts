@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
 import z from 'zod/v4';
+import { SEARCH_POINT_EMBEDDING_DIMENSION } from '$lib/model/search-points';
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -106,7 +107,7 @@ export class EmbeddingClient {
 	 */
 	async embedText(text: string): Promise<number[]> {
 		const vectors = await this.embed({ input: text });
-		return vectors[0];
+		return this.requireVector(vectors[0]);
 	}
 
 	/**
@@ -123,7 +124,7 @@ export class EmbeddingClient {
 	 */
 	async embedImage(image: string): Promise<number[]> {
 		const vectors = await this.embed({ image });
-		return vectors[0];
+		return this.requireVector(vectors[0]);
 	}
 
 	/**
@@ -132,7 +133,17 @@ export class EmbeddingClient {
 	 */
 	async embedMultimodal(text: string, image: string): Promise<number[]> {
 		const vectors = await this.embed({ input: text, image });
-		return vectors[0];
+		return this.requireVector(vectors[0]);
+	}
+
+	private requireVector(vector: number[] | undefined): number[] {
+		if (!vector) throw new Error('Embedding service returned no vector');
+		if (vector.length !== SEARCH_POINT_EMBEDDING_DIMENSION) {
+			throw new Error(
+				`Expected ${SEARCH_POINT_EMBEDDING_DIMENSION}-dimensional embedding, received ${vector.length}`
+			);
+		}
+		return vector;
 	}
 
 	/**
