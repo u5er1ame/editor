@@ -47,7 +47,8 @@ export const handleValidationError: HandleValidationError = async ({ event, issu
 const default_user = {
 	username: env.SURREAL_DEFAULT_USERNAME,
 	password: env.SURREAL_DEFAULT_PASSWORD,
-	namespace: env.SURREAL_DEFAULT_NAMESPACE
+	namespace: env.SURREAL_DEFAULT_NAMESPACE,
+	database: env.SURREAL_DEFAULT_DATABASE
 };
 
 const log_request: Handle = async ({ event, resolve }) => {
@@ -75,7 +76,7 @@ const log_request: Handle = async ({ event, resolve }) => {
 
 const get_cookies: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get('sr_token') ?? null;
-	const database = event.cookies.get('sr_db') ?? 'main';
+	const database = event.cookies.get('sr_db') ?? default_user.database;
 
 	event.locals.db = { ...event.locals.db, token, database };
 
@@ -114,23 +115,24 @@ const check_auth: Handle = async ({ event, resolve }) => {
 		}
 
 		if (event.locals.db.token == null) {
-			console.warn('Token not found login as default user');
-
-			const tokens = await event.locals.db.instance.signin(default_user).catch((e) => {
+			const ns_user = { ...default_user, database: undefined  };
+			console.warn('Token not found login as default user', ns_user);
+			const tokens = await event.locals.db.instance.signin(ns_user).catch((e) => {
+				console.error(e);
 				return error(503, 'Cant signin as default user');
 			});
 
 			const decoded = decodeJWT(tokens.access);
 			const maxAge = getTokenMaxAge(decoded);
 
-			event.cookies.set('sr_token', tokens.access, { path: '/', maxAge });
+			event.cookies.set('sr_token', tokens.access, { path: '/', maxAge, httpOnly: true });
 
 			event.locals.db = {
 				...event.locals.db,
 				token: tokens.access,
 				username: decoded.ID ?? default_user.username,
-				// namespace: decoded.NS ?? default_user.namespace,
-				database: decoded.DB ?? event.locals.db.database
+				namespace: decoded.NS ?? default_user.namespace,
+				database: decoded.DB ?? event.locals.db.database ?? default_user.database
 			};
 
 			return await resolve(event);
@@ -160,14 +162,14 @@ const check_auth: Handle = async ({ event, resolve }) => {
 			const decoded = decodeJWT(tokens.access);
 			const maxAge = getTokenMaxAge(decoded);
 
-			event.cookies.set('sr_token', tokens.access, { path: '/', maxAge });
+			event.cookies.set('sr_token', tokens.access, { path: '/', maxAge, httpOnly: true });
 
 			event.locals.db = {
 				...event.locals?.db,
 				token: tokens.access,
-				username: decoded.ID,
-				// namespace: decoded.NS ?? default_user.namespace,
-				database: event.locals.db.database ?? decoded.DB
+				username: decoded.ID ?? default_user.username,
+				namespace: decoded.NS ?? default_user.namespace,
+				database: event.locals.db.database ?? decoded.DB ?? default_user.database
 			};
 		}
 
