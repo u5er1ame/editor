@@ -9,6 +9,7 @@ export class GraphViewController {
 	static toNode(item: ServerData, config: GraphConfig): Node {
 		if (!item.id) throw new Error("Cant find id");
 		let type = item.id.toString().split(":")[0] ?? "default";
+		console.log(item, config);
 		return {
 			id: item.id.toString(),
 			type: config.type ?? type,
@@ -16,7 +17,7 @@ export class GraphViewController {
 				raw: item,
 				labelKey: config.labelKey ?? "name",
 			},
-			parentId: config.parentIdKey ? item[config.parentIdKey].toString() : undefined,
+			parentId: config.parentIdKey ? item[config.parentIdKey]?.toString() ??  item[config.parentIdKey] : undefined,
 			position: { x: 0, y: 0 },
 			...config.flowConfig
 		}

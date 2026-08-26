@@ -79,7 +79,7 @@ async function handleSave() {
 				</Field.Content>
 			    </Field.Field>
 			{/each}
-			<Button type="submit" variant="default" class="hover:bg-hover cursor-pointer" title="{m.action_save()}">{m.action_save()}</Button>
+			<Button type="submit" variant="default" class="hover:bg-hover cursor-pointer" title={m.action_save()}>{m.action_save()}</Button>
 		    </Field.Set>
 		</form>
 	    </Dialog.Content>

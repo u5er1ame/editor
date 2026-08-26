@@ -40,9 +40,9 @@ describe('GraphConfigBuilder', () => {
 			.flowConfig({ connectable: true })
 			.build();
 
-		expect(config.flowConfig.connectable).toBe(true);
-		expect(config.flowConfig.draggable).toBe(true); // from default
-		expect(config.flowConfig.extent).toBe('parent'); // from default
+		expect(config.flowConfig?.connectable).toBe(true);
+		expect(config.flowConfig?.draggable).toBe(true); // from default
+		expect(config.flowConfig?.extent).toBe('parent'); // from default
 	});
 
 	it('sets elkConfig', () => {
@@ -82,7 +82,7 @@ describe('GraphConfigBuilder', () => {
 			.flowConfig({ draggable: false })
 			.build();
 
-		expect(config.flowConfig.connectable).toBe(true);
-		expect(config.flowConfig.draggable).toBe(false);
+		expect(config.flowConfig?.connectable).toBe(true);
+		expect(config.flowConfig?.draggable).toBe(false);
 	});
 });

@@ -8,7 +8,7 @@
 	scale: 1.2;
 }
 
-@custom-variant dark (@media not print { &:where(.dark, .dark *) });
+/*@custom-variant dark (@media not print { &:where(.dark, .dark *) });*/
 /* b/w
 *  bg
 *   bg-1

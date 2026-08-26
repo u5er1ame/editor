@@ -5,7 +5,6 @@
 	import { Grid, Toolbar, Willow, WillowDark, type IApi } from '@svar-ui/svelte-grid';
 	import { type Node, useNodesData, useNodes, useOnSelectionChange } from '@xyflow/svelte';
 	import { browser } from '$app/environment';
-	import { Flow } from '$lib/utils';
 
 	const Style = $derived.by(() => {
 		if (mode.current && mode.current == 'dark') {
@@ -15,7 +14,7 @@
 		}
 	});
 
-	let {} = $props();
+	let { } = $props();
 	let tbl: IApi | undefined = $state();
 	function init(api: IApi) {
 		api.on("update-cell", (event) => {
