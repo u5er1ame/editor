@@ -2,9 +2,11 @@ import type { StyleLike } from 'ol/style/Style';
 import type { View as OlView } from 'ol';
 import type { Tables } from '$lib/model/types';
 
+export type MapTableName = Tables | 'zones';
+
 export interface MapLayerConfig {
 	/** Table name this layer represents */
-	table: Tables;
+	table: MapTableName;
 	/** Geometry field name in the data */
 	geometryKey: string;
 	/** Field to use as feature id */
@@ -113,12 +115,12 @@ export class MapConfigBuilder {
 		return this;
 	}
 
-	removeLayer(table: Tables) {
+	removeLayer(table: MapTableName) {
 		this._config.layers = this._config.layers!.filter((l) => l.table !== table);
 		return this;
 	}
 
-	updateLayer(table: Tables, updates: Partial<MapLayerConfig>) {
+	updateLayer(table: MapTableName, updates: Partial<MapLayerConfig>) {
 		const idx = this._config.layers!.findIndex((l) => l.table === table);
 		if (idx !== -1) {
 			this._config.layers![idx] = { ...this._config.layers![idx], ...updates };

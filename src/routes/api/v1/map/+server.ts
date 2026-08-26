@@ -16,12 +16,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	const table = url.searchParams.get('table');
 
 	// Tables that might have geometry
-	const geometryTables = ['levels', 'area_name', 'electric_rooms', 'boards', 'connects'];
+	const geometryTables = ['levels', 'area_name', 'zones', 'electric_rooms', 'boards', 'connects'];
 
 	const mapData: any[] = [];
 
 	// If specific table requested, only fetch that one
-	const tablesToFetch = table ? [table] : geometryTables;
+	const tablesToFetch = table && geometryTables.includes(table) ? [table] : geometryTables;
 
 	for (const tableName of tablesToFetch) {
 		try {

@@ -5,6 +5,7 @@ import type Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
 import type { MapLayerConfig } from '$lib/builders/map.config';
 import type { Tables } from '$lib/model/types';
+import { MALL_LOCAL_PROJECTION } from '$lib/view/map/projection';
 
 
 export interface MapFeatureData {
@@ -43,8 +44,8 @@ export class MapViewController {
 
 		const source = new VectorSource({
 			features: format.readFeatures(geoJsonData, {
-				dataProjection: 'EPSG:3857',
-				featureProjection: 'EPSG:3857'
+				dataProjection: MALL_LOCAL_PROJECTION,
+				featureProjection: MALL_LOCAL_PROJECTION
 			})
 		});
 

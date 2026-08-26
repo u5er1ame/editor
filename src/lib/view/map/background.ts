@@ -1,5 +1,6 @@
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
+import { MALL_LOCAL_PROJECTION } from './projection';
 
 export interface BackgroundColors {
 	bg: string;
@@ -37,7 +38,7 @@ export function createBackgroundLayer(initial: BackgroundColors): BackgroundLaye
 	const current = { ...initial };
 
 	const source = new XYZ({
-		projection: 'EPSG:3857',
+		projection: MALL_LOCAL_PROJECTION,
 		tileSize,
 		wrapX: false,
 		tileUrlFunction: (coordinate) => {
