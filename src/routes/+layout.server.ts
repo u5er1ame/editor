@@ -29,11 +29,12 @@ const views: View[] = [
 ];
 
 export const load: LayoutServerLoad = async ({ locals, fetch }) => {
+  console.log("locals",locals)
 	return {
 		db: {
 			isConnected: locals.db.instance.isConnected,
 			username: locals.db.username,
-			namespace: locals.db.instance.namespace,
+			namespace: locals.db.instance.namespace ?? locals.db.namespace,
 			database: locals.db.instance.database ?? locals.db.database
 		},
 		views

@@ -14,7 +14,7 @@
 	import { getDataClient, generateId, updateRecord, insertRecord, deleteRecord } from '$lib/db.remote';
 	import Skeleton from './ui/skeleton/skeleton.svelte';
 	import Editor from './editor/Root.svelte';
-	import type { DBContext } from '../../routes/+layout.svelte';
+	import type { DBContext } from '$lib/app/session/db-context.svelte';
 	import Theme from './svar/Theme.svelte';
 	import Spinner from './ui/spinner/spinner.svelte';
 	import { toast } from 'svelte-sonner';
@@ -35,10 +35,8 @@
 
 	let { table = $bindable(), readonly = $bindable(), config, changes, ...rest } = $props();
 	let selection: IRow | null = $state(null);
-	const isEditor = $derived(
-		(getContext<DBContext>('db').userRoles?.includes('EDITOR') ?? false) ||
-			(getContext<DBContext>('db').userRoles?.includes('OWNER') ?? false)
-	);
+	const ctx = getContext<DBContext>('db');
+	const isEditor = $derived(ctx.isEditor());
 	let showEditor = $state(false);
 
 	// Page state persistence for view transitions using SvelteKit

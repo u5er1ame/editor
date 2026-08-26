@@ -6,7 +6,7 @@
 	import DbInfo from './DbInfo.svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { DBContext } from '../../routes/+layout.svelte';
+	import type { DBContext } from '$lib/app/session/db-context.svelte';
 	import { getContext } from 'svelte';
 	import { getNamespaceInfo, getSystemInfo } from '$lib/db.remote';
 	import Spinner from './ui/spinner/spinner.svelte';

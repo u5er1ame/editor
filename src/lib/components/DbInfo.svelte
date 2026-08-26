@@ -13,7 +13,7 @@ import MemInfo from './MemInfo.svelte';
 import { toast } from 'svelte-sonner';
 import { goto } from '$app/navigation';
 
-import type { DBContext } from '../../routes/+layout.svelte';
+import type { DBContext } from '$lib/app/session/db-context.svelte';
 
 let { ...rest } = $props();
 

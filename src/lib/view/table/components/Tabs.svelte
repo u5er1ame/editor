@@ -9,7 +9,7 @@
 	import NewTable from '$lib/components/NewTable.svelte';
 
 	import { getDatabaseInfo } from '$lib/db.remote';
-	import type { DBContext } from '../../../../routes/+layout.svelte';
+	import type { DBContext } from '$lib/app/session/db-context.svelte';
 
 	function isWriteable(table: any) {
 		if (table?.drop) {
